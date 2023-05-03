@@ -1,0 +1,592 @@
+<?php include "header.php";?>
+
+<!--second header start-->
+<header>
+	<section id="secondaryHeader">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12">
+					<div class="col-md-8 col-xs-10" id="menu">
+						<ul>
+							<li>
+								<a href="#overview" class="">
+									Overview
+								</a>
+							</li>
+							<li>
+								<a href="#features">
+									Features
+								</a>
+							</li>
+							<li>
+								<a href="#benefits">
+									Benefits
+								</a>
+							</li>
+							<li>
+								<a href="#chooseUs">
+									Choose Us
+								</a>
+							</li>
+							<li>
+								<a href="#service">
+									Service
+								</a>
+							</li>
+						</ul>
+					</div>
+					<!--end  menu-->
+				</div>
+			</div>
+		</div>
+	</section>
+</header>
+<!--second header end-->
+
+<!-- header theme section start -->
+<section class="headerThemeSection row-fluid animated fadeIn">
+	<div id="subHeader">
+		<h2>
+			Overview
+		</h2>
+	</div>
+</section>
+<!-- header theme section end -->
+<br>
+<section id="overview">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				<div class="col-md-12">
+					<p align="center">
+						LAB management system was not as easy as it is by using <strong>Cloud LAB</strong> software. After a long & close study, <strong><a href="http://alchemy-bd.com" target="_blank">Alchemy software</a></strong> finally launched its unique, incomparable, easy, user-friendly <strong>Lab Management System</strong> software that is capable to satisfy need of all types of Lab Management System.
+					</p>
+					<br>
+					<div class="col-md-6">
+						<div class="overviewBox">
+							<div class="overviewIcon">
+								<i class="fa fa-user">
+								</i>
+							</div>
+							<div>
+								<h4>
+									Unbelievable lower price
+								</h4>
+								<p>
+									This software is rich in many attractive features but charge a minimum price so that its is most affordable in its range
+
+								</p>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="overviewBox">
+
+							<div class="overviewIcon">
+								<i class="fa fa-user">
+								</i>
+							</div>
+
+							<div>
+								<h4>
+									Integrate able with any pos hardware
+								</h4>
+								<p align="justify">
+									It is easy integrate able with any standard POS Device (POS printer, barcode scanner etc.) to give full functionalities and best performance.
+								</p>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="overviewBox">
+
+							<div class="overviewIcon">
+								<i class="fa fa-user">
+								</i>
+							</div>
+
+							<div>
+								<h4>
+									Used advance software development technology 
+								</h4>
+								<p align="justify">
+									To give a classified software use experience, Alchemy team used all latest software development technology to develop this software.
+								</p>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="overviewBox">
+
+							<div class="overviewIcon">
+								<i class="fa fa-user">
+								</i>
+							</div>
+
+							<div>
+								<h4>
+									Quick return on investment (ROI)
+								</h4>
+								<p align="justify">
+									Alchemy Software guarantees that you must be able to get returns of your investment within 2 months of using this software. 
+								</p>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="overviewBox">
+
+							<div class="overviewIcon">
+								<i class="fa fa-user">
+								</i>
+							</div>
+
+							<div>
+								<h4>
+									Operate & control easily from anywhere 
+								</h4>
+								<p align="justify">
+									This software is so flexibly designed that user can use & control business through it from anywhere of the world.
+								</p>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="overviewBox">
+
+							<div class="overviewIcon">
+								<i class="fa fa-user">
+								</i>
+							</div>
+
+							<div>
+								<h4>
+									Life time software up gradation, without extra charge!
+								</h4>
+								<p align="justify">
+								Your software will be continuously update time to time so that you can enjoy benefit of latest technology all the time without paying extra charge for it.
+								</p>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="overviewBox">
+
+							<div class="overviewIcon">
+								<i class="fa fa-user">
+								</i>
+							</div>
+
+							<div>
+								<h4>
+									 Forget about software & server etc. maintenance 
+								</h4>
+								<p align="justify">
+									Alchemy Software has several distinct team of professionals to tackle every significant matters like software & server maintenance, domain & hosting, bandwidth extension, data backup, data security, database tuning etc. so that user can work smoothly and needs not to face any types of hazard.
+								</p>
+							</div>
+						</div>
+					</div>
+					
+					<div class="col-md-6">
+						<div class="overviewBox">
+
+							<div class="overviewIcon">
+								<i class="fa fa-user">
+								</i>
+							</div>
+
+							<div>
+								<h4>
+									10am-6pm x 6 days a week customer support
+								</h4>
+								<p align="justify">
+									Our dedicated customer support team waiting for your phone call to provide you best possible service in these industries. Now we providing on line service (through internet) or on site (service directly at client premises for major issues).This team working hard so that you can feel safe and dependable Alchemy Software as several hundred organization did in last few years.
+								</p>
+							</div>
+						</div>
+					</div>
+	
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+<br>
+<!-- header theme section start -->
+<section class="headerThemeSection row-fluid animated fadeIn">
+	<div id="subHeader">
+		<h2>
+			Features
+		</h2>
+	</div>
+</section>
+<!-- header theme section end -->
+<br>
+<section id="features">
+	<div class="container">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="col-md-12">
+				<h4><strong>
+					C&F Job & Party Management  
+				</strong></h4>
+			
+				<p style="margin-left:15px; line-height: 35px;font-size:16px;">
+					<i class="fa fa-check-circle"></i> User-friendly system that any person can operate very easily <br/>
+					<i class="fa fa-check-circle"></i> Details database for C&F (import & export) Job with necessary information<br/>
+					<i class="fa fa-check-circle"></i> Quick & fast job creation (less then one minute).<br/>
+					<i class="fa fa-check-circle"></i> Easy controllable auto job numbering system for effective controlling<br/>
+					<i class="fa fa-check-circle"></i> Special reporting for unbilled job <br/>
+					<i class="fa fa-check-circle"></i> Import & export wise bill forwarding system<br/>
+					<i class="fa fa-check-circle"></i> Smart Job wise profit & loss etc. related reporting with necessary useful information<br/>
+					<i class="fa fa-check-circle"></i> Employee of all office/location can work together any time form any location<br/>
+					<i class="fa fa-check-circle"></i> Auto party ledger update and date wise receivable list<br/>
+					<i class="fa fa-check-circle"></i> Job wise or general  collection management  <br/>
+					<i class="fa fa-check-circle"></i> Various  job register, .& no additional manual register require<br/>
+					<i class="fa fa-check-circle"></i> Various types of useful reporting for business improvement<br/>
+					<i class="fa fa-check-circle"></i> Reporting for profitable customer determination <br/>
+					<i class="fa fa-check-circle"></i> You can control access of all user show/ hide <br/>
+					<i class="fa fa-check-circle"></i> Instant mail system from own software.<br/>
+					<i class="fa fa-check-circle"></i> Party wise bill status report so that no job missed unintentionally.<br/>
+					<i class="fa fa-check-circle"></i> Access can be controlled by admin user and unlimited user can be created, deactivated if desired by admin.<br/>
+					<i class="fa fa-check-circle"></i> Details log will be recorded so that admin can find out who did what in that software<br/>
+					<i class="fa fa-check-circle"></i> Auto integration facilities with C&F Accounts Management Software<br/>
+				</p>
+				
+				<br>
+
+				<h4><strong>Financial Management Software</strong></h4>
+					<p style="margin-left:15px; line-height: 35px;font-size:16px;">
+						<i class="fa fa-check-circle"></i> Quick and fast data input form <br/>
+						<i class="fa fa-check-circle"></i> Easy user friendly data input form that allows everyone to work easily<br/>
+						<i class="fa fa-check-circle"></i> without having accounting degree.<br/>
+						<i class="fa fa-check-circle"></i> All the Report Complies with Bangladesh Accounting standard (BAS-1) and International Standard (IAS-1)<br/>
+						<i class="fa fa-check-circle"></i> Special feature for top level management for easy control <br/>
+						<i class="fa fa-check-circle"></i> Transparent reporting for effective audit performance<br/>
+						<i class="fa fa-check-circle"></i> Special reporting to find error quickly <br/>
+						<i class="fa fa-check-circle"></i> 3 tire reporting (Top level, mid level, Lower level)<br/>
+						<i class="fa fa-check-circle"></i> User can purchase the product partially and get discount if purchased full software at a time.<br/>
+						<i class="fa fa-check-circle"></i> Auto integration facilities with C&F Job & Party Management Software<br/>
+					</p>
+				
+			</div>
+		</div>
+	</div>
+</section>
+
+<!-- header theme section start -->
+<section class="headerThemeSection row-fluid animated fadeIn">
+	<div id="subHeader">
+		<h2>
+			Benefits
+		</h2>
+	</div>
+</section>
+<!-- header theme section end -->
+<br>
+
+<section id="benefits">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				<div class="col-md-12">
+					<p style="line-height: 35px;font-size:16px;">
+						<i class="fa fa-check-circle">
+						</i> Save time, Reduce labor cost, increase overall efficiency regarding book keeping   <br />
+						<i class="fa fa-check-circle">
+						</i> Optimized your business progress and obstacles regarding it <br />
+						<i class="fa fa-check-circle">
+						</i> Get the information instantly from anywhere of the world any time  <br />
+						<i class="fa fa-check-circle">
+						</i> No setup require just login and use like facebook, gmail, yahoo etc. account <br />
+						<i class="fa fa-check-circle">
+						</i> Developed using latest software technology and upgrading continually  <br />
+						<i class="fa fa-check-circle">
+						</i> Rich in useful features with graphical presentation in affordable price range <br />
+						<i class="fa fa-check-circle">
+						</i> Unlimited user creates facilities and you can regulate access, use of functions self without any assistance. <br />
+						<i class="fa fa-check-circle">
+						</i> Online/browser based and Useable from any device (desktop, laptop, tablet, Mobile etc.) <br />
+						<i class="fa fa-check-circle">
+						</i> Unlimited space for data storage  <br />
+						<i class="fa fa-check-circle">
+						</i> 	No additional cost regarding server maintenance, domain hosting etc  <br />
+						<i class="fa fa-check-circle">
+						</i> 	No tiring work  regarding server & site maintenance, domain & hosting, data tuning & security, bandwidth extension, database size, data backup &nbsp;&nbsp;&nbsp;&nbsp;management, server &nbsp;&nbsp;&nbsp;&nbsp;management etc. Alchemy Software authority took the responsibility to keep you hazard free. <br />
+						<i class="fa fa-check-circle">
+						</i> 	Flexibility to stop service any time by giving one months prior notice.   <br />
+						<i class="fa fa-check-circle">
+						</i> 	Also flexible option to take any other software related service of Alchemy Software at discounted price. <br />
+						<i class="fa fa-check-circle">
+						</i> 	Auto Up-gradation facilities whenever new version will release. <br />
+						<i class="fa fa-check-circle">
+						</i> 	Client can purchase the product partially and get discount if purchased full software at a time. <br />
+
+					</p>
+				</div>
+			</div>
+		</div>
+	</div>
+	</div>
+</section>
+
+<!-- header theme section start -->
+<section class="headerThemeSection row-fluid animated fadeIn">
+	<div id="subHeader">
+		<h2>
+			Why Choose Alchemy Software
+		</h2>
+	</div>
+</section>
+<br>
+<!-- header theme section end -->
+<section id="chooseUs">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				<div class="col-md-12">
+					<br>
+					<p align="justify" style="line-height:25px;">
+						We never stop improving our services, including development methodologies, engineering practices, management techniques and QA standards to enhance our team’s capabilities and increase customer satisfaction. Our aim is to be the leading global market leader and services provider with our powerful, easy to use, integrated set of applications, businesses can attract, engage, and delight customers by delivering inbound experiences with state-of-the-art services that are relevant, helpful, and personalized for setting the industry standard for quality, security, stability and value on a worldwide scale.
+					</p>
+
+					<p style="margin-left:15px;line-height:35px;">
+				<i class="fa fa-check-circle"></i> 5+ years success track record in customer satisfaction in multiple industries<br/>
+				<i class="fa fa-check-circle"></i> We have a large group of professionals in different discipline to provide you best possible service <br/>
+				<i class="fa fa-check-circle"></i> On time delivery record <br/>
+				<i class="fa fa-check-circle"></i> 5 distinct team working together to animate your aspiration<br/>
+				<i class="fa fa-check-circle"></i> Office at Dhaka, Chittagong and Cox’s bazaar it’s increasing day by day for better customer service.  <br/>
+				<i class="fa fa-check-circle"></i> Professional, Dedicated, enthusiastic service team for quick support<br/>
+				<i class="fa fa-check-circle"></i> 10.00 am -6.00 pm x 6 days in a week on line and on site service<br/>
+				<i class="fa fa-check-circle"></i> Efficient developer team to provide uninterrupted software solutions<br/>
+				<i class="fa fa-check-circle"></i> Professional training team to train your workforce and make them efficient which can lead you to success.<br/>
+						<i class="fa fa-check-circle"></i> A team of professionals who can guide you to the ultimate destination.<br/>
+					</p>
+
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+<br>
+<!-- header theme section start -->
+<section class="headerThemeSection row-fluid animated fadeIn">
+	<div id="subHeader">
+		<h2>
+			Our Software solutions for other industries
+		</h2>
+	</div>
+</section>
+<br>
+<!-- header theme section end -->
+<section id="service">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				<div class="col-md-12">
+					<div id="readySoftwarePakage">
+						<strong>
+							Ready Software packages (Cloud Based)
+						</strong>
+						<p>
+							<i class="fa fa-check">
+							</i> Travel Agent Mgt.
+						</p>
+						<p>
+							<i class="fa fa-check">
+							</i> Point of sales (POS) Mgt.
+						</p>
+						<p>
+							<i class="fa fa-check">
+							</i> Financial Mgt.
+						</p>
+						<p>
+							<i class="fa fa-check">
+							</i> Stock/Inventory Mgt.
+						</p>
+						<p>
+							<i class="fa fa-check">
+							</i> Therapy Center Mgt.
+						</p>
+						<p>
+							<i class="fa fa-check">
+							</i> C&F Agent Mgt.
+						</p>
+						<p>
+							<i class="fa fa-check">
+							</i> Coming Soon...
+						</p>
+					</div>
+					<p>
+						<strong>
+							Ready Software packages-desktop/web based (Customizable)
+						</strong>
+						<div id="customizeSc">
+						<p>
+							<i class="fa fa-check">
+							</i> General Accounts
+						</p>
+						<p>
+							<i class="fa fa-check">
+							</i> Billing & Stock Management
+						</p>
+						<p>
+							<i class="fa fa-check">
+							</i> Payroll Management
+						</p>
+						<p>
+							<i class="fa fa-check">
+							</i> Provident Fund (PF) Management
+						</p>
+						<p>
+							<i class="fa fa-check">
+							</i> Customer Relationship Management (CRM)
+						</p>
+						<p>
+							<i class="fa fa-check">
+							</i> Point of Sales (POS) Management  (Retailer/Whole Seller/Dealer)
+						</p>
+						<p>
+							<i class="fa fa-check">
+							</i> Hospital Management
+						</p>
+						<p>
+							<i class="fa fa-check">
+							</i> Diagnostic Lab Management
+						</p>
+						<p>
+							<i class="fa fa-check">
+							</i> Import & Export Management (With L/C)
+						</p>
+						<p>
+							<i class="fa fa-check">
+							</i> Micro-Finance Management
+						</p>
+						<p>
+							<i class="fa fa-check">
+							</i> C&F Agent Management
+						</p>
+						<p>
+							<i class="fa fa-check"> 
+							</i> Real Estate Management
+						</p>
+						<p>
+							<i class="fa fa-check"> 
+							</i> Freight Forwarder Agent Management
+						</p>
+						<p>
+							<i class="fa fa-check"> 
+							</i> Travel Agent Management
+						</p>
+						<p>
+							<i class="fa fa-check"> 
+							</i> Educational Institute Management
+						</p>
+						<p>
+							<i class="fa fa-check"> 
+							</i> Transportation Management
+						</p>
+						<p>
+							<i class="fa fa-check"> 
+							</i> Refueling Station Management
+						</p>
+						<p>
+							<i class="fa fa-check"> 
+							</i> Tea Brokers Management
+						</p>
+						<p>
+							<i class="fa fa-check"> 
+							</i> Share Back Office Management
+						</p>
+						</div>
+					</p>
+
+					<p>
+						<strong>
+							Website Development services
+						</strong>
+						<p style="margin-left: 15px;">
+							<i class="fa fa-check"> 
+							</i> All kinds dynamic website
+						</p>
+						<p style="margin-left: 15px;">
+							<i class="fa fa-check"> 
+							</i> All kinds static website
+						</p>
+					</p>
+
+					<p>
+						<strong>
+							E-commerce Site development services
+						</strong>
+						<p style="margin-left: 15px;">
+							<i class="fa fa-check"> 
+							</i> All types of online buy sell shop.
+						</p>
+						<p style="margin-left: 15px;">
+							<i class="fa fa-check"> 
+							</i> Payment gateway integration.
+						</p>
+						<p style="margin-left: 15px;">
+							<i class="fa fa-check"> 
+							</i> Website Security integration.
+						</p>
+					</p>
+
+					<p>
+						<strong>
+							Mobile Application development services
+						</strong>
+						<p style="margin-left: 15px;">
+							<i class="fa fa-check"> 
+							</i> Android platform
+						</p>
+						<p style="margin-left: 15px;">
+							<i class="fa fa-check"> 
+							</i> IOS platform
+						</p>
+						<p style="margin-left: 15px;">
+							<i class="fa fa-check"> 
+							</i> Windows platform
+						</p>
+					</p>
+
+					<p>
+						<strong>
+							SMS Notification System
+						</strong>
+						<p style="margin-left: 15px;">
+							<i class="fa fa-check"> 
+							</i> Auto software generated SMS system.
+						</p>
+						<p style="margin-left: 15px;">
+							<i class="fa fa-check"> 
+							</i> Greettings SMS System.
+						</p>
+						<p style="margin-left: 15px;">
+							<i class="fa fa-check"> 
+							</i> Device Integrate SMS System.
+						</p>
+					</p>
+
+					<p>
+						<strong>
+							ERP Software services
+						</strong>
+						<p style="margin-left: 15px;">
+							<i class="fa fa-check"> 
+							</i> ERP for Production Oriented Industries.
+						</p>
+						<p style="margin-left: 15px;">
+							<i class="fa fa-check"> 
+							</i> ERP for Service Oriented Business.
+						</p>
+					</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+<br>
+<?php include "footer.php";?>

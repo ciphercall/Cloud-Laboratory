@@ -1,0 +1,526 @@
+﻿@using System.Data
+@using System.Data.SqlClient
+@using System.Text.RegularExpressions
+@using AslLabApi.DataAccess
+@using AslLabApi.Models
+@using AslLabApi.DataAccess
+@model AslLabApi.Models.DTO.OpdDTO
+
+@{
+    Layout = null;
+    if (HttpContext.Current.Session["LoggedUserType"] == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedUserTp = HttpContext.Current.Session["LoggedUserType"].ToString();
+    var LoggedUserStatus = HttpContext.Current.Session["LoggedUserStatus"].ToString();
+    var LoggedCompanyStatus = HttpContext.Current.Session["LoggedCompanyStatus"].ToString();
+
+    if ((LoggedUserTp == "CompanyAdmin" || LoggedUserTp == "UserAdmin" || LoggedUserTp == "User") && LoggedUserStatus == "A" && LoggedCompanyStatus == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedCompId = HttpContext.Current.Session["loggedCompID"].ToString();
+    Int64 compid = Convert.ToInt64(LoggedCompId);
+
+
+    string companyName = "", address = "", contactNo = "";
+    AslLabApiContext db = new AslLabApiContext();
+    var SelectCompanyName = from n in db.AslCompanyDbSet
+
+                            where n.COMPID == compid
+                            select new { n.COMPNM, n.ADDRESS, n.CONTACTNO };
+
+    foreach (var n in SelectCompanyName)
+    {
+        companyName = n.COMPNM;
+        address = n.ADDRESS;
+        contactNo = n.CONTACTNO;
+    }
+    var compNm = companyName;
+    var Address = address;
+    var contactno = contactNo;
+
+
+
+
+
+
+    TimeZoneInfo timeZoneInfo;
+    timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Central Asia Standard Time");
+    DateTime currentDateTime = TimeZoneInfo.ConvertTime(DateTime.Now, timeZoneInfo);
+
+    var fromdate = Model.FromDate;
+    var todate = Model.ToDate;
+    var allorsingle = Model.ReferID;
+
+
+}
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <link href="~/Content/reportcss/style.css" rel="stylesheet" />
+
+    @*<script src="~/Content/jquery1.9.1/jquery-1.9.1.js"></script>*@
+    @*<script type="text/javascript">
+            function ClosePrint() {
+                var print = document.getElementById("print");
+                print.style.visibility = "hidden";
+                //            print.display = false;
+
+                window.print();
+                window.close();
+            }
+        </script>*@
+
+</head>
+<body style=" background-color:#fafafa;">
+
+
+    <div style="width: 1017px;height:777px; margin: 0px auto; border: 1px solid #d3d3d3; border-radius: 5px; box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); background: none repeat scroll 0 0 white;">
+        <table id="mainTable" border="0" width="100%">
+            <thead>
+                <tr>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="10%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+
+                </tr>
+                <tr style="background-color: #00689b">
+                    <td colspan="12">
+                        <h3 style="color: white;padding:4px">@compNm</h3>
+                        <p style="color:white;padding-left:4px">@Address<span>  @contactno</span></p>
+                    </td>
+
+                    <td colspan="6" style="color: white;padding:8px" align="right">
+                        Powered By<br />Alchemy Software
+                    </td>
+
+                </tr>
+
+                <tr>
+                    <td colspan="12" align="left" style="padding: 4px; font-weight: bold">Refer Statement - Patient</td>
+                    <td align="right" colspan="6" style="padding:8px">Print:@currentDateTime.ToString("dd-MM-yy hh:mm tt")</td>
+                </tr>
+
+                @{
+                    string d = Convert.ToString(fromdate);
+                    DateTime fdate = DateTime.Parse(d);
+                    string ffdt = fdate.ToString("dd-MMM-yyyy");
+
+
+                    string d2 = Convert.ToString(todate);
+                    DateTime fdate2 = DateTime.Parse(d2);
+                    string ffdt2 = fdate2.ToString("dd-MMM-yyyy");
+                }
+                <tr>
+                    <td colspan="6" align="left" style="padding: 4px; font-weight: bold">From: <span>@ffdt</span></td>
+                    <td align="left" colspan="6" style="padding:8px; font-weight: bold">To: <span>@ffdt2</span></td>
+                </tr>
+                <tr style="background-color: #00689b; outline: thin solid">
+                    <td colspan="3" style="color: white; padding: 4px; font-size: small" align="center">Patient ID</td>
+                    <td colspan="3" style="color: white; padding: 4px; font-size: small" align="center">Patient Name</td>
+                    <td colspan="3" style="color: white; padding: 4px; font-size: small" align="center">Mobile No</td>
+                    <td colspan="3" style="color: white; padding: 4px; font-size: small" align="center">Net Amount</td>
+                    <td colspan="3" style="color: white; padding: 4px; font-size: small" align="center">Paid Amount</td>
+                    <td colspan="3" style="color: white; padding: 4px; font-size: small" align="center">Balance</td>
+
+
+
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @{
+
+
+                    if (allorsingle == 111)
+                    {
+                        var referData = (from n in db.HMS_REFER where n.COMPID == compid select n).OrderBy(x => x.REFERID).ToList();
+                        System.Data.SqlClient.SqlConnection conn = new System.Data.SqlClient.SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["AslLabApiContext"].ToString());
+                        string query = string.Format(
+                            "SELECT DISTINCT REFERNM, A.PATIENTID, PATIENTNM,  MOBNO, ISNULL(NETAMT,0) NETAMT, ISNULL(RCVAMT,0) PAIDAMT,  ISNULL(DUEAMT,0) BALAMT " +
+                            "FROM HMS_OPDMST A, HMS_OPD B, HMS_REFER C " +
+                            "WHERE A.COMPID = B.COMPID " +
+                            "AND   A.COMPID = C.COMPID " +
+                            "AND   A.TRANSDT   = B.TRANSDT " +
+                            "AND A.PATIENTID = B.PATIENTID " +
+                            "AND   A.REFERID   = C.REFERID " +
+                            "AND   A.COMPID    = '{0}' " +
+                            "AND   A.TRANSDT BETWEEN '{1}' AND '{2}'" +
+                            "ORDER BY A.PATIENTID",
+                            compid, fromdate, todate);
+                        System.Data.SqlClient.SqlCommand cmd = new System.Data.SqlClient.SqlCommand(query, conn);
+                        conn.Open();
+                        SqlDataAdapter da = new SqlDataAdapter(cmd);
+                        DataTable ds = new DataTable();
+                        da.Fill(ds);
+
+                        string patientname = "", patientid = "", gender = "";
+                        decimal subnetamount = 0, subpaidamount = 0, subbalance = 0, grandNet = 0, grandpaid = 0, grandbalance = 0;
+                        string mobno = "", formatch = "", newdata = "";
+                        decimal netAmount = 0, paidamount = 0, balance = 0;
+                        Int64 peachi_data = 0, dataprint = 0;
+
+
+
+
+                        foreach (var groupDate in referData)
+                        {
+                            dataprint = 0;
+                            peachi_data = 0;
+                            subbalance = 0;
+                            subpaidamount = 0;
+                            subnetamount = 0;
+
+                            foreach (DataRow row in ds.Rows)
+                            {
+                                if (groupDate.REFERNM == row["REFERNM"].ToString())
+                                {
+                                    if (peachi_data == 0)
+                                    {
+                                        <tr style="outline: thin solid">
+                                            <td colspan="18">Refer Name : @groupDate.REFERNM</td>
+                                        </tr>
+                                        peachi_data = 1;
+
+                                    }
+                                    patientid = row["PATIENTID"].ToString();
+                                    patientname = row["PATIENTNM"].ToString();
+
+                                    mobno = row["MOBNO"].ToString();
+
+
+                                    netAmount = Convert.ToDecimal(row["NETAMT"]);
+                                    paidamount = Convert.ToDecimal(row["PAIDAMT"]);
+
+                                    balance = Convert.ToDecimal(row["BALAMT"]);
+
+                                    <tr>
+                                        <td colspan="3" style="color: black; padding: 4px; font-size: small" align="center">@patientid</td>
+                                        <td colspan="3" style="color: black; padding: 4px; font-size: small" align="center">@patientname</td>
+                                        <td colspan="3" style="color: black; padding: 4px; font-size: small" align="center">@mobno</td>
+                                        <td colspan="3" style="color: black; padding: 4px; font-size: small" align="right">@netAmount</td>
+                                        <td colspan="3" style="color: black; padding: 4px; font-size: small" align="right">@paidamount</td>
+                                        <td colspan="3" style="color: black; padding: 4px; font-size: small" align="right">@balance</td>
+
+                                    </tr>
+                                    subnetamount += netAmount;
+                                    subpaidamount += paidamount;
+                                    subbalance += balance;
+                                    dataprint = 1;
+                                }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            }
+                            if (dataprint == 1)
+                            {
+                                <tr>
+                                    <td colspan="9" style="color: black; padding: 4px; font-size: small; font-weight: bold" align="right"> Sub Total : </td>
+                                    @if (subnetamount < 0)
+                                    {
+                                        decimal rr = subnetamount * (-1);
+                                        string convertamount = Convert.ToString(rr);
+                                        string Subnetamount = CommainAmount.AmountwithComma(convertamount);
+                                        <td colspan="3" style="color: black; padding: 4px; font-size: small;font-weight: bold" align="right"> @Subnetamount </td>
+                                    }
+                                    else
+                                    {
+                                        string convertamount = Convert.ToString(subnetamount);
+                                        string Subnetamount = CommainAmount.AmountwithComma(convertamount);
+                                        <td colspan="3" style="color: black; padding: 4px; font-size: small;font-weight: bold" align="right"> @Subnetamount </td>
+                                    }
+                                    @if (subpaidamount < 0)
+                                    {
+                                        decimal rr = subpaidamount * (-1);
+                                        string convertamount = Convert.ToString(rr);
+                                        string Subpaidamount = CommainAmount.AmountwithComma(convertamount);
+                                        <td colspan="3" style="color: black; padding: 4px; font-size: small;font-weight: bold" align="right"> @Subpaidamount </td>
+                                    }
+                                    else
+                                    {
+                                        string convertamount = Convert.ToString(subpaidamount);
+                                        string Subpaidamount = CommainAmount.AmountwithComma(convertamount);
+                                        <td colspan="3" style="color: black; padding: 4px; font-size: small;font-weight: bold" align="right"> @Subpaidamount </td>
+                                    }
+                                    @*<td colspan="3" style="color: black; padding: 4px; font-size: small;font-weight: bold" align="right"> @subpaidamount</td>*@
+                                    @if (subbalance < 0)
+                                    {
+                                        decimal rr = subbalance * (-1);
+                                        string convertamount = Convert.ToString(rr);
+                                        string Subbalance = CommainAmount.AmountwithComma(convertamount);
+                                        <td colspan="3" style="color: black; padding: 4px; font-size: small;font-weight: bold" align="right"> @Subbalance </td>
+                                    }
+                                    else
+                                    {
+                                        string convertamount = Convert.ToString(subbalance);
+                                        string Subbalance = CommainAmount.AmountwithComma(convertamount);
+                                        <td colspan="3" style="color: black; padding: 4px; font-size: small;font-weight: bold" align="right"> @Subbalance </td>
+                                    }
+                                    @*<td colspan="3" style="color: black; padding: 4px; font-size: small; font-weight: bold" align="right"> @subnetamount </td>*@
+                                    @*<td colspan="3" style="color: black; padding: 4px; font-size: small; font-weight: bold" align="right"> @subpaidamount</td>
+                                    <td colspan="3" style="color: black; padding: 4px; font-size: small; font-weight: bold" align="right"> @subbalance </td>*@
+                                </tr>
+                            }
+
+                            grandNet += subnetamount;
+                            grandpaid += subpaidamount;
+                            grandbalance += subbalance;
+
+                        }
+                        <tr>
+                            <td colspan="9" style="color: black; padding: 4px; font-size: small; font-weight: bold" align="right"> Grand Total : </td>
+                            @if (grandNet < 0)
+                            {
+                                decimal rr = grandNet * (-1);
+                                string convertamount = Convert.ToString(rr);
+                                string GrandNet = CommainAmount.AmountwithComma(convertamount);
+                                <td colspan="3" style="color: black; padding: 4px; font-size: small;font-weight: bold" align="right"> @GrandNet </td>
+                            }
+                            else
+                            {
+                                string convertamount = Convert.ToString(grandNet);
+                                string GrandNet = CommainAmount.AmountwithComma(convertamount);
+                                <td colspan="3" style="color: black; padding: 4px; font-size: small;font-weight: bold" align="right"> @GrandNet </td>
+                            }
+                            @if (grandpaid < 0)
+                            {
+                                decimal rr = grandpaid * (-1);
+                                string convertamount = Convert.ToString(rr);
+                                string Grandpaid = CommainAmount.AmountwithComma(convertamount);
+                                <td colspan="3" style="color: black; padding: 4px; font-size: small;font-weight: bold" align="right"> @Grandpaid </td>
+                            }
+                            else
+                            {
+                                string convertamount = Convert.ToString(grandpaid);
+                                string Grandpaid = CommainAmount.AmountwithComma(convertamount);
+                                <td colspan="3" style="color: black; padding: 4px; font-size: small;font-weight: bold" align="right"> @Grandpaid </td>
+                            }
+                            @*<td colspan="3" style="color: black; padding: 4px; font-size: small;font-weight: bold" align="right"> @subpaidamount</td>*@
+                            @if (grandbalance < 0)
+                            {
+                                decimal rr = grandbalance * (-1);
+                                string convertamount = Convert.ToString(rr);
+                                string Grandbalance = CommainAmount.AmountwithComma(convertamount);
+                                <td colspan="3" style="color: black; padding: 4px; font-size: small;font-weight: bold" align="right"> @Grandbalance </td>
+                            }
+                            else
+                            {
+                                string convertamount = Convert.ToString(grandbalance);
+                                string Grandbalance = CommainAmount.AmountwithComma(convertamount);
+                                <td colspan="3" style="color: black; padding: 4px; font-size: small;font-weight: bold" align="right"> @Grandbalance </td>
+                            }
+                            @*<td colspan="3" style="color: black; padding: 4px; font-size: small; font-weight: bold" align="right"> @grandNet </td>
+                            <td colspan="3" style="color: black; padding: 4px; font-size: small; font-weight: bold" align="right"> @grandpaid</td>
+                            <td colspan="3" style="color: black; padding: 4px; font-size: small; font-weight: bold" align="right"> @grandbalance </td>*@
+                        </tr>
+
+
+                        conn.Close();
+                    }
+
+                    else
+                    {
+                        System.Data.SqlClient.SqlConnection conn = new System.Data.SqlClient.SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["AslLabApiContext"].ToString());
+                        string query = string.Format(
+                            "SELECT DISTINCT REFERNM, A.PATIENTID, PATIENTNM,  MOBNO, ISNULL(NETAMT,0) NETAMT, ISNULL(RCVAMT,0) PAIDAMT,  ISNULL(DUEAMT,0) BALAMT " +
+                            "FROM HMS_OPDMST A, HMS_OPD B, HMS_REFER C " +
+                            "WHERE A.COMPID = B.COMPID " +
+                            "AND   A.COMPID = C.COMPID " +
+                            "AND   A.TRANSDT   = B.TRANSDT " +
+                            "AND A.PATIENTID = B.PATIENTID " +
+                            "AND   A.REFERID   = C.REFERID " +
+                            "AND   A.COMPID    = '{0}' " +
+                            "AND   A.TRANSDT BETWEEN '{1}' AND '{2}' " +
+                            "AND A.REFERID='{3}' " +
+                            "ORDER BY A.PATIENTID",
+                            compid, fromdate, todate, allorsingle);
+                        System.Data.SqlClient.SqlCommand cmd = new System.Data.SqlClient.SqlCommand(query, conn);
+                        conn.Open();
+                        SqlDataAdapter da = new SqlDataAdapter(cmd);
+                        DataTable ds = new DataTable();
+                        da.Fill(ds);
+
+                        string patientname = "", patientid = "", gender = "";
+                        decimal subnetamount = 0, subpaidamount = 0, subbalance = 0, sumPatientprevious = 0;
+                        string mobno = "", formatch = "", newdata = "";
+                        decimal netAmount = 0, paidamount = 0, balance = 0;
+                        Int64 peachi_data = 0, howmanyDataHasbyPatient = 0;
+
+
+
+
+
+
+
+
+                        foreach (DataRow row in ds.Rows)
+                        {
+                            if (peachi_data == 0)
+                            {
+                                <tr style="outline: thin solid">
+                                    <td colspan="18">Refer Name : @row["REFERNM"].ToString()</td>
+                                </tr>
+                                peachi_data = 1;
+                                @*<tr style="background-color: #00689b; outline: thin solid">
+                                        <td colspan="3" style="color: white; padding: 4px; font-size: small" align="center">Patient ID</td>
+                                        <td colspan="3" style="color: white; padding: 4px; font-size: small" align="center">Patient Name</td>
+                                        <td colspan="3" style="color: white; padding: 4px; font-size: small" align="center">Mobile No</td>
+                                        <td colspan="3" style="color: white; padding: 4px; font-size: small" align="center">Net Amount</td>
+                                        <td colspan="3" style="color: white; padding: 4px; font-size: small" align="center">Paid Amount</td>
+                                        <td colspan="3" style="color: white; padding: 4px; font-size: small" align="center">Balance</td>
+
+
+
+                                    </tr>*@
+                            }
+
+
+
+                            patientid = row["PATIENTID"].ToString();
+                            patientname = row["PATIENTNM"].ToString();
+
+                            mobno = row["MOBNO"].ToString();
+
+
+                            netAmount = Convert.ToDecimal(row["NETAMT"]);
+                            paidamount = Convert.ToDecimal(row["PAIDAMT"]);
+
+                            balance = Convert.ToDecimal(row["BALAMT"]);
+
+                            <tr>
+                                <td colspan="3" style="color: black; padding: 4px; font-size: small" align="center">@patientid</td>
+                                <td colspan="3" style="color: black; padding: 4px; font-size: small" align="center">@patientname</td>
+                                <td colspan="3" style="color: black; padding: 4px; font-size: small" align="center">@mobno</td>
+                                <td colspan="3" style="color: black; padding: 4px; font-size: small" align="right">@netAmount</td>
+                                <td colspan="3" style="color: black; padding: 4px; font-size: small" align="right">@paidamount</td>
+                                <td colspan="3" style="color: black; padding: 4px; font-size: small" align="right">@balance</td>
+
+                            </tr>
+
+
+
+
+
+                            subnetamount += netAmount;
+                            subpaidamount += paidamount;
+                            subbalance += balance;
+
+
+
+
+
+
+
+
+
+
+
+                        }
+
+                        <tr>
+                            <td colspan="9" style="color: black; padding: 4px; font-size: small;font-weight: bold" align="right"> Total : </td>
+                            @if (subnetamount < 0)
+                            {
+                                decimal rr = subnetamount * (-1);
+                                string convertamount = Convert.ToString(rr);
+                                string Subnetamount = CommainAmount.AmountwithComma(convertamount);
+                                <td colspan="3" style="color: black; padding: 4px; font-size: small;font-weight: bold" align="right"> @Subnetamount </td>
+                            }
+                            else
+                            {
+                                string convertamount = Convert.ToString(subnetamount);
+                                string Subnetamount = CommainAmount.AmountwithComma(convertamount);
+                                <td colspan="3" style="color: black; padding: 4px; font-size: small;font-weight: bold" align="right"> @Subnetamount </td>
+                            }
+                            @if (subpaidamount < 0)
+                            {
+                                decimal rr = subpaidamount * (-1);
+                                string convertamount = Convert.ToString(rr);
+                                string Subpaidamount = CommainAmount.AmountwithComma(convertamount);
+                                <td colspan="3" style="color: black; padding: 4px; font-size: small;font-weight: bold" align="right"> @Subpaidamount </td>
+                            }
+                            else
+                            {
+                                string convertamount = Convert.ToString(subpaidamount);
+                                string Subpaidamount = CommainAmount.AmountwithComma(convertamount);
+                                <td colspan="3" style="color: black; padding: 4px; font-size: small;font-weight: bold" align="right"> @Subpaidamount </td>
+                            }
+                            @*<td colspan="3" style="color: black; padding: 4px; font-size: small;font-weight: bold" align="right"> @subpaidamount</td>*@
+                            @if (subbalance < 0)
+                            {
+                                decimal rr = subbalance * (-1);
+                                string convertamount = Convert.ToString(rr);
+                                string Subbalance = CommainAmount.AmountwithComma(convertamount);
+                                <td colspan="3" style="color: black; padding: 4px; font-size: small;font-weight: bold" align="right"> @Subbalance </td>
+                            }
+                            else
+                            {
+                                string convertamount = Convert.ToString(subbalance);
+                                string Subbalance = CommainAmount.AmountwithComma(convertamount);
+                                <td colspan="3" style="color: black; padding: 4px; font-size: small;font-weight: bold" align="right"> @Subbalance </td>
+                            }
+                            @*<td colspan="3" style="color: black; padding: 4px; font-size: small;font-weight: bold" align="right"> @subbalance </td>*@
+                        </tr>
+
+
+
+
+                            conn.Close();
+                    }
+
+                }
+
+
+
+
+
+
+
+            </tbody>
+        </table>
+
+
+    </div>
+
+
+</body>
+</html>

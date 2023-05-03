@@ -1,0 +1,299 @@
+﻿@using AslLabApi.Models
+@using AslLabApi.Models.DTO
+@using AslLabApi.Models.HMS
+@model AslLabApi.Models.DTO.OpdDTO
+
+@{
+    ViewBag.Title = "Lab Order";
+    Layout = null;
+
+    if (HttpContext.Current.Session["LoggedUserType"] == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedUserTp = HttpContext.Current.Session["LoggedUserType"].ToString();
+    var LoggedUserStatus = HttpContext.Current.Session["LoggedUserStatus"].ToString();
+    var LoggedCompanyStatus = HttpContext.Current.Session["LoggedCompanyStatus"].ToString();
+
+    if ((LoggedUserTp == "CompanyAdmin" || LoggedUserTp == "UserAdmin" || LoggedUserTp == "User") && LoggedUserStatus == "A" && LoggedCompanyStatus == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+
+    var LoggedCompId = HttpContext.Current.Session["loggedCompID"].ToString();
+    Int64 compid = Convert.ToInt64(LoggedCompId);
+
+    string companyName = "", address = "", contactNo = "";
+
+    AslLabApiContext db = new AslLabApiContext();
+
+    var SelectCompanyName = from n in db.AslCompanyDbSet
+
+                            where n.COMPID == compid
+                            select new { n.COMPNM, n.ADDRESS, n.CONTACTNO };
+
+    foreach (var n in SelectCompanyName)
+    {
+        companyName = n.COMPNM;
+        address = n.ADDRESS;
+        contactNo = n.CONTACTNO;
+    }
+    var compNm = companyName;
+    var Address = address;
+    var contactno = contactNo;
+
+    List<Department> department = new List<Department>();
+    department = db.HMS_DEPT.Where(e => e.COMPID == compid).ToList();
+
+
+    TimeZoneInfo timeZoneInfo;
+    timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Central Asia Standard Time");
+    DateTime currentDateTime = TimeZoneInfo.ConvertTime(DateTime.Now, timeZoneInfo);
+
+
+    //permission check
+
+    Int64 loggedUserID = Convert.ToInt64(HttpContext.Current.Session["loggedUserID"].ToString());
+
+
+    var permission_Check = from m in db.AslRoleDbSet
+                           where m.COMPID == compid && m.USERID == loggedUserID
+                               && m.CONTROLLERNAME == "ReportParameter" && m.ACTIONNAME == "Index"
+                           select m;
+    var Status = "";
+    foreach (var check in permission_Check)
+    {
+        Status = check.STATUS;
+    }
+
+    if (Status == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+
+    var patientid = Model.PatientID;
+    DateTime transdate = Convert.ToDateTime(Model.TransactionDate);
+    var patientname = Model.PatientName;
+    var mobileno = Model.MObileNo;
+
+    string gender = "", doctor_name = "", xraydata = "", usgdata = "", refer_name="";
+    Int64 age = 0, doctorid = 0;
+
+}
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+
+    <link href="~/Content/reportcss/style.css" rel="stylesheet" />
+
+
+</head>
+
+<body style=" background-color:#fafafa;">
+
+
+
+    @*<input id="print" tabindex="1" type="button" value="Print" onclick="ClosePrint()" />*@
+    <div style="width: 595px; height: 842px; margin: 0px auto; border: 1px solid #d3d3d3; border-radius: 5px; box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); background: none repeat scroll 0 0 white;">
+        <table id="mainTable" border="0" width="100%">
+            <thead>
+                <tr>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+
+                </tr>
+                <tr style="background-color: #00689b">
+                    <td colspan="12">
+                        <h3 style="color: white;padding:4px">@compNm</h3>
+
+                    </td>
+
+                    <td colspan="8" style="color: white;padding:8px" align="right">
+                        Powered By<br />Alchemy Software
+                    </td>
+
+                </tr>
+
+                <tr>
+                    <td colspan="12" align="left" style="padding: 4px; font-weight: bold">Lab Order</td>
+                    <td align="right" colspan="8" style="padding:8px">Print:@currentDateTime.ToString("dd-MM-yy hh:mm tt")</td>
+                </tr>
+
+
+
+            </thead>
+            @{
+                var departmentfind = (from n in db.HMS_DEPT where n.COMPID == compid select n).ToList();
+                var testdataload = (from n in db.HMS_TEST where n.COMPID == compid select n).OrderBy(x => x.DEPTID).ToList();
+
+                var find_data = (from n in db.HMS_OPDMST where n.COMPID == compid && n.PATIENTID == patientid select n).ToList();
+                var opdData = (from n in db.HMS_OPD where n.COMPID == compid && n.PATIENTID == patientid select n).ToList();
+
+                var doctorname = (from n in db.HMS_REFER where n.COMPID == compid select n).ToList();
+                Int64 flag = 0;
+                string username = "";
+            }
+            <tbody>
+                @foreach (var dpt in departmentfind)
+                {
+                    foreach (var testshow in opdData)
+                    {
+                        var findUser = (from n in db.AslUsercoDbSet where n.COMPID == testshow.COMPID && n.USERID == testshow.INSUSERID select n).ToList();
+                        foreach (var name in findUser)
+                        {
+                            username = name.USERNM;
+                        }
+                        foreach (var matchdptwithtest in testdataload)
+                        {
+                            if (matchdptwithtest.TESTID == testshow.TESTID && matchdptwithtest.DEPTID == dpt.DEPTID)
+                            {
+                                flag = 1;
+                                break;
+                            }
+                        }
+                    }
+                    if (flag == 1)
+                    {
+                        <tr style="background-color: White; outline: thin solid">
+                            <td colspan="20" align="center" style="font-weight: bold">@dpt.DEPTNM</td>
+                        </tr>
+
+                        <tr style="background-color: White; outline: thin solid">
+                            <td colspan="3" style="color: black">Patient ID </td>
+                            <td colspan="3" style="color:black">: @patientid</td>
+                            <td colspan="4" style="color: black">Date Of Received </td>
+                            <td colspan="3" style="color: black">: @transdate.ToString("dd-MMM-yy")</td>
+                            <td colspan="4" style="color: black">Date Of Report</td>
+                            <td colspan="3" style="color: black">: @currentDateTime.ToString("dd-MM-yy")</td>
+
+                        </tr>
+
+
+                        foreach (var item in find_data)
+                        {
+                            gender = item.GENDER;
+                            age = Convert.ToInt64(item.AGE);
+                            doctorid = Convert.ToInt64(item.DOCTORID);
+                            
+                            foreach (var x in doctorname)
+                            {
+                                if (x.REFERID == doctorid)
+                                {
+                                    doctor_name = x.REFERNM;
+                                }
+                            }
+                            foreach (var x in doctorname)
+                            {
+                                if (x.REFERID == item.REFERID)
+                                {
+                                    refer_name = x.REFERNM;
+                                }
+                            }
+                        }
+                        <tr style="background-color: white; outline: thin solid">
+                            <td colspan="3" style="color: black">Patient Name </td>
+                            <td colspan="10" style="color: black">: @patientname </td>
+
+
+
+                            @*<td colspan="4" style="color: black">Age</td>
+                                <td colspan="3" style="color: black">: @age</td>*@
+                            <td colspan="4" style="color: black">Age</td>
+
+                            <td colspan="3" style="color: black">: @age-@gender</td>
+
+                        </tr>
+                        <tr style="background-color: white; outline: thin solid">
+
+                            <td colspan="3" style="color: black">Doctor Name</td>
+
+                            <td colspan="17" style="color: black">: @doctor_name</td>
+
+                        </tr>
+                     <tr style="background-color: white; outline: thin solid">
+
+                            <td colspan="3" style="color: black">Refer Name</td>
+
+                            <td colspan="17" style="color: black">: @refer_name</td>
+
+                        </tr>
+                       <tr style="background-color: white; outline: thin solid">
+                            <td colspan="4" style="padding-left: 4px;font-weight: bold">Test Name: </td>
+                            <td colspan="8" style="padding-left: 4px;font-weight: bold">User:@username </td>
+                            <td colspan="8" style="padding-left: 4px;font-weight: bold">Time:@currentDateTime.ToString("dd-MM-yy hh:mm tt") </td>
+                        </tr>
+                        foreach (var testshow in opdData)
+                        {
+
+                            foreach (var matchdptwithtest in testdataload)
+                            {
+                                if (matchdptwithtest.TESTID == testshow.TESTID && matchdptwithtest.DEPTID == dpt.DEPTID)
+                                {
+                                    <tr style="background-color: white; outline: thin solid">
+                                        <td colspan="20" style="padding-left: 14px;font-weight:bold">@matchdptwithtest.TESTNM</td>
+                                    </tr>
+                                }
+                            }
+                        }
+                        flag = 0;
+
+
+                        for (int i = 1; i <= 20; i++)
+                        {
+                            <tr></tr>
+                        }
+
+                    }
+
+
+
+
+
+
+
+                }
+
+            </tbody>
+        </table>
+
+    </div>
+
+
+
+
+
+
+
+</body>
+
+</html>

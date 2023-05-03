@@ -1,0 +1,415 @@
+﻿@using AslLabApi.Models
+@model AslLabApi.Models.DTO.ResultDTO
+
+
+@{
+    ViewBag.Title = "Index";
+
+    if (HttpContext.Current.Session["LoggedUserType"] == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedUserTp = HttpContext.Current.Session["LoggedUserType"].ToString();
+    var LoggedUserStatus = HttpContext.Current.Session["LoggedUserStatus"].ToString();
+    var LoggedCompanyStatus = HttpContext.Current.Session["LoggedCompanyStatus"].ToString();
+
+    var LoggedUserId = Convert.ToInt64(System.Web.HttpContext.Current.Session["loggedUserID"]);
+
+    if ((LoggedUserTp == "CompanyAdmin" || LoggedUserTp == "AslSuperadmin") && LoggedUserStatus == "A" && LoggedCompanyStatus == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+    var LoggedCompId = HttpContext.Current.Session["loggedCompID"].ToString();
+    Int64 compid = Convert.ToInt64(LoggedCompId);
+
+    AslLabApiContext db = new AslLabApiContext();
+
+    List<SelectListItem> testname = new List<SelectListItem>();
+    var testdata = (from n in db.HMS_TEST where n.COMPID == compid select n).ToList();
+    foreach (var test in testdata)
+    {
+
+        testname.Add(new SelectListItem { Text = test.TESTNM, Value = Convert.ToString(test.TESTID) });
+    }
+
+    TimeZoneInfo timeZoneInfo;
+    timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Central Asia Standard Time");
+    DateTime currentDateTime = TimeZoneInfo.ConvertTime(DateTime.Now, timeZoneInfo);
+
+}
+
+
+<link href="~/Content/newcss/jquery-ui.css" rel="stylesheet" />
+
+
+<link href="~/Content/newcss/ng-grid.css" rel="stylesheet" />
+<link rel="stylesheet" href="~/Content/style.css" />
+
+
+
+<script src="~/Content/jquery1.8.0/jquery.min.js"></script>
+
+
+<script src="~/Content/jquery1.9.1/jquery-1.9.1.js"></script>
+
+
+<script src="~/Content/jquery1.10.3/jquery-ui.js"></script>
+
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+
+
+
+    <div id="contentHeaderBox">
+        <h1 style="padding-left:16px">Result Information</h1>
+
+        <div class="btn-group pull-right" id="editOption">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" aria-expanded="false">
+                <i class="fa fa-cog"></i>
+            </button>
+            <ul class="dropdown-menu pull-right" style="" role="menu">
+
+                <li>
+                    <a href="@Url.Action("Index", "Result")"><i class="fa fa-plus"></i> Create</a>
+                </li>
+                @*<li>
+                        <a href="@Url.Action("Update", "TestMaster")"><i class="fa fa-edit"></i> Update</a>
+                    </li>*@
+
+
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="form-group">
+            <div ng-app="resultApp" data-ng-controller="ApiResultController" @*class="container"*@>
+                <div class="row">
+                    @Html.HiddenFor(model => model.COMPID, new { id = "txtcompid", style = "width:3em;", @Value = compid })
+                    <div class="col-md-2">
+                        <label>Patient ID</label>
+                        <span>
+                            @Html.TextBoxFor(model => model.PatientId, new { id = "PatientId", @class = "form-control" })
+                        </span>
+                    </div>
+                    <div class="col-md-3">
+                        <label>Patient Name</label>
+                        <span>
+                            @Html.TextBoxFor(model => model.PatientName, new { id = "PatientName", @class = "form-control", tabindex = "-1" })
+                        </span>
+                    </div>
+                    <div class="col-md-2">
+                        <label>Date</label>
+                        <span>
+                            @Html.TextBoxFor(model => model.TransactionDate, new { @class = "form-control input-sm", id = "TransactionDate", tabindex = "-1" })
+                        </span>
+                    </div>
+                    <div class="col-md-3">
+                        <label>Test Name</label>
+                        <span>
+                            @Html.DropDownListFor(model => model.TestId, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { id = "TestId", @class = "form-control" })
+                        </span>
+                    </div>
+                    <div class="col-md-2">
+                        <input style="margin-top: 22px" type="submit" value="Show" data-ng-click="add($event)" class="btn btn-primary" />
+                        
+                    </div>
+                </div>
+              
+                <br/>
+
+          
+
+
+
+
+
+
+
+
+                <table class="table table-bordered table-hover col-md-12" >
+                    <tr>
+                        <td class="col-md-5">Test Particulars</td>
+                        <td class="col-md-5">Result</td>
+                       
+                        <td class="col-md-2"></td>
+                    </tr>
+                    @*<tr>
+
+                        <td class="col-md-5">@Html.DropDownListFor(model => model.RestId, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { id = "RestId", data_ng_model = "newChild.RestId", @class = "form-control" })</td>
+
+                        <td class="col-md-5">@Html.TextBoxFor(model => model.Result, new { id = "Result", @class = "form-control", data_ng_model = "newChild.Result" })</td>
+                       
+                        <td class="col-md-2"><input type="submit" value="Insert" data-ng-click="addrow($event)" class="btn btn-primary" style="margin-left: 20px"/></td>
+
+
+                    </tr>*@
+                    <tr data-ng-repeat="testitem in ResultData">
+
+                        <td hidden><strong data-ng-hide="testitem.editMode">{{testitem.ID}}</strong></td>
+
+                        <td hidden><strong data-ng-hide="testitem.editMode" id="gridRestId">{{testitem.RestId}}</strong></td>
+                        <td class="col-md-5">
+                            <p data-ng-hide="testitem.editMode">{{ testitem.Restname }}</p>
+                            @*@Html.DropDownListFor(model => model.RestId, new SelectList(string.Empty, "Value", "Text"), "--Select--", new {data_ng_show="testitem.editMode", @class = "form-control" })*@
+
+                        </td>
+                        <td class="col-md-5">
+                            <p data-ng-hide="testitem.editMode">{{ testitem.Result }}</p>
+                            @Html.TextBoxFor(model => model.Result, new { id = "Result", data_ng_show = "testitem.editMode", @class = "form-control", data_ng_model = "testitem.Result" })
+                            @*<input data-ng-show="testitem.editMode" type="text" data-ng-model="testitem.Result" id="gridRate" />*@
+                        </td>
+
+
+                        <td class="col-md-2">
+                            <p style="margin-left: 20px" data-ng-hide="testitem.editMode"><a data-ng-click="toggleEdit(testitem)" id="edit" href="javascript:;">Edit</a> | <a data-ng-click="deleteTestitem(testitem)" href="javascript:;">Delete</a></p>
+                            <p style="margin-left: 20px" data-ng-show="testitem.editMode"><a data-ng-click="save(testitem)" href="javascript:;">Save</a> | <a data-ng-click="cancel(testitem)" href="javascript:;">Cancel</a></p>
+
+                        </td>
+                    </tr>
+                </table>
+            <hr />
+
+                @Html.TextBoxFor(model => model.INSLTUDE, new { id = "latlonPos", style = "display: none;" })
+                <input id="lat" type="hidden" />
+                <input id="lon" type="hidden" />
+                @Html.TextBoxFor(model => model.INSUSERID, new { id = "InsUserID", style = "display: none;", @Value = LoggedUserId })
+                
+
+        </div>
+    </div>
+
+    </div>
+
+
+    
+      //Latitute & longitude
+    <script src="http://maps.google.com/maps/api/js?sensor=false">
+    </script>
+
+    <script language="javascript" type="text/javascript">
+        $(function () {
+            navigator.geolocation.getCurrentPosition(showPosition);
+            //navigator.geolocation.getCurrentPosition(showPosition, positionError);
+
+            function showPosition(position) {
+                var coordinates = position.coords;
+                $("#lat").val(coordinates.latitude);
+                $("#lon").val(coordinates.longitude);
+
+                $("#latlonPos").val(
+                    $("#lat").val() + "," + $("#lon").val()
+                );
+                $("#latlonRms").val(
+                    $("#lat").val() + "," + $("#lon").val()
+                );
+            }
+        });
+    </script>
+
+
+
+
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            document.getElementById('PatientName').readOnly = true;
+            document.getElementById('TransactionDate').readOnly = true;
+
+
+            //$("#TransactionDate").datepicker({ dateFormat: 'dd-M-yy', changeYear: true });
+
+
+            $('#PatientId').autocomplete({
+                source: function (request, response) {
+                    var changedText2 = $("#txtcompid").val();
+
+                    $.ajax({
+
+                        url: '/api/Result/PatientId',
+                        type: 'GET',
+                        cache: false,
+                        data: { query: request.term, query2: changedText2 },
+                        dataType: 'json',
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return {
+                                    label: item.PatientId,
+                                    value: item.PatientId,
+                                    id: item.PatientName,
+                                    date: item.TransactionDate
+
+                                };
+                            }));
+                        }
+                    });
+                },
+                select: function (event, ui) {
+                    $('#PatientName').val(ui.item.id);
+                    $('#PatientId').val(ui.item.label);
+
+                    $('#TransactionDate').val(ui.item.date);
+
+                    txtOneChanged2();
+
+                    return false;
+                },
+                change: $('#PatientId').keyup(_.debounce(txtOneChanged2, 1000))
+            });
+
+
+
+
+
+
+            $('#TestId').change(function () {
+                var changedtxt = $("#TestId").val();
+                $.ajax
+               ({
+                   url: '@Url.Action("restidload", "Result")',
+                   type: 'post',
+                   dataType: "json",
+                   data: { TestID: changedtxt },
+                   success: function (data) {
+                       $("#RestId").empty();
+
+                       $("#RestId").append('<option value="'
+                           + '">'
+                           + "--Select--" + '</option>');
+
+
+
+                       $.each(data, function (i, memo) {
+
+                           $("#RestId").append('<option value="'
+                               + memo.Value + '">'
+                               + memo.Text + '</option>');
+
+
+
+
+                       });
+
+                   }
+               });
+            });
+
+
+        });
+
+
+        function txtOneChanged2() {
+
+
+            var changedText = $("#PatientId").val();
+            var changedText2 = $("#txtcompid").val();
+
+
+            var Name = document.getElementById('PatientName');
+            var txtBox = document.getElementById('PatientId');
+            var txtBox2 = document.getElementById('TransactionDate');
+
+
+
+
+
+            if (changedText != "") {
+
+                $.getJSON(
+                    '/api/Result/DynamicPatientName', { "ChangedText": changedText, "ChangedText2": changedText2 },
+                    function (result) {
+                        Name.value = result[0].PatientName;
+                        txtBox.value = result[0].PatientId;
+
+                        txtBox2.value = result[0].TransactionDate;
+
+
+                        $.ajax
+        ({
+            url: '@Url.Action("testidload", "Result")',
+            type: 'post',
+            dataType: "json",
+            data: { patientid: txtBox.value },
+            success: function (data) {
+                $("#TestId").empty();
+
+                $("#TestId").append('<option value="'
+                    + '">'
+                    + "--Select--" + '</option>');
+
+
+
+                $.each(data, function (i, memo) {
+
+                    $("#TestId").append('<option value="'
+                        + memo.Value + '">'
+                        + memo.Text + '</option>');
+
+
+
+
+                });
+
+            }
+        });
+
+
+
+
+                    });
+
+
+
+            }
+
+
+
+        }
+
+    </script>
+
+
+
+
+
+}
+
+
+<link href="~/Content/themes/base/jquery-ui.css" rel="stylesheet" />
+
+<script src="~/Scripts/jquery-ui-1.10.4.min.js"></script>
+
+
+
+
+
+<script src="~/Scripts/angularjs/1.0.5/angular.js"></script>
+<script src="~/Scripts/Result/Result.js"></script>
+
+<script src="~/Scripts/angularjs/ui-bootstrap-tpls-0.4.0.js"></script>
+
+
+
+
+<script src="~/Scripts/Underscore.js"></script>
+
+
+
+
+
+
+
+
+

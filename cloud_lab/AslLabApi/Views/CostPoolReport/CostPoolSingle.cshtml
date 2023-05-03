@@ -1,0 +1,188 @@
+﻿@using System.Web.UI.WebControls
+@using AslLabApi.Models
+@model AslLabApi.Models.PageModel
+
+@{
+    ViewBag.Title = "CostPoolSingle";
+
+    if (HttpContext.Current.Session["LoggedUserType"] == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedUserTp = HttpContext.Current.Session["LoggedUserType"].ToString();
+    var LoggedUserStatus = HttpContext.Current.Session["LoggedUserStatus"].ToString();
+    var LoggedCompanyStatus = HttpContext.Current.Session["LoggedCompanyStatus"].ToString();
+
+    if ((LoggedUserTp == "CompanyAdmin" || LoggedUserTp == "UserAdmin" || LoggedUserTp == "User") && LoggedUserStatus == "A" && LoggedCompanyStatus == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+
+    var LoggedCompId = HttpContext.Current.Session["loggedCompID"].ToString();
+
+
+
+
+    AslLabApiContext db = new AslLabApiContext();
+
+    //permission check
+    Int64 compid = Convert.ToInt64(System.Web.HttpContext.Current.Session["loggedCompID"]);
+    Int64 loggedUserID = Convert.ToInt64(HttpContext.Current.Session["loggedUserID"].ToString());
+
+
+    var permission_Check = from m in db.AslRoleDbSet
+                           where m.COMPID == compid && m.USERID == loggedUserID
+                               && m.CONTROLLERNAME == "CostPoolReport" && m.ACTIONNAME == "CostPoolSingle"
+                           select m;
+    var Status = "";
+    foreach (var check in permission_Check)
+    {
+        Status = check.STATUS;
+    }
+
+    if (Status == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+}
+
+@*<link href="~/Content/bootstrap%20datepicker%20css/datepicker.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap%20datepicker%20css/datepicker3.css" rel="stylesheet" />
+
+    <script src="~/Scripts/bootstrap-datepicker.js"></script>*@
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    @Html.HiddenFor(model => model.AGlStrans.COMPID, new { id = "txtCompId", @Value = LoggedCompId })
+    @Html.HiddenFor(model => model.AGlCostPool.COSTPID, new { id = "txtCostPID" })
+    <div id="contentHeaderBox">
+        <h1 style="padding-left:16px">Cost Pool Operating P/L Single</h1>
+    </div>
+    <br />
+    <div class="col-md-12">
+        <div class="form-group">
+            <div class="row">
+
+                <div class="col-md-3">
+                    <span>@Html.Label("name", "Cost Pool", htmlAttributes: new { @class = "control-label" })</span>
+                    @Html.TextBoxFor(model => model.AGlCostPool.COSTPNM, htmlAttributes: new { id = "txtCostPNM", @class = "form-control input-sm",autofocus=true })
+                    @Html.ValidationMessageFor(model => model.AGlCostPool.COSTPNM, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="col-md-3">
+                    <span>@Html.Label("name", "From", htmlAttributes: new { @class = "control-label" })</span>
+                    @Html.TextBoxFor(model => model.FromDate, new { @class = "form-control input-sm", id = "idFromdate" })
+
+                </div>
+
+                <div class="col-md-3">
+                    <span>@Html.Label("name", "To", htmlAttributes: new { @class = "control-label" })</span>
+                    @Html.TextBoxFor(model => model.ToDate, new { @class = "form-control input-sm", id = "idTodate" })
+
+                </div>
+
+
+                <div class="col-md-1">
+                    <span><br /></span>
+                    <input id="SubmitId" type="submit" class="btn btn-info" value="Print" name="command" formtarget="_blank" />
+                </div>
+                <div class="col-md-2"></div>
+            </div>
+        </div>
+
+
+
+    </div>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(function () {
+                $("#idFromdate").datepicker({ dateFormat: 'dd-M-yy', changeYear: true });
+            });
+            $(function () {
+                $("#idTodate").datepicker({ dateFormat: 'dd-M-yy', changeYear: true });
+            });
+        });
+    </script>
+
+    <script type="text/javascript">
+
+       $(document).ready(function () {
+           $('#txtCostPNM').autocomplete(
+            {
+                source:function(request, response) {
+                    
+                    //var changedText2 = $("#txtcompid").val();
+                    //var changedText3 = $("#TransactionDate").val();
+                    $.ajax({
+
+                        url:'@Url.Action("TagSearch", "CostPoolReport")',
+                        type: 'GET',
+                        cache: false,
+                        data: { term: request.term},
+                        dataType: 'json',
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return {
+                                    label: item.COSTPNM,
+                                    value: item.COSTPNM,
+                                    id: item.COSTPID,
+                                  
+
+
+                                };
+                            }));
+                        }
+                    });
+                },
+                select:  function (event, ui) {
+                    $('#txtCostPNM').val(ui.item.label);
+                    $('#txtCostPID').val(ui.item.id);
+
+                  
+                    //txtOneChanged();
+
+                    //return false;
+                },
+                change: $('#txtCostPNM').keyup(_.debounce(txtOneChanged, 100)),
+               
+               
+
+            
+
+            });
+        });
+
+        function txtOneChanged() {
+            var changedText = $("#txtCostPNM").val();
+            var txtBox = document.getElementById('txtCostPNM');
+            var txtBox1 = document.getElementById('txtCostPID');
+            $.getJSON(
+                '/CostPoolReport/ItemNameChanged', { "ChangedText": changedText },
+                function (result) {
+                    txtBox.value = result.Costname;
+                    txtBox1.value = result.Costpid;
+
+                    //document.getElementById("txtCostPNM").focus();
+                });
+        }
+    </script>
+}
+
+
+<link href="~/Content/themes/base/jquery-ui.css" rel="stylesheet" />
+<script src="~/Scripts/jquery-ui-1.10.4.min.js"></script>
+<script src="~/Scripts/Underscore.js"></script>

@@ -1,0 +1,186 @@
+﻿@using AslLabApi.Models
+@model IEnumerable<AslLabApi.Models.HMS.SignBy>
+
+@{
+    ViewBag.Title = "Index";
+
+    if (HttpContext.Current.Session["LoggedUserType"] == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedUserTp = HttpContext.Current.Session["LoggedUserType"].ToString();
+    var LoggedUserStatus = HttpContext.Current.Session["LoggedUserStatus"].ToString();
+    var LoggedCompanyStatus = HttpContext.Current.Session["LoggedCompanyStatus"].ToString();
+
+    if ((LoggedUserTp == "CompanyAdmin" || LoggedUserTp == "AslSuperadmin") && LoggedUserStatus == "A" && LoggedCompanyStatus == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+
+    var LoggedCompId = HttpContext.Current.Session["loggedCompID"].ToString();
+
+
+    var compid = Convert.ToInt64(LoggedCompId);
+  
+
+
+}
+
+
+
+
+
+
+
+@if (Model != null)
+{
+     if (TempData["message"] != null)
+        {
+            <div class="text-center">
+                <h6 style="color: #BD7F1C">@TempData["message"] </h6>
+            </div>
+            <br />
+        }
+
+    <div class="panel panel-primary">
+        <div class="panel-heading">SignBy Information</div>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <tr>
+                   
+                    <th>
+                        Authorized name
+                    </th>
+                   
+                    <th>
+                        Title
+                    </th>
+                   
+                    <th>
+                        Department Name
+                    </th>
+                    <th>
+                        Institute
+                    </th>
+                   
+                </tr>
+
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        
+                        <td>
+                            @Html.DisplayFor(modelItem => item.AUTHNM)
+                        </td>
+                        @*<td>
+                                @Html.DisplayFor(modelItem => item.DEPTNM)
+                            </td>*@
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TITLE)
+                        </td>
+                        @*<td>
+                                @Html.DisplayFor(modelItem => item.ADDRESS)
+                            </td>*@
+                        <td>
+                            @Html.DisplayFor(modelItem => item.DEPTNM)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.INSTITUTE)
+                        </td>
+                        @*<td>
+                                @Html.DisplayFor(modelItem => item.LOGINID)
+                            </td>*@
+                        @*<td>
+                                @Html.DisplayFor(modelItem => item.LOGINPW)
+                            </td>*@
+                       
+                        @*<td>
+                                @Html.ActionLink("Edit", "Edit", new { id = item.AslUsercoId }) |
+                                @Html.ActionLink("Details", "Details", new { id = item.AslUsercoId }) |
+                                @Html.ActionLink("Delete", "Delete", new { id = item.AslUsercoId })
+                            </td>*@
+                    </tr>
+                }
+
+            </table>
+        </div>
+    </div>
+
+}
+
+else{
+    AslLabApiContext db=new AslLabApiContext();
+    var listofdata = (from n in db.HMS_SIGNBY where n.COMPID == compid select n).ToList();
+    
+    <div class="panel panel-primary">
+        <div class="panel-heading">SignBy Information</div>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <tr>
+
+                    <th>
+                        Authorized name
+                    </th>
+
+                    <th>
+                        Title
+                    </th>
+
+                    <th>
+                        Department Name
+                    </th>
+                    <th>
+                        Institute
+                    </th>
+
+                </tr>
+
+                @foreach (var item in listofdata)
+                {
+                    <tr>
+
+                        <td>
+                            @Html.DisplayFor(modelItem => item.AUTHNM)
+                        </td>
+                        @*<td>
+                                @Html.DisplayFor(modelItem => item.DEPTNM)
+                            </td>*@
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TITLE)
+                        </td>
+                        @*<td>
+                                @Html.DisplayFor(modelItem => item.ADDRESS)
+                            </td>*@
+                        <td>
+                            @Html.DisplayFor(modelItem => item.DEPTNM)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.INSTITUTE)
+                        </td>
+                        @*<td>
+                                @Html.DisplayFor(modelItem => item.LOGINID)
+                            </td>*@
+                        @*<td>
+                                @Html.DisplayFor(modelItem => item.LOGINPW)
+                            </td>*@
+
+                        @*<td>
+                                @Html.ActionLink("Edit", "Edit", new { id = item.AslUsercoId }) |
+                                @Html.ActionLink("Details", "Details", new { id = item.AslUsercoId }) |
+                                @Html.ActionLink("Delete", "Delete", new { id = item.AslUsercoId })
+                            </td>*@
+                    </tr>
+                }
+
+            </table>
+        </div>
+    </div>
+}
+
+    
+    

@@ -1,0 +1,353 @@
+﻿@using System.Web.UI.WebControls
+@using AslLabApi.Models
+@model AslLabApi.Models.DTO.OpdDTO
+
+
+
+@{
+    ViewBag.Title = "Index";
+
+    if (HttpContext.Current.Session["LoggedUserType"] == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedUserTp = HttpContext.Current.Session["LoggedUserType"].ToString();
+    var LoggedUserStatus = HttpContext.Current.Session["LoggedUserStatus"].ToString();
+    var LoggedCompanyStatus = HttpContext.Current.Session["LoggedCompanyStatus"].ToString();
+
+    if ((LoggedUserTp == "CompanyAdmin" || LoggedUserTp == "UserAdmin" || LoggedUserTp == "User") && LoggedUserStatus == "A" && LoggedCompanyStatus == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+
+    var LoggedCompId = HttpContext.Current.Session["loggedCompID"].ToString();
+
+    AslLabApiContext db = new AslLabApiContext();
+    Int64 compid = Convert.ToInt64(System.Web.HttpContext.Current.Session["loggedCompID"]);
+    //permission check
+
+    Int64 loggedUserID = Convert.ToInt64(HttpContext.Current.Session["loggedUserID"].ToString());
+
+
+    var permission_Check = from m in db.AslRoleDbSet
+                           where m.COMPID == compid && m.USERID == loggedUserID
+                               && m.CONTROLLERNAME == "ReportParameter" && m.ACTIONNAME == "Index"
+                           select m;
+    var Status = "";
+    foreach (var check in permission_Check)
+    {
+        Status = check.STATUS;
+    }
+
+    if (Status == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+    
+    List<SelectListItem> type=new List<SelectListItem>();
+    type.Add(new SelectListItem { Text = "--Select--", Value = "" });
+    type.Add(new SelectListItem{Text = "Test",Value="Test"});
+    type.Add(new SelectListItem { Text = "Category", Value = "Category" });
+    
+    List<SelectListItem> header = new List<SelectListItem>();
+    
+    header.Add(new SelectListItem { Text = "YES", Value = "Y" });
+    header.Add(new SelectListItem { Text = "NO", Value = "N" });
+    List<SelectListItem> top = new List<SelectListItem>();
+
+    top.Add(new SelectListItem { Text = "YES", Value = "Y" });
+    top.Add(new SelectListItem { Text = "NO", Value = "N" });
+}
+
+
+
+
+<link href="~/Content/newcss/jquery-ui.css" rel="stylesheet" />
+
+
+<link rel="stylesheet" href="~/Content/style.css" />
+
+
+
+<script src="~/Content/jquery1.8.0/jquery.min.js"></script>
+
+
+<script src="~/Content/jquery1.9.1/jquery-1.9.1.js"></script>
+
+
+<script src="~/Content/jquery1.10.3/jquery-ui.js"></script>
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    @Html.HiddenFor(model => model.CompanyID, new { id = "txtCompId", @Value = LoggedCompId })
+    @*@Html.HiddenFor(model => model.AGlMaster.DEBITCD, new { id = "txtHeadId", @Value = TempData["HeadCD"] })*@
+
+    <div id="contentHeaderBox">
+        <h1 style="padding-left:16px">Report Parameter</h1>
+    </div>
+    <br />
+    <div class="col-md-12">
+        <div class="form-group">
+            <div class="row">
+                
+                @Html.HiddenFor(model => model.CompanyID, new { id = "txtcompid", style = "width:3em;", @Value = compid })
+
+                <div class="col-md-3">
+                    <span>@Html.Label("name", "Patient ID", htmlAttributes: new { @class = "control-label" })</span>
+                    @Html.TextBoxFor(model => model.PatientID, new { id = "PatientId", @class = "form-control" })
+
+                </div>
+
+                <div class="col-md-3">
+                    <span>@Html.Label("name", "Patient Name", htmlAttributes: new { @class = "control-label" })</span>
+                    @Html.TextBoxFor(model => model.PatientName, new { id = "PatientName", @class = "form-control", tabindex = "-1" })
+
+                </div>
+                <div class="col-md-3">
+                    <span>@Html.Label("name", "Date", htmlAttributes: new { @class = "control-label" })</span>
+                @Html.TextBoxFor(model => model.TransactionDate, new { @class = "form-control input-sm", id = "TransactionDate", tabindex = "-1" })
+
+                </div>
+                <div class="col-md-3">
+                    <span>@Html.Label("name", "Mobile No", htmlAttributes: new { @class = "control-label" })</span>
+                 @Html.TextBoxFor(model => model.MObileNo, new { @class = "form-control input-sm", id = "MObileNo", tabindex = "-1" })
+
+                </div>
+        
+            </div>
+            <br/>
+            <div class="row">
+                <div class="col-md-2" style="width:10%">
+                    <input style="margin-top: 10px" type="submit" value="Top - Only" class="btn btn-primary btn-info" formtarget="_blank" name="command" />
+
+                </div>
+                <div class="col-md-2">
+                    <input style="margin-top: 10px" type="submit" value="Top - USG/X-ray" class="btn btn-primary btn-info" formtarget="_blank" name="command" />
+
+                </div>
+                <div class="col-md-2" style="width:10%">
+                    <input style="margin-top: 10px" type="submit" value="Lab Order" class="btn btn-primary btn-info" formtarget="_blank" name="command" />
+
+                </div>
+               
+                <div class="col-md-2">
+                    <input style="margin-top: 10px" type="submit" value="Money Receipt" class="btn btn-primary btn-info" formtarget="_blank" name="command" />
+
+                </div>
+                <div class="col-md-2" style="width:18%">
+                    <input style="margin-top: 10px" type="submit" value="Money Receipt - Due" class="btn btn-primary btn-info" formtarget="_blank" name="command" />
+
+                </div>
+                <div class="col-md-2">
+                    <input style="margin-top: 10px" type="submit" value="SMS - Report" class="btn btn-primary btn-info" name="command" />
+
+                </div>
+               
+               
+               
+              
+            </div>
+            <br/>
+            <div class="row">
+                <div class="col-md-3" style="width:20%">
+                    <span>@Html.Label("name", "Type", htmlAttributes: new { @class = "control-label" })</span>
+                    @Html.DropDownListFor(model => model.Type, type, new { id = "type", @class = "form-control" })
+
+                </div>
+                <div class="col-md-4">
+                    <span>@Html.Label("name", "Particulars", htmlAttributes: new { @class = "control-label" })</span>
+                    @Html.DropDownListFor(model => model.TestCategoryId, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { id = "testOrcategory", @class = "form-control" })
+
+                </div>
+                <div class="col-md-2">
+                    <span>@Html.Label("name", "HEADER", htmlAttributes: new { @class = "control-label" })</span>
+                    @Html.DropDownListFor(model => model.Header, header, new { id = "Header", @class = "form-control" })
+
+                </div>
+                <div class="col-md-2">
+                    <span>@Html.Label("name", "TOP", htmlAttributes: new { @class = "control-label" })</span>
+                    @Html.DropDownListFor(model => model.Top, top, new { id = "Top", @class = "form-control" })
+
+                </div>
+                <div class="col-md-1">
+                  
+                    <input style="margin-top:20px" type="submit" value="Submit" class="btn btn-primary btn-info" formtarget="_blank" name="command" />
+
+                </div>
+               
+            </div>
+            
+
+        </div>
+
+
+
+
+    </div>
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            document.getElementById('PatientName').readOnly = true;
+            document.getElementById('TransactionDate').readOnly = true;
+            document.getElementById('MObileNo').readOnly = true;
+
+
+            $('#PatientId').autocomplete({
+                source: function (request, response) {
+                    var changedText2 = $("#txtcompid").val();
+
+                    $.ajax({
+
+                        url: '/api/Result/PatientId',
+                        type: 'GET',
+                        cache: false,
+                        data: { query: request.term, query2: changedText2 },
+                        dataType: 'json',
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return {
+                                    label: item.PatientId,
+                                    value: item.PatientId,
+                                    id: item.PatientName,
+                                    date: item.TransactionDate,
+                                    mobno: item.MobileNo
+                                };
+                            }));
+                        }
+                    });
+                },
+                select: function (event, ui) {
+                    $('#PatientName').val(ui.item.id);
+                    $('#PatientId').val(ui.item.value);
+
+                    $('#TransactionDate').val(ui.item.date);
+                    $('#MObileNo').val(ui.item.mobno);
+                    //txtOneChanged2();
+
+                    return false;
+                },
+                change: $('#PatientId').keyup(_.debounce(txtOneChanged2, 500))
+            });
+
+            $('#type').change(function () {
+                var changedtxt = $("#type").val();
+                var changedtxt2 = $("#PatientId").val();
+                $.ajax
+               ({
+                   url: '@Url.Action("testorCat", "ReportParameter")',
+                   type: 'post',
+                   dataType: "json",
+                   data: { Type: changedtxt, PatientdID: changedtxt2 },
+                   success: function (data) {
+                       $("#testOrcategory").empty();
+
+                       $("#testOrcategory").append('<option value="'
+                           + '">'
+                           + "--Select--" + '</option>');
+
+
+
+                       $.each(data, function (i, memo) {
+
+                           $("#testOrcategory").append('<option value="'
+                               + memo.Value + '">'
+                               + memo.Text + '</option>');
+
+
+
+
+                       });
+
+                   }
+               });
+            });
+
+        });
+
+
+
+
+        function txtOneChanged2() {
+
+
+            var changedText = $("#PatientId").val();
+            var changedText2 = $("#txtcompid").val();
+
+
+            var Name = document.getElementById('PatientName');
+            var txtBox = document.getElementById('PatientId');
+            var txtBox2 = document.getElementById('TransactionDate');
+
+            var txtBox3 = document.getElementById('MObileNo');
+
+
+
+            if (changedText != "") {
+
+                $.getJSON(
+                    '/api/Result/DynamicPatientName', { "ChangedText": changedText, "ChangedText2": changedText2 },
+                    function (result) {
+                        Name.value = result[0].PatientName;
+                        txtBox.value = result[0].PatientId;
+
+                        txtBox2.value = result[0].TransactionDate;
+
+                        txtBox3.value = result[0].MobileNo;
+
+
+                    });
+
+
+
+            }
+
+
+
+        }
+
+
+    </script>
+
+
+
+
+
+}
+
+
+
+<link href="~/Content/themes/base/jquery-ui.css" rel="stylesheet" />
+
+<script src="~/Scripts/jquery-ui-1.10.4.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script src="~/Scripts/Underscore.js"></script>
+
+
+
+

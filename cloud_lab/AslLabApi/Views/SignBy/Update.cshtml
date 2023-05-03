@@ -1,0 +1,308 @@
+﻿@using System.Web.UI.WebControls
+@using AslLabApi.Models
+@model AslLabApi.Models.DTO.SignByDTO
+
+@{
+    ViewBag.Title = "Create";
+
+    if (HttpContext.Current.Session["LoggedUserType"] == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedUserTp = HttpContext.Current.Session["LoggedUserType"].ToString();
+    var LoggedUserStatus = HttpContext.Current.Session["LoggedUserStatus"].ToString();
+    var LoggedCompanyStatus = HttpContext.Current.Session["LoggedCompanyStatus"].ToString();
+
+    if ((LoggedUserTp == "CompanyAdmin" || LoggedUserTp == "AslSuperadmin") && LoggedUserStatus == "A" && LoggedCompanyStatus == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+
+    var LoggedCompId = HttpContext.Current.Session["loggedCompID"].ToString();
+
+
+
+
+
+
+}
+
+
+
+
+
+@* new added..................................... *@
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+<script src="~/Content/AdminPanel/js/jquery-2.1.3.js"></script>
+@*<link href="~/Content/AdminPanel/css/bootstrap.min.css" rel="stylesheet" />*@
+<link href="~/Content/AdminPanel/css/font-awesome.min.css" rel="stylesheet" />
+
+
+
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+
+
+    @Html.HiddenFor(model => model.COMPID, new { id = "txtCompid", @Value = LoggedCompId })
+    @Html.HiddenFor(model => model.SignId, new { id = "SignId" })
+      @Html.HiddenFor(model => model.SignId, new { id = "ID" })
+
+
+
+    AslLabApiContext db = new AslLabApiContext();
+
+    <div id="contentHeaderBox">
+        <h1 style="padding-left:16px">SignBy Info Update</h1>
+        @*@if (TempData["message"] != null)
+            {
+                <div class="text-center">
+                    <h6 style="color: #BD7F1C">@TempData["message"] </h6>
+                </div>
+                <br />
+            }*@
+        <div class="btn-group pull-right" id="editOption">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" aria-expanded="false">
+                <i class="fa fa-cog"></i>
+            </button>
+            <ul class="dropdown-menu pull-right" style="" role="menu">
+
+                <li>
+                    <a href="@Url.Action("Create", "SignBy")"><i class="fa fa-plus"></i> Create</a>
+                </li>
+                <li>
+                    <a href="@Url.Action("Update", "SignBy")"><i class="fa fa-edit"></i> Update</a>
+                </li>
+                @*<li>
+                        <a href="@Url.Action("Delete", "JobInformation")"><i class="fa fa-times"></i> Delete</a>
+                    </li>*@
+
+            </ul>
+        </div>
+    </div>
+
+
+    <div class="col-md-12">
+        <div class="form-group">
+            <div class="row">
+
+
+
+                <div class="col-md-2">
+                    @Html.Label("Authorized Name", htmlAttributes: new { @class = "control-label" })
+                </div>
+                <div class="col-md-4">
+                    @Html.TextBoxFor(model => model.AuthorName, new { @class = "form-control", id = "AuthorName", @placeholder = "Author Name", autofocus = true })
+
+                </div>
+
+
+                <div class="col-md-2">
+                    @Html.Label("Title", htmlAttributes: new { @class = "control-label" })
+                </div>
+                <div class="col-md-4">
+                    @Html.TextBoxFor(model => model.Title, new { @class = "form-control", id = "Title" })
+
+                </div>
+
+
+            </div>
+            <br />
+            <div class="row">
+
+
+
+                <div class="col-md-2">
+                    @Html.Label("Department Name", htmlAttributes: new { @class = "control-label" })
+                </div>
+                <div class="col-md-4">
+                    @Html.TextBoxFor(model => model.DepartmentName, new { @class = "form-control", id = "DepartmentName", @placeholder = "Department Name", autofocus = true })
+
+                </div>
+
+
+                <div class="col-md-2">
+                    @Html.Label("Institute", htmlAttributes: new { @class = "control-label" })
+                </div>
+                <div class="col-md-4">
+                    @Html.TextBoxFor(model => model.Institute, new { @class = "form-control", id = "Institute" })
+
+                </div>
+
+
+                
+            </div>
+            <br/>
+            <div class="row">
+                <div class="col-md-10">
+
+                </div>
+                <div class="col-md-2">
+
+
+
+                    <input id="SubmitId" type="submit" class="btn btn-info" value="Update" />
+
+
+
+                </div>
+            </div>
+        </div>
+
+        <div id="result-Table">
+            @Html.Partial("~/Views/SignBy/_SignByInfo.cshtml")
+        </div>
+
+    </div>
+
+
+
+
+
+}
+<script language="javascript" type="text/javascript">
+        $(document).ready(function () {
+            $('#AuthorName').autocomplete({
+                source: function (request, response) {
+
+                  
+                    $.ajax({
+                        url: '@Url.Action("AuthorListTag", "SignBy")',
+                        dataType: "json",
+                        data: {
+                            term: request.term,
+                           
+
+                        },
+                        success: function (data) {
+                            //response(data);
+                            response($.map(data, function (item) {
+                                return {
+                                    label: item,
+                                    value: item
+                                };
+                            }));
+                        }
+                    });
+
+                },
+                change: $('#AuthorName').keyup(function (e) {
+
+                    $('#AuthorName').keyup(_.debounce(txtOneChanged(e.keyCode), 1000));
+
+                }),
+
+                select: function (event, ui) {
+                    $("#AuthorName").val(ui.item.label);
+
+                    txtOneChanged();
+                }
+
+
+
+            });
+
+
+
+        });
+
+
+        function txtOneChanged(value) {
+
+            if (value != 8) {
+                var changedText = $("#AuthorName").val();
+
+
+                var Name = document.getElementById('AuthorName');
+                var txtBox = document.getElementById('SignId');
+                var txtBox2 = document.getElementById('Title');
+
+                var txtbox3 = document.getElementById('DepartmentName');
+                var txtbox4 = document.getElementById('Institute');
+                var txtbox5 = document.getElementById('ID');
+                if (changedText != "") {
+
+                    $.getJSON(
+                        '/SignBy/DynamicautocompleteSignBy', { "ChangedText": changedText },
+                        function (result) {
+                            Name.value = result.Authorname;
+                            txtBox.value = result.SignId;
+                            txtBox2.value = result.Title;
+                            txtbox3.value = result.Deptname;
+                            txtbox4.value = result.Institute;
+                            if (result.SignId != 0) {
+                                txtbox5.value = $("#SignId").val();
+                            }
+
+                            //document.getElementById("categoryName").focus();
+                        });
+
+                }
+                if ($("#SignId").val() != "") {
+                    txtbox5.value = $("#SignId").val();
+                }
+
+            }
+
+
+
+        }
+</script>
+<style type="text/css">
+    .ui-autocomplete {
+        position: absolute;
+        cursor: default;
+        background: #f0ffff;
+        max-height: 200px; /*scroll box height*/
+        overflow-y: auto;
+        /* prevent horizontal scrollbar */
+        overflow-x: hidden;
+        /* add padding to account for vertical scrollbar */
+        padding-right: 20px;
+    }
+</style>
+
+<script>
+    $(document).ready(function () {
+       
+
+        $('#SubmitId').click(function (e) {
+            var id = $("#txtCompid").val();
+            var signid = $("#ID").val();
+        var authorname = $("#AuthorName").val();
+        var title = $("#Title").val();
+        var departmentname = $("#DepartmentName").val();
+        var institute = $("#Institute").val();
+        e.preventDefault();
+        $('#result-Table').load('@Url.Action("SignByInfoUpdate", "SignBy")', { companyID: id,Signid:signid,AuthorName: authorname, Title: title, Departmentname: departmentname, Institute: institute });
+        $("#AuthorName").val("");
+        $("#Title").val("");
+        $("#DepartmentName").val("");
+        $("#Institute").val("");
+    });
+
+      
+    });
+</script>
+
+
+
+
+
+<link href="~/Content/themes/base/jquery-ui.css" rel="stylesheet" />
+
+<script src="~/Scripts/jquery-1.9.1.min.js"></script>
+
+<script src="~/Scripts/jquery-ui-1.10.4.min.js"></script>
+
+<script src="~/Scripts/Underscore.js"></script>

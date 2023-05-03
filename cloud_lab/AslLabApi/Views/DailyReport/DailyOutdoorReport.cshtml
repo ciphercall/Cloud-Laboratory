@@ -1,0 +1,789 @@
+﻿@using System.Data
+@using System.Data.SqlClient
+@using AslLabApi.Models
+@using AslLabApi.Models.DTO
+@using AslLabApi.Models.HMS
+@model AslLabApi.Models.DTO.OpdDTO
+
+@{
+    ViewBag.Title = "DailyReport";
+    Layout = null;
+
+    if (HttpContext.Current.Session["LoggedUserType"] == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedUserTp = HttpContext.Current.Session["LoggedUserType"].ToString();
+    var LoggedUserStatus = HttpContext.Current.Session["LoggedUserStatus"].ToString();
+    var LoggedCompanyStatus = HttpContext.Current.Session["LoggedCompanyStatus"].ToString();
+
+    if ((LoggedUserTp == "CompanyAdmin" || LoggedUserTp == "UserAdmin" || LoggedUserTp == "User") && LoggedUserStatus == "A" && LoggedCompanyStatus == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+
+    var LoggedCompId = HttpContext.Current.Session["loggedCompID"].ToString();
+    Int64 compid = Convert.ToInt64(LoggedCompId);
+
+    string companyName = "", address = "", contactNo = "";
+
+    AslLabApiContext db = new AslLabApiContext();
+
+    var SelectCompanyName = from n in db.AslCompanyDbSet
+
+                            where n.COMPID == compid
+                            select new { n.COMPNM, n.ADDRESS, n.CONTACTNO };
+
+    foreach (var n in SelectCompanyName)
+    {
+        companyName = n.COMPNM;
+        address = n.ADDRESS;
+        contactNo = n.CONTACTNO;
+    }
+    var compNm = companyName;
+    var Address = address;
+    var contactno = contactNo;
+
+    //List<department>
+   
+    //department = db.HMS_DEPT.Where(e => e.COMPID == compid).ToList();
+
+
+    TimeZoneInfo timeZoneInfo;
+    timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Central Asia Standard Time");
+    DateTime currentDateTime = TimeZoneInfo.ConvertTime(DateTime.Now, timeZoneInfo);
+
+    //string date = currentDateTime.ToString("yyyy-MM-dd");
+    //DateTime today = DateTime.Parse(date);
+
+    DateTime todate = Model.ToDate;
+
+    //permission check
+
+    Int64 loggedUserID = Convert.ToInt64(HttpContext.Current.Session["loggedUserID"].ToString());
+
+
+    var permission_Check = from m in db.AslRoleDbSet
+                           where m.COMPID == compid && m.USERID == loggedUserID
+                           && m.CONTROLLERNAME == "DailyReport" && m.ACTIONNAME == "Index"
+                           select m;
+    var Status = "";
+    foreach (var check in permission_Check)
+    {
+        Status = check.STATUS;
+    }
+
+    if (Status == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+
+
+    decimal grandDiscountLab = 0, grandNetAmount = 0, grandReceiveAmount = 0, grandDueAmount = 0;
+}
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+
+    <link href="~/Content/reportcss/style.css" rel="stylesheet" />
+    @*
+        <script type="text/javascript">
+        function ClosePrint() {
+            var print = document.getElementById("print");
+            print.style.visibility = "hidden";
+            //            print.display = false;
+
+            window.print();
+        }
+        </script>*@
+
+</head>
+
+<body style=" background-color:#fafafa;">
+
+
+
+    @*<input id="print" tabindex="1" type="button" value="Print" onclick="ClosePrint()" />*@
+    <div style="width: 100%; margin: 0px auto; border: 1px solid #d3d3d3; border-radius: 5px; box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); background: none repeat scroll 0 0 white;">
+        <table id="mainTable" border="0" width="100%">
+            <thead>
+                <tr>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="10%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+
+                </tr>
+                <tr style="background-color: white">
+                    <td colspan="12">
+                        <h3 style="color: black;padding:4px">@compNm</h3>
+                        @*<p style="color:white;padding-left:4px">@Address<span>  @contactno</span></p>*@
+                    </td>
+
+                    <td colspan="6" style="color: black;padding:8px" align="right">
+                        Powered By<br />Alchemy Software
+                    </td>
+
+                </tr>
+
+                <tr>
+                    <td colspan="12" align="left" style="padding: 4px; font-weight: bold">Daily Report - Outdoor</td>
+                    <td align="right" colspan="6" style="padding:8px">Print:@currentDateTime.ToString("dd-MM-yy hh:mm tt")</td>
+                </tr>
+
+
+
+            </thead>
+            <tbody>
+                @{
+
+
+                    System.Data.SqlClient.SqlConnection conn = new System.Data.SqlClient.SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["AslLabApiContext"].ToString());
+                    string query = string.Format(
+                    "SELECT HMS_OPDMST.PATIENTID, PATIENTNM, REFERNM, TOTAMT, DISCREF, DISCHOS, DISCNET, NETAMT, RCVAMT, DUEAMT, TESTID, AMOUNT FROM HMS_OPDMST  " +
+                    "INNER JOIN HMS_OPD ON HMS_OPDMST.COMPID = HMS_OPD.COMPID AND HMS_OPDMST.TRANSDT = HMS_OPD.TRANSDT AND HMS_OPDMST.PATIENTID = HMS_OPD.PATIENTID " +
+                    "LEFT OUTER JOIN HMS_REFER ON HMS_OPDMST.COMPID = HMS_REFER.COMPID AND HMS_OPDMST.REFERID = HMS_REFER.REFERID " +
+                    "WHERE HMS_OPDMST.COMPID = '{0}' AND HMS_OPDMST.TRANSDT = '{1}' Order By PATIENTID",
+
+                    compid, todate);
+                    System.Data.SqlClient.SqlCommand cmd = new System.Data.SqlClient.SqlCommand(query, conn);
+                    conn.Open();
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable ds = new DataTable();
+                    da.Fill(ds);
+
+                    string patientname = "";
+                    decimal totalamount = 0, discountR = 0, discountH = 0, discountNet = 0, netamount = 0, receiveamount = 0, dueamount = 0, amount = 0;
+
+                    string patientid = "", refername = "";
+                    Int64 testId = 0, age = 0;
+                    string previouspatient = "";
+
+                    var testname = (from n in db.HMS_TEST where n.COMPID == compid select n).ToList();
+
+
+                    string ffdt2 = todate.ToString("dd-MMM-yyyy");
+
+                    decimal subamount = 0, subtotal = 0, subdiscountR = 0, subdiscountH = 0, subdiscountNet = 0, subnetamount = 0, subreceived = 0, subDue = 0;
+
+                    <tr style="outline: thin solid">
+                        <td colspan="18">@ffdt2</td>
+                    </tr>
+                    <tr style="background-color: white; outline: thin solid">
+                        <td colspan="2" style="color: black; padding: 4px; font-size: small;outline:thin solid" align="center">Patient ID</td>
+                        <td colspan="2" style="color: black; padding: 4px; font-size: small; outline: thin solid" align="center">Patient Name</td>
+                        <td colspan="2" style="color: black; padding: 4px; font-size: small; outline: thin solid" align="center">Refer Name</td>
+                        <td colspan="2" style="color: black; padding: 4px; font-size: small; outline: thin solid" align="center">Test ID</td>
+                        <td colspan="1" style="color: black; padding: 4px; font-size: small; outline: thin solid" align="center">Amount</td>
+                        <td colspan="2" style="color: black; padding: 4px; font-size: small; outline: thin solid" align="center">Total Amount</td>
+
+                        <td colspan="1" style="color: black; padding: 4px; font-size: small; outline: thin solid" align="center">Discount(R)</td>
+                        <td colspan="1" style="color: black; padding: 4px; font-size: small; outline: thin solid" align="center">Discount(H)</td>
+                        <td colspan="1" style="color: black; padding: 4px; font-size: small; outline: thin solid" align="center">Discount(Net)</td>
+                        <td colspan="1" style="color: black; padding: 4px; font-size: small; outline: thin solid" align="center">Net Amount</td>
+
+                        <td colspan="2" style="color: black; padding: 4px; font-size: small; outline: thin solid" align="center">Received Amount</td>
+                        <td colspan="1" style="color: black; padding: 4px; font-size: small; outline: thin solid" align="center">Due Amount</td>
+
+
+
+
+
+                    </tr>
+
+
+                    foreach (DataRow row in ds.Rows)
+                    {
+                        patientid = row["PATIENTID"].ToString();
+                        patientname = row["PATIENTNM"].ToString();
+                        refername = row["REFERNM"].ToString();
+                        var s = row["TOTAMT"].ToString();
+                        if (row["TOTAMT"].ToString() != "")
+                        {
+                            totalamount = Convert.ToDecimal(row["TOTAMT"]);
+                        }
+                        else
+                        {
+                            totalamount = 0;
+                        }
+
+                        if (row["DISCREF"].ToString() != "")
+                        {
+                            discountR = Convert.ToDecimal(row["DISCREF"]);
+                        }
+                        else
+                        {
+                            discountR = 0;
+                        }
+                        if (row["DISCHOS"].ToString() != "")
+                        {
+                            discountH = Convert.ToDecimal(row["DISCHOS"]);
+                        }
+                        else
+                        {
+                            discountH = 0;
+                        }
+                        if (row["DISCNET"].ToString() != "")
+                        {
+                            discountNet = Convert.ToDecimal(row["DISCNET"]);
+                        }
+                        else
+                        {
+                            discountNet = 0;
+                        }
+                        if (row["NETAMT"].ToString() != "")
+                        {
+                            netamount = Convert.ToDecimal(row["NETAMT"]);
+                        }
+                        else
+                        {
+                            netamount = 0;
+                        }
+                        if (row["RCVAMT"].ToString() != "")
+                        {
+                            receiveamount = Convert.ToDecimal(row["RCVAMT"]);
+                        }
+                        else
+                        {
+                            receiveamount = 0;
+                        }
+
+                        if (row["DUEAMT"].ToString() != "")
+                        {
+                            dueamount = Convert.ToDecimal(row["DUEAMT"]);
+                        }
+                        else
+                        {
+                            dueamount = 0;
+                        }
+
+
+                        testId = Convert.ToInt64(row["TESTID"]);
+                        amount = Convert.ToDecimal(row["AMOUNT"]);
+
+
+
+
+
+                        <tr style="outline:thin solid">
+                            @if (previouspatient != patientid)
+                            {
+                                <td align="left" colspan="2" style="font-size: small; outline: thin solid">
+                                    @patientid
+                                </td>
+                                <td align="left" colspan="2" style="font-size: small; outline: thin solid">
+                                    @patientname
+                                </td>
+                                <td colspan="2" align="left" style="font-size: small; outline: thin solid">
+                                    @refername
+                                </td>
+                            }
+
+                            else
+                            {
+                                <td align="center" colspan="2" style="outline:thin solid"></td>
+    <td align="right" colspan="2" style="outline:thin solid"></td>
+    <td colspan="2" align="right" style="outline:thin solid"></td>
+                            }
+                            @foreach (var nameVar in testname)
+                            {
+                                if (nameVar.TESTID == testId)
+                                {
+                                    <td colspan="2" style="font-size: small; outline: thin solid" align="left">
+                                        @nameVar.TESTNM
+                                    </td>
+                                    break;
+                                }
+                            }
+
+                            <td colspan="1" style="font-size: small; outline: thin solid" align="right">
+                                @amount
+                            </td>
+                            @if (previouspatient != patientid)
+                            {
+                                <td colspan="2" style="font-size: small; outline: thin solid" align="right">
+                                    @totalamount
+                                </td>
+
+
+
+
+                                <td align="right" style="font-size: small; outline: thin solid" colspan="1">
+                                    @discountR
+                                </td>
+                                <td align="right" style="font-size: small; outline: thin solid" colspan="1">
+                                    @discountH
+                                </td>
+                                <td colspan="1" style="font-size: small; outline: thin solid" align="right">
+                                    @discountNet
+                                </td>
+                                <td colspan="1" style="font-size: small; outline: thin solid" align="right">
+                                    @netamount
+                                </td>
+
+                                <td align="right" style="font-size: small; outline: thin solid" colspan="2">
+                                    @receiveamount
+                                </td>
+                                <td align="right" style="font-size: small; outline: thin solid" colspan="1">
+                                    @dueamount
+                                </td>
+
+                                subtotal = subtotal + totalamount;
+                                subdiscountR = subdiscountR + discountR;
+                                subdiscountH = subdiscountH + discountH;
+                                subdiscountNet = subdiscountNet + discountNet;
+                                subnetamount = subnetamount + netamount;
+                                subreceived = subreceived + receiveamount;
+                                subDue = subDue + dueamount;
+
+                            }
+                            else
+                            {
+                                <td colspan="2" align="right" style="outline:thin solid"></td>
+
+
+
+
+    <td align="center" colspan="1" style="outline:thin solid"></td>
+    <td align="right" colspan="1" style="outline:thin solid"></td>
+    <td colspan="1" align="right" style="outline:thin solid"></td>
+    <td colspan="1" align="right" style="outline:thin solid"></td>
+
+    <td align="center" colspan="2" style="outline:thin solid"></td>
+    <td align="right" colspan="1" style="outline:thin solid"></td>
+
+                            }
+
+
+                        </tr>
+                            previouspatient = patientid;
+
+                            subamount = subamount + amount;
+
+
+
+                    }
+
+
+                    <tr>
+                        <td colspan="8" style="font-weight: bold; padding: 4px; font-size: small; outline: thin solid" align="right">SubTotal :</td>
+                        <td colspan="1" style="font-weight: bold; font-size: small; outline: thin solid" align="right">@subamount</td>
+                        <td colspan="2" style="font-weight: bold; font-size: small; outline: thin solid" align="right">@subtotal</td>
+                        <td colspan="1" style="font-weight: bold; font-size: small; outline: thin solid" align="right">@subdiscountR</td>
+                        <td colspan="1" style=" font-weight: bold; font-size: small; outline: thin solid" align="right">@subdiscountH</td>
+                        <td colspan="1" style="font-weight: bold; font-size: small; outline: thin solid" align="right">@subdiscountNet</td>
+                        <td colspan="1" style="font-weight: bold; font-size: small; outline: thin solid" align="right">@subnetamount</td>
+                        <td colspan="2" style="font-weight: bold; font-size: small; outline: thin solid" align="right">@subreceived</td>
+                        <td colspan="1" style="font-weight: bold; font-size: small; outline: thin solid" align="right">@subDue</td>
+                    </tr>
+                    grandDiscountLab += subdiscountNet;
+                    grandNetAmount += subnetamount;
+                    grandReceiveAmount += subreceived;
+                    grandDueAmount += subDue;
+                    conn.Close();
+                }
+
+                <tr style="outline: thin solid">
+                    <td colspan="18">Due Collection(Today)</td>
+                </tr>
+
+                @{
+
+
+                    System.Data.SqlClient.SqlConnection conn2 = new System.Data.SqlClient.SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["AslLabApiContext"].ToString());
+                    string query2 = string.Format(
+                    "SELECT HMS_OPDMST.PATIENTID, PATIENTNM, HMS_OPDMST.TRANSNO, DUEAMTP, HMS_OPDRCV.DISCHOS, HMS_OPDRCV.NETAMT, HMS_OPDRCV.RCVAMT, HMS_OPDRCV.DUEAMT " +
+                    "FROM HMS_OPDMST INNER JOIN HMS_OPDRCV ON HMS_OPDMST.COMPID = HMS_OPDRCV.COMPID AND HMS_OPDMST.TRANSDT = HMS_OPDRCV.TRANSDT AND HMS_OPDMST.PATIENTID = HMS_OPDRCV.PATIENTID " +
+
+                    "WHERE HMS_OPDMST.COMPID = '{0}' AND HMS_OPDMST.TRANSDT = '{1}' ",
+
+                    compid, todate);
+                    System.Data.SqlClient.SqlCommand cmd2 = new System.Data.SqlClient.SqlCommand(query2, conn2);
+                    conn2.Open();
+                    SqlDataAdapter da2 = new SqlDataAdapter(cmd2);
+                    DataTable ds2 = new DataTable();
+                    da2.Fill(ds2);
+
+                    string patientname2 = "";
+                    decimal patientdue = 0, discountH2 = 0, netamount2 = 0, receiveamount2 = 0, dueamount2 = 0;
+                    string patientid2 = "", transno = "";
+
+                    decimal subpatientdue = 0, discountLab = 0, netamountToday = 0, receiveamountToday = 0, dueamountToday = 0;
+
+
+
+
+                    @*string ffdt3 = todate.ToString("dd-MMM-yyyy");
+
+                        <tr style="outline: thin solid">
+                            <td colspan="18">@ffdt3</td>
+                        </tr>*@
+                    <tr style="background-color: white; outline: thin solid">
+                        <td colspan="3" style="color: black; padding: 4px; font-size: small; outline: thin solid" align="center">Patient ID</td>
+                        <td colspan="4" style="color: black; padding: 4px; font-size: small; outline: thin solid" align="center">Patient Name</td>
+                        <td colspan="3" style="color: black; padding: 4px; font-size: small; outline: thin solid" align="center">Trans No</td>
+                        <td colspan="3" style="color: black; padding: 4px; font-size: small; outline: thin solid" align="center">Patient Due Amount</td>
+
+
+                        <td colspan="1" style="color: black; padding: 4px; font-size: small; outline: thin solid" align="center">Discount(Lab)</td>
+
+                        <td colspan="1" style="color: black; padding: 4px; font-size: small; outline: thin solid" align="center">Net Amount</td>
+
+                        <td colspan="2" style="color: black; padding: 4px; font-size: small; outline: thin solid" align="center">Received Amount</td>
+                        <td colspan="1" style="color: black; padding: 4px; font-size: small; outline: thin solid" align="center">Due Amount</td>
+
+
+
+
+
+                    </tr>
+
+                    foreach (DataRow row in ds2.Rows)
+                    {
+                        patientid2 = row["PATIENTID"].ToString();
+                        patientname2 = row["PATIENTNM"].ToString();
+                        transno = row["TRANSNO"].ToString();
+                        if (row["DUEAMTP"].ToString() != "")
+                        {
+                            patientdue = Convert.ToDecimal(row["DUEAMTP"]);
+                        }
+                        else
+                        {
+                            patientdue = 0;
+                        }
+                        if (row["DISCHOS"].ToString() != "")
+                        {
+                            discountH2 = Convert.ToDecimal(row["DISCHOS"]);
+                        }
+                        else
+                        {
+                            discountH2 = 0;
+                        }
+
+                        if (row["NETAMT"].ToString() != "")
+                        {
+                            netamount2 = Convert.ToDecimal(row["NETAMT"]);
+                        }
+                        else
+                        {
+                            netamount2 = 0;
+                        }
+
+
+                        if (row["RCVAMT"].ToString() != "")
+                        {
+                            receiveamount2 = Convert.ToDecimal(row["RCVAMT"]);
+                        }
+                        else
+                        {
+                            receiveamount2 = 0;
+                        }
+                        if (row["DUEAMT"].ToString() != "")
+                        {
+                            dueamount2 = Convert.ToDecimal(row["DUEAMT"]);
+                        }
+                        else
+                        {
+                            dueamount2 = 0;
+                        }
+
+
+
+
+
+
+
+                        <tr style="outline:thin solid">
+                            <td align="center" colspan="3" style="font-size: small; outline: thin solid">
+                                @patientid2
+                            </td>
+                            <td align="right" colspan="4" style="font-size: small; outline: thin solid">
+                                @patientname2
+                            </td>
+
+                            <td colspan="3" align="right" style="font-size: small; outline: thin solid">
+                                @transno
+                            </td>
+
+
+
+
+                            <td align="right" colspan="3" style="font-size: small; outline: thin solid">
+                                @patientdue
+                            </td>
+                            <td align="right" colspan="1" style="font-size: small; outline: thin solid">
+                                @discountH2
+                            </td>
+
+                            <td colspan="1" align="right" style="font-size: small; outline: thin solid">
+                                @netamount2
+                            </td>
+
+                            <td align="right" colspan="2" style="font-size: small; outline: thin solid">
+                                @receiveamount2
+                            </td>
+                            <td align="right" colspan="1" style="font-size: small; outline: thin solid">
+                                @dueamount2
+                            </td>
+
+
+
+                        </tr>
+                        subpatientdue = subpatientdue + patientdue;
+                        discountLab = discountLab + discountH2;
+                        netamountToday = netamountToday + netamount2;
+                        receiveamountToday = receiveamountToday + receiveamount2;
+                        dueamountToday = dueamountToday + dueamount2;
+
+                    }
+
+                    <tr>
+                        <td colspan="11" style="font-weight: bold; font-size: small; outline: thin solid" align="right">SubTotal :</td>
+                        <td colspan="2" style="font-weight: bold; font-size: small; outline: thin solid" align="right">@subpatientdue</td>
+                        <td colspan="1" style="font-weight: bold; font-size: small; outline: thin solid" align="right">@discountLab</td>
+                        <td colspan="1" style="font-weight: bold; font-size: small; outline: thin solid" align="right">@netamountToday</td>
+                        <td colspan="2" style=" font-weight: bold; font-size: small; outline: thin solid" align="right">@receiveamountToday</td>
+                        <td colspan="1" style="font-weight: bold; font-size: small; outline: thin solid" align="right">@dueamountToday</td>
+
+                    </tr>
+
+                    
+                    grandDiscountLab += discountLab;
+                    grandNetAmount += netamountToday;
+                    grandReceiveAmount += receiveamountToday;
+                    grandDueAmount += dueamountToday;
+                    
+                    conn2.Close();
+                }
+
+
+                <tr style="outline: thin solid">
+                    <td colspan="18">Due Collection(Previous Day)</td>
+                </tr>
+
+                @{
+
+
+                    System.Data.SqlClient.SqlConnection conn3 = new System.Data.SqlClient.SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["AslLabApiContext"].ToString());
+                    string query3 = string.Format(
+                    "SELECT HMS_OPDMST.PATIENTID, PATIENTNM, HMS_OPDMST.TRANSNO, DUEAMTP, HMS_OPDRCV.DISCHOS, HMS_OPDRCV.NETAMT, HMS_OPDRCV.RCVAMT, HMS_OPDRCV.DUEAMT " +
+                    "FROM HMS_OPDMST INNER JOIN HMS_OPDRCV ON HMS_OPDMST.COMPID = HMS_OPDRCV.COMPID AND HMS_OPDMST.TRANSDT <> HMS_OPDRCV.TRANSDT AND HMS_OPDMST.PATIENTID = HMS_OPDRCV.PATIENTID " +
+
+                    "WHERE HMS_OPDRCV.COMPID = '{0}' AND HMS_OPDRCV.TRANSDT = '{1}' ",
+
+                    compid, todate);
+                    System.Data.SqlClient.SqlCommand cmd3 = new System.Data.SqlClient.SqlCommand(query3, conn3);
+                    conn3.Open();
+                    SqlDataAdapter da3 = new SqlDataAdapter(cmd3);
+                    DataTable ds3 = new DataTable();
+                    da3.Fill(ds3);
+
+                    string patientname3 = "";
+                    decimal patientdue3 = 0, discountH3 = 0, netamount3 = 0, receiveamount3 = 0, dueamount3 = 0;
+                    string patientid3 = "", transno3 = "";
+
+                    decimal Previoudpatientdue = 0, PreviousdiscountLab = 0, netamountPrevious = 0, receiveamountPrevious = 0, dueamountPrevious = 0;
+
+
+
+
+                    @*string ffdt3 = today.ToString("dd-MMM-yyyy");
+
+                        <tr style="outline: thin solid">
+                            <td colspan="18">@ffdt3</td>
+                        </tr>*@
+                    <tr style="background-color: white; outline: thin solid">
+                        <td colspan="3" style="color: black; padding: 4px; font-size: small; outline: thin solid" align="center">Patient ID</td>
+                        <td colspan="4" style="color: black; padding: 4px; font-size: small; outline: thin solid" align="center">Patient Name</td>
+                        <td colspan="3" style="color: black; padding: 4px; font-size: small; outline: thin solid" align="center">Trans No</td>
+                        <td colspan="3" style="color: black; padding: 4px; font-size: small; outline: thin solid" align="center">Patient Due Amount</td>
+
+
+                        <td colspan="1" style="color: black; padding: 4px; font-size: small; outline: thin solid" align="center">Discount(Lab)</td>
+
+                        <td colspan="1" style="color: black; padding: 4px; font-size: small; outline: thin solid" align="center">Net Amount</td>
+
+                        <td colspan="2" style="color: black; padding: 4px; font-size: small; outline: thin solid" align="center">Received Amount</td>
+                        <td colspan="1" style="color: black; padding: 4px; font-size: small; outline: thin solid" align="center">Due Amount</td>
+
+
+
+
+
+                    </tr>
+
+                    foreach (DataRow row in ds3.Rows)
+                    {
+                        patientid3 = row["PATIENTID"].ToString();
+                        patientname3 = row["PATIENTNM"].ToString();
+                        transno3 = row["TRANSNO"].ToString();
+
+                        if (row["DUEAMTP"].ToString() != "")
+                        {
+                            patientdue3 = Convert.ToDecimal(row["DUEAMTP"]);
+                        }
+                        else
+                        {
+                            patientdue3 = 0;
+                        }
+
+                        if (row["DISCHOS"].ToString() != "")
+                        {
+                            discountH3 = Convert.ToDecimal(row["DISCHOS"]);
+                        }
+                        else
+                        {
+                            discountH3 = 0;
+                        }
+
+                        if (row["NETAMT"].ToString() != "")
+                        {
+                            netamount3 = Convert.ToDecimal(row["NETAMT"]);
+                        }
+                        else
+                        {
+                            netamount3 = 0;
+                        }
+
+
+                        if (row["RCVAMT"].ToString() != "")
+                        {
+                            receiveamount3 = Convert.ToDecimal(row["RCVAMT"]);
+                        }
+                        else
+                        {
+                            receiveamount3 = 0;
+                        }
+                        if (row["DUEAMT"].ToString() != "")
+                        {
+                            dueamount3 = Convert.ToDecimal(row["DUEAMT"]);
+                        }
+                        else
+                        {
+                            dueamount3 = 0;
+                        }
+
+
+
+
+
+
+
+
+
+
+
+
+                        <tr style="outline:thin solid">
+                            <td align="center" colspan="3" style="font-size: small; outline: thin solid">
+                                @patientid3
+                            </td>
+                            <td align="right" colspan="4" style="font-size: small; outline: thin solid">
+                                @patientname3
+                            </td>
+
+                            <td colspan="3" align="right" style="font-size: small; outline: thin solid">
+                                @transno3
+                            </td>
+
+
+
+
+                            <td align="right" colspan="3" style="font-size: small; outline: thin solid">
+                                @patientdue3
+                            </td>
+                            <td align="right" colspan="1" style="font-size: small; outline: thin solid">
+                                @discountH3
+                            </td>
+
+                            <td colspan="1" align="right" style="font-size: small; outline: thin solid">
+                                @netamount3
+                            </td>
+
+                            <td align="right" colspan="2" style="font-size: small; outline: thin solid">
+                                @receiveamount3
+                            </td>
+                            <td align="right" colspan="1" style="font-size: small; outline: thin solid">
+                                @dueamount3
+                            </td>
+
+
+
+                        </tr>
+                        Previoudpatientdue = Previoudpatientdue + patientdue3;
+                        PreviousdiscountLab = PreviousdiscountLab + discountH3;
+                        netamountPrevious = netamountPrevious + netamount3;
+                        receiveamountPrevious = receiveamountPrevious + receiveamount3;
+                        dueamountPrevious = dueamountPrevious + dueamount3;
+
+                    }
+
+                    <tr>
+                        <td colspan="11" style="font-weight: bold; font-size: small; outline: thin solid" align="right">SubTotal :</td>
+                        <td colspan="2" style="font-weight: bold; font-size: small; outline: thin solid" align="right">@Previoudpatientdue</td>
+                        <td colspan="1" style="font-weight: bold; font-size: small; outline: thin solid" align="right">@PreviousdiscountLab</td>
+                        <td colspan="1" style="font-weight: bold; font-size: small; outline: thin solid" align="right">@netamountPrevious</td>
+                        <td colspan="2" style=" font-weight: bold; font-size: small; outline: thin solid" align="right">@receiveamountPrevious</td>
+                        <td colspan="1" style="font-weight: bold; font-size: small; outline: thin solid" align="right">@dueamountPrevious</td>
+
+                    </tr>
+                    
+                    grandDiscountLab += PreviousdiscountLab;
+                    grandNetAmount += netamountPrevious;
+                    grandReceiveAmount += receiveamountPrevious;
+                    grandDueAmount += dueamountPrevious;
+                    
+                    conn3.Close();
+                    
+                    
+                      <tr>
+                        <td colspan="11" style="font-weight: bold; font-size: small; outline: thin solid" align="right">Grand Total :</td>
+                        <td colspan="2" style="font-weight: bold; font-size: small; outline: thin solid" align="right"></td>
+                        <td colspan="1" style="font-weight: bold; font-size: small; outline: thin solid" align="right">@grandDiscountLab</td>
+                        <td colspan="1" style="font-weight: bold; font-size: small; outline: thin solid" align="right">@grandNetAmount</td>
+                        <td colspan="2" style=" font-weight: bold; font-size: small; outline: thin solid" align="right">@grandReceiveAmount</td>
+                        <td colspan="1" style="font-weight: bold; font-size: small; outline: thin solid" align="right">@grandDueAmount</td>
+
+                    </tr>
+                    
+                }
+            </tbody>
+        </table>
+
+    </div>
+
+
+
+
+
+
+
+</body>
+
+</html>

@@ -1,0 +1,134 @@
+﻿@model IEnumerable<AslLabApi.Models.ASL_MENUMST>
+
+@{
+    ViewBag.Title = "ShowModuleList";
+
+    if (HttpContext.Current.Session["LoggedUserType"] == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+    
+    var LoggedUserTp = HttpContext.Current.Session["LoggedUserType"].ToString();
+    var LoggedUserStatus = HttpContext.Current.Session["LoggedUserStatus"].ToString();
+
+    if (LoggedUserTp == "AslSuperadmin" && LoggedUserStatus == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+}
+
+@*<div class="container">
+    <div class="row">
+        <div class="col-md-1"></div>
+        <div class="col-md-10">
+            <div class="panel panel-info" style="padding: 0px;">
+                <div class="panel-heading text-center">
+                    <h4> Show all Module Information</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>*@
+
+@if (TempData["ModuleUpdateMessage"] != null)
+{
+    <div class="panel-heading text-center">
+        <h4>@TempData["ModuleUpdateMessage"] </h4>
+    </div>
+}
+@if (TempData["ModuleDeleteMessage"] != null)
+{
+    <div class="panel-heading text-center">
+        <h4>@TempData["ModuleDeleteMessage"] </h4>
+    </div>
+}
+
+<div id="contentHeaderBox">
+    <h1>Module List</h1>
+</div>
+<br />
+<div class="col-md-12">
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.MODULEID)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.MODULENM)
+                </th>
+                <th></th>
+            </tr>
+
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.MODULEID)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.MODULENM)
+                    </td>
+                    <td>
+                        @Html.ActionLink("Edit", "EditModuleList", new { id = item.MODULEID }) |
+                        @Html.ActionLink("Delete", "DeleteModule", new { id = item.MODULEID })
+                    </td>
+                </tr>
+            }
+
+        </table>
+    </div>
+
+    </div>
+
+
+
+
+
+
+
+    @*<div class="container">
+        <div class="row">
+            <div class="col-md-1"></div>
+            <div class="col-md-12">
+                <div class="panel panel-primary">
+                    <div class="panel-heading text-center">Module List</div>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <tr>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.MODULEID)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.MODULENM)
+                                </th>
+                                <th></th>
+                            </tr>
+
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.MODULEID)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.MODULENM)
+                                    </td>
+                                    <td>
+                                        @Html.ActionLink("Edit", "EditModuleList", new { id = item.MODULEID }) |
+                                        @Html.ActionLink("Delete", "DeleteModule", new { id = item.MODULEID })
+                                    </td>
+                                </tr>
+                            }
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-1"></div>
+        </div>
+    </div>*@

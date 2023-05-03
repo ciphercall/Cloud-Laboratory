@@ -1,0 +1,226 @@
+﻿@using AslLabApi.Models
+@using AslLabApi.Models.DTO
+@using AslLabApi.Models.HMS
+@model AslLabApi.Models.DTO.TestMasterDTO
+
+@{
+    ViewBag.Title = "GetListOfCategory";
+    Layout = null;
+
+    if (HttpContext.Current.Session["LoggedUserType"] == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedUserTp = HttpContext.Current.Session["LoggedUserType"].ToString();
+    var LoggedUserStatus = HttpContext.Current.Session["LoggedUserStatus"].ToString();
+    var LoggedCompanyStatus = HttpContext.Current.Session["LoggedCompanyStatus"].ToString();
+
+    if ((LoggedUserTp == "CompanyAdmin" || LoggedUserTp == "UserAdmin" || LoggedUserTp == "User") && LoggedUserStatus == "A" && LoggedCompanyStatus == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+
+    var LoggedCompId = HttpContext.Current.Session["loggedCompID"].ToString();
+    Int64 compid = Convert.ToInt64(LoggedCompId);
+
+    string companyName = "", address = "", contactNo = "";
+
+    AslLabApiContext db = new AslLabApiContext();
+
+    var SelectCompanyName = from n in db.AslCompanyDbSet
+
+                            where n.COMPID == compid
+                            select new { n.COMPNM, n.ADDRESS, n.CONTACTNO };
+
+    foreach (var n in SelectCompanyName)
+    {
+        companyName = n.COMPNM;
+        address = n.ADDRESS;
+        contactNo = n.CONTACTNO;
+    }
+    var compNm = companyName;
+    var Address = address;
+    var contactno = contactNo;
+
+    List<TestMaster> category = new List<TestMaster>();
+    category = db.HMS_TESTMST.Where(e => e.COMPID == compid).OrderBy(x => x.TCATID).ToList();
+
+    List<Test> test = new List<Test>();
+    test = db.HMS_TEST.Where(e => e.COMPID == compid).OrderBy(x => x.TESTID).ToList();
+
+    List<Department> department = new List<Department>();
+    department = db.HMS_DEPT.Where(e => e.COMPID == compid).ToList();
+
+    TimeZoneInfo timeZoneInfo;
+    timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Central Asia Standard Time");
+    DateTime currentDateTime = TimeZoneInfo.ConvertTime(DateTime.Now, timeZoneInfo);
+
+
+    //permission check
+
+    Int64 loggedUserID = Convert.ToInt64(HttpContext.Current.Session["loggedUserID"].ToString());
+
+
+    var permission_Check = from m in db.AslRoleDbSet
+                           where m.COMPID == compid && m.USERID == loggedUserID
+                               && m.CONTROLLERNAME == "List" && m.ACTIONNAME == "ListofTest"
+                           select m;
+    var Status = "";
+    foreach (var check in permission_Check)
+    {
+        Status = check.STATUS;
+    }
+
+    if (Status == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+
+
+
+}
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+
+    <link href="~/Content/reportcss/style.css" rel="stylesheet" />
+    @*<script type="text/javascript">
+            function ClosePrint() {
+                var print = document.getElementById("print");
+                print.style.visibility = "hidden";
+                //            print.display = false;
+
+                window.print();
+            }
+        </script>*@
+
+</head>
+
+<body style=" background-color:#fafafa;">
+
+
+
+    @*<input id="print" tabindex="1" type="button" value="Print" onclick="ClosePrint()" />*@
+    <div style="width: 960px; margin: 0px auto; border: 1px solid #d3d3d3; border-radius: 5px; box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); background: none repeat scroll 0 0 white;">
+        <table id="mainTable" border="0" width="100%">
+            <thead>
+                <tr>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="10%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+
+                </tr>
+                <tr style="background-color: #00689b">
+                    <td colspan="12">
+                        <h3 style="color: white;padding:4px">@compNm</h3>
+                        @*<p style="color:white;padding-left:4px">@Address<span>  @contactno</span></p>*@
+                    </td>
+
+                    <td colspan="6" style="color: white;padding:8px" align="right">
+                        Powered By<br />Alchemy Software
+                    </td>
+
+                </tr>
+
+                <tr>
+                    <td colspan="12" align="left" style="padding: 4px; font-weight: bold">List Of Test</td>
+                    <td align="right" colspan="6" style="padding:8px">Print:@currentDateTime.ToString("dd-MM-yy hh:mm tt")</td>
+                </tr>
+                @*<tr style="outline: thin solid">
+                        <td colspan="5" style="padding:4px">User Name: <span style="font-weight: bold">@userNm</span></td>
+
+                        <td colspan="1" align="right">From:</td>
+                        <td colspan="1" style="font-weight: bold">@ViewBag.FromDate</td>
+                        <td colspan="1" align="right">To:</td>
+                        <td colspan="1" style="font-weight: bold">@ViewBag.ToDate</td>
+
+                    </tr>*@
+
+                <tr style="background-color: #00689b; outline: thin solid">
+                    <td colspan="8" style="color: white; padding: 4px" align="center">Test Name</td>
+                    <td colspan="4" style="color: white; padding: 4px" align="center">Department</td>
+                    <td colspan="3" style="color: white; padding: 4px" align="center">Rate</td>
+                    <td colspan="3" style="color: white; padding: 4px" align="center">Discount(%)</td>
+
+
+
+                </tr>
+            </thead>
+            <tbody>
+
+                @foreach (var item in category)
+                {
+                     foreach (var deptname in department)
+                        {
+                            if (deptname.DEPTID == item.DEPTID)
+                            {
+                                <tr style="outline:thin solid">
+                                    <td colspan="9" style="padding: 4px; font-size: small; font-weight: bold" align="left">@Html.DisplayFor(modelItem => item.TCATNM)</td>
+                                    <td colspan="9" style="padding: 4px" align="left">@Html.DisplayFor(modelItem => deptname.DEPTNM)</td>
+                                     
+                                </tr>
+                                break;
+
+                            }
+                            
+                        }
+                  
+                    foreach (var testname in test)
+                    {
+                        if (testname.TCATID == item.TCATID)
+                        {
+                            <tr>
+                                <td colspan="8" style="padding: 4px" align="left">@Html.DisplayFor(modelItem => testname.TESTNM)</td>
+                                <td colspan="4" style="padding: 4px" align="center"></td>
+                                <td colspan="3" style="padding: 4px" align="center">@Html.DisplayFor(modelItem => testname.RATE)</td>
+                                <td colspan="3" style="padding: 4px" align="center">@Html.DisplayFor(modelItem => testname.PCNTD)</td>
+                            </tr>
+                        }
+
+                    }
+
+
+
+                }
+
+            </tbody>
+        </table>
+
+    </div>
+
+
+
+
+
+
+
+</body>
+
+</html>

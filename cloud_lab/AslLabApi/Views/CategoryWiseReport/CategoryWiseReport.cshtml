@@ -1,0 +1,239 @@
+﻿@using AslLabApi.DataAccess
+@using AslLabApi.Models
+@using AslLabApi.DataAccess
+@model AslLabApi.Models.DTO.OpdDTO
+
+@{
+    Layout = null;
+    if (HttpContext.Current.Session["LoggedUserType"] == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedUserTp = HttpContext.Current.Session["LoggedUserType"].ToString();
+    var LoggedUserStatus = HttpContext.Current.Session["LoggedUserStatus"].ToString();
+    var LoggedCompanyStatus = HttpContext.Current.Session["LoggedCompanyStatus"].ToString();
+
+    if ((LoggedUserTp == "CompanyAdmin" || LoggedUserTp == "UserAdmin" || LoggedUserTp == "User") && LoggedUserStatus == "A" && LoggedCompanyStatus == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedCompId = HttpContext.Current.Session["loggedCompID"].ToString();
+    Int64 compid = Convert.ToInt64(LoggedCompId);
+
+
+    string companyName = "", address = "", contactNo = "";
+    AslLabApiContext db = new AslLabApiContext();
+    var SelectCompanyName = from n in db.AslCompanyDbSet
+
+                            where n.COMPID == compid
+                            select new { n.COMPNM, n.ADDRESS, n.CONTACTNO };
+
+    foreach (var n in SelectCompanyName)
+    {
+        companyName = n.COMPNM;
+        address = n.ADDRESS;
+        contactNo = n.CONTACTNO;
+    }
+    var compNm = companyName;
+    var Address = address;
+    var contactno = contactNo;
+
+    var patientId = Model.PatientID;
+    var transdt = Model.TransactionDate;
+    var patientName = Model.PatientName;
+    var MobileNo = Model.MObileNo;
+    var Age = Model.Age;
+    var Gender = Model.Gender;
+    var DoctorName = Model.DoctorName;
+    var netamount = Model.NetAmount;
+    var paid = Model.ReceiveAmount;
+    decimal due = 0;
+    if (Model.DueAmount == null)
+    {
+        due = 0;
+    }
+    else
+    {
+        due = Convert.ToDecimal(Model.DueAmount);
+    }
+
+    var Discount = Model.Discountnet;
+    Int64 printOrpreview = Model.ForPrintOrPreview;
+    TimeZoneInfo timeZoneInfo;
+    timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Central Asia Standard Time");
+    DateTime currentDateTime = TimeZoneInfo.ConvertTime(DateTime.Now, timeZoneInfo);
+
+    var fromdate = Model.FromDate;
+    var todate = Model.ToDate;
+
+}
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <link href="~/Content/reportcss/style.css" rel="stylesheet" />
+
+
+
+</head>
+<body style=" background-color:#fafafa;">
+
+
+    <div style="width: 960px; margin: 0px auto; border: 1px solid #d3d3d3; border-radius: 5px; box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); background: none repeat scroll 0 0 white;">
+        <table id="mainTable" border="0" width="100%">
+            <thead>
+                <tr>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="10%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+
+                </tr>
+                <tr style="background-color: #00689b">
+                    <td colspan="12">
+                        <h3 style="color: white;padding:4px">@compNm</h3>
+                        <p style="color:white;padding-left:4px">@Address<span>  @contactno</span></p>
+                    </td>
+
+                    <td colspan="6" style="color: white;padding:8px" align="right">
+                        Powered By<br />Alchemy Software
+                    </td>
+
+                </tr>
+
+                <tr>
+                    <td colspan="12" align="left" style="padding: 4px; font-weight: bold">Pathology Statement - Category</td>
+                    <td align="right" colspan="6" style="padding:8px">Print:@currentDateTime.ToString("dd-MM-yy hh:mm tt")</td>
+                </tr>
+                @{
+                    string d = Convert.ToString(fromdate);
+                    DateTime fdate = DateTime.Parse(d);
+                    string ffdt = fdate.ToString("dd-MMM-yyyy");
+
+
+                    string d2 = Convert.ToString(todate);
+                    DateTime fdate2 = DateTime.Parse(d2);
+                    string ffdt2 = fdate2.ToString("dd-MMM-yyyy");
+                }
+                <tr>
+                    <td colspan="6" align="left" style="padding: 4px; font-weight: bold">From: <span>@ffdt</span></td>
+                    <td align="left" colspan="6" style="padding:8px; font-weight: bold">To: <span>@ffdt2</span></td>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @{
+                    var data_opd = (from n in db.HMS_OPD where n.COMPID == compid && n.TRANSDT >= Model.FromDate && n.TRANSDT <= Model.ToDate select n).OrderBy(x => x.TCATID).ToList();
+                    var TCatid = (from n in db.HMS_TESTMST where n.COMPID == compid select n).ToList();
+                    Int64 Count_test = 0, catid_mileche = 0,grandTotalTest=0;
+                    decimal totalAmount = 0, grantAmount = 0;
+                }
+                <tr style="background-color: #00689b; outline: thin solid">
+                    <td colspan="9" style="color: white; padding: 4px; font-size: small" align="center">Category Particulars</td>
+                    <td colspan="3" style="color: white; padding: 4px; font-size: small" align="center">Test Qty</td>
+
+                    <td colspan="6" style="color: white; padding: 4px; font-size: small" align="center">Amount</td>
+
+
+                </tr>
+                @foreach (var cat_data in TCatid)
+                {
+                    catid_mileche = 0;
+                    Count_test = 0;
+                    totalAmount = 0;
+                    
+                    foreach (var item in data_opd)
+                    {
+                        if (item.TCATID == cat_data.TCATID)
+                        {
+                            Count_test = Count_test + 1;
+                            totalAmount = Convert.ToDecimal(totalAmount + item.AMOUNT);
+                            catid_mileche = 1;
+                        }
+                        else if(item.TCATID>cat_data.TCATID)
+                        {
+                            break;
+                        }
+
+                    }
+                    if (catid_mileche == 1)
+                    {
+                        <tr>
+                            <td colspan="9" align="left">@cat_data.TCATNM</td>
+                            <td colspan="3" align="center">@Count_test</td>
+
+                            @if (totalAmount < 0)
+                            {
+                                decimal rr = totalAmount * (-1);
+                                string convertamount = Convert.ToString(rr);
+                                string TotalAmount = CommainAmount.AmountwithComma(convertamount);
+                                <td colspan="6" align="right">@TotalAmount</td>
+                            }
+                            else
+                            {
+                                string convertamount = Convert.ToString(totalAmount);
+                                string TotalAmount = CommainAmount.AmountwithComma(convertamount);
+                               <td colspan="6" align="right">@TotalAmount</td>
+                            }
+                            @*<td colspan="6" align="right">@totalAmount</td>*@
+                        </tr>
+                        grantAmount = grantAmount + totalAmount;
+                        grandTotalTest = grandTotalTest + Count_test;
+                    }
+
+
+                }
+                <tr style="outline: thin solid">
+                    <td colspan="9" align="right" style="font-weight: bold"> Total:</td>
+                    @{
+                        string convertTotalTest = Convert.ToString(grandTotalTest);
+
+                        string Grandtotaltest = CommainAmount.AmountwithComma(convertTotalTest);
+                        
+                        string convertgrandAmount = Convert.ToString(grantAmount);
+
+                        string GrandAmount = CommainAmount.AmountwithComma(convertgrandAmount);
+                        
+                    }
+                    <td colspan="3" align="center" style="font-weight: bold">@Grandtotaltest</td>
+                    <td colspan="6" align="right" style="font-weight: bold">@GrandAmount</td>
+                </tr>
+                
+
+
+
+
+
+            </tbody>
+        </table>
+
+
+    </div>
+
+
+</body>
+</html>
+

@@ -1,0 +1,454 @@
+﻿@using System.Data
+@using System.Data.SqlClient
+@using AslLabApi.Models
+@using AslLabApi.Models.DTO
+@using AslLabApi.Models.HMS
+@model AslLabApi.Models.DTO.OpdDTO
+
+@{
+    ViewBag.Title = "Pathological Report";
+    Layout = null;
+
+    if (HttpContext.Current.Session["LoggedUserType"] == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedUserTp = HttpContext.Current.Session["LoggedUserType"].ToString();
+    var LoggedUserStatus = HttpContext.Current.Session["LoggedUserStatus"].ToString();
+    var LoggedCompanyStatus = HttpContext.Current.Session["LoggedCompanyStatus"].ToString();
+
+    if ((LoggedUserTp == "CompanyAdmin" || LoggedUserTp == "UserAdmin" || LoggedUserTp == "User") && LoggedUserStatus == "A" && LoggedCompanyStatus == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+
+    var LoggedCompId = HttpContext.Current.Session["loggedCompID"].ToString();
+    Int64 compid = Convert.ToInt64(LoggedCompId);
+
+    string companyName = "", address = "", contactNo = "";
+
+    AslLabApiContext db = new AslLabApiContext();
+
+    var SelectCompanyName = from n in db.AslCompanyDbSet
+
+                            where n.COMPID == compid
+                            select new { n.COMPNM, n.ADDRESS, n.CONTACTNO };
+
+    foreach (var n in SelectCompanyName)
+    {
+        companyName = n.COMPNM;
+        address = n.ADDRESS;
+        contactNo = n.CONTACTNO;
+    }
+    var compNm = companyName;
+    var Address = address;
+    var contactno = contactNo;
+
+    List<Department> department = new List<Department>();
+    department = db.HMS_DEPT.Where(e => e.COMPID == compid).ToList();
+
+
+    TimeZoneInfo timeZoneInfo;
+    timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Central Asia Standard Time");
+    DateTime currentDateTime = TimeZoneInfo.ConvertTime(DateTime.Now, timeZoneInfo);
+
+
+    //permission check
+
+    Int64 loggedUserID = Convert.ToInt64(HttpContext.Current.Session["loggedUserID"].ToString());
+
+
+    var permission_Check = from m in db.AslRoleDbSet
+                           where m.COMPID == compid && m.USERID == loggedUserID
+                               && m.CONTROLLERNAME == "ReportParameter" && m.ACTIONNAME == "Index"
+                           select m;
+    var Status = "";
+    foreach (var check in permission_Check)
+    {
+        Status = check.STATUS;
+    }
+
+    if (Status == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+
+    var patientid = Model.PatientID;
+    DateTime transdate = Convert.ToDateTime(Model.TransactionDate);
+    var patientname = Model.PatientName;
+    var mobileno = Model.MObileNo;
+
+    string gender = "", refer_name = "", xraydata = "", usgdata = "";
+    Int64 age = 0, referid = 0;
+
+}
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+
+    <link href="~/Content/reportcss/style.css" rel="stylesheet" />
+
+
+</head>
+
+<body style=" background-color:#fafafa;">
+
+
+
+    @*<input id="print" tabindex="1" type="button" value="Print" onclick="ClosePrint()" />*@
+    <div style="width: 960px; margin: 0px auto; border: 1px solid #d3d3d3; border-radius: 5px; box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); background: none repeat scroll 0 0 white;">
+        <table id="mainTable" border="0" width="100%">
+            <thead>
+                <tr>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+
+                </tr>
+                @if (Model.Header == "Y")
+                {
+                    <tr style="background-color: #00689b">
+                        <td colspan="12">
+                            <h3 style="color: white;padding:4px">@compNm</h3>
+
+                        </td>
+
+                        <td colspan="8" style="color: white;padding:8px" align="right">
+                            Powered By<br />Alchemy Software
+                        </td>
+
+                    </tr>
+                }
+                else
+                {
+                    <tr style="background-color: white; height:100px">
+                        <td colspan="12"></td>
+
+                        <td colspan="8" style="color: white;padding:8px" align="right"></td>
+
+                    </tr>
+                }
+                @{
+                var find_data = (from n in db.HMS_OPDMST where n.COMPID == compid && n.PATIENTID == patientid select n).ToList();
+
+                var refername = (from n in db.HMS_REFER where n.COMPID == compid select n).ToList();
+
+                }
+                @if (Model.Top == "Y")
+                {
+                    <tr>
+                        <td colspan="12" align="left" style="padding: 4px; font-weight: bold">Pathological Report</td>
+                        <td align="right" colspan="8" style="padding:8px">Print:@currentDateTime.ToString("dd-MM-yy hh:mm tt")</td>
+                    </tr>
+
+                    <tr style="background-color: White; outline: thin solid">
+                        <td colspan="3" style="color: black">Patient ID </td>
+                        <td colspan="3" style="color:black">: @patientid</td>
+                        <td colspan="4" style="color: black">Date Of Received </td>
+                        <td colspan="3" style="color: black">: @transdate.ToString("dd-MMM-yy")</td>
+                        <td colspan="4" style="color: black">Date Of Report</td>
+                        <td colspan="3" style="color: black">: @currentDateTime.ToString("dd-MM-yy")</td>
+
+                    </tr>
+                    
+                    <tr style="background-color: white; outline: thin solid">
+                        <td colspan="3" style="color: black">Patient Name </td>
+                        <td colspan="3" style="color: black">: @patientname </td>
+
+                        @foreach (var item in find_data)
+                        {
+                            gender = item.GENDER;
+                            age = Convert.ToInt64(item.AGE);
+                            referid = Convert.ToInt64(item.REFERID);
+                            foreach (var x in refername)
+                            {
+                                if (x.REFERID == referid)
+                                {
+                                    refer_name = x.REFERNM;
+                                }
+                            }
+                        }
+                        <td colspan="4" style="color: black">Age</td>
+                        <td colspan="3" style="color: black">: @age</td>
+                        <td colspan="4" style="color: black">Gender</td>
+
+                        <td colspan="3" style="color: black">: @gender</td>
+
+                    </tr>
+
+                    <tr style="background-color: white; outline: thin solid">
+
+                        <td colspan="3" style="color: black">Referred By</td>
+
+                        <td colspan="17" style="color: black">: @refer_name</td>
+
+                    </tr>
+                }
+                else
+                {
+                    <tr style="background-color: white; height:100px">
+                        <td colspan="12"></td>
+
+                        <td colspan="8" style="color: white;padding:8px" align="right"></td>
+
+                    </tr>
+                }
+
+
+                @{
+                    string TestorCatname = "";
+                    if (Model.Type == "Category")
+                    {
+                        var catname = (from n in db.HMS_TESTMST where n.COMPID == compid && n.TCATID == Model.TestCategoryId select n).ToList();
+                        foreach (var xx in catname)
+                        {
+                            TestorCatname = xx.TCATNM;
+                            break;
+
+                        }
+                    }
+                    else if (Model.Type == "Test")
+                    {
+                        var testname = (from n in db.HMS_TEST where n.COMPID == compid && n.TESTID == Model.TestCategoryId select n).ToList();
+                        foreach (var xx in testname)
+                        {
+                            TestorCatname = xx.TESTNM;
+                            break;
+
+                        }
+                    }
+                }
+                <tr></tr>
+                <tr></tr>
+                <tr></tr>
+                <tr></tr>
+                <tr style="background-color: white; outline: thin solid">
+
+                    @*<td colspan="3" style="color: black"></td>*@
+
+                    <td colspan="20" style="color: black;font-size: large;padding:3px" align="center"> @TestorCatname</td>
+
+                </tr>
+
+                <tr></tr>
+                <tr></tr>
+                <tr></tr>
+                <tr></tr>
+                <tr style="background-color: #00689b; outline: thin solid">
+                    <td colspan="7" style="color: white; padding: 4px; font-size: small" align="center">Test Particulars</td>
+                    <td colspan="7" style="color: white; padding: 4px; font-size: small" align="center">Result</td>
+                    <td colspan="6" style="color: white; padding: 4px; font-size: small" align="center">Normal Values</td>
+
+
+
+
+
+                </tr>
+            </thead>
+
+            <tbody>
+                @{
+                    if (Model.Type == "Category")
+                    {
+                        var groupRestgr = (from n in db.HMS_TESTNV where n.COMPID == compid select new { n.RESTGR }).Distinct().ToList();
+                        System.Data.SqlClient.SqlConnection conn = new System.Data.SqlClient.SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["AslLabApiContext"].ToString());
+                        string query = string.Format(
+                            "SELECT RESTGR, RESTNM, RESULT+' '+RESTMU RESULT, NVALUE " +
+                            "FROM HMS_RESULT INNER JOIN HMS_TESTNV ON HMS_RESULT.COMPID = HMS_TESTNV.COMPID AND HMS_RESULT.TESTID = HMS_TESTNV.TESTID AND HMS_RESULT.RESTID = HMS_TESTNV.RESTID " +
+                            "WHERE HMS_RESULT.COMPID = '{0}' AND HMS_RESULT.PATIENTID = '{1}' " +
+                            "AND SUBSTRING(CONVERT(NVARCHAR(10),HMS_RESULT.TESTID,103),1,5) = '{2}'",
+
+                            compid, Model.PatientID, Model.TestCategoryId);
+
+                        System.Data.SqlClient.SqlCommand cmd = new System.Data.SqlClient.SqlCommand(query, conn);
+                        conn.Open();
+                        SqlDataAdapter da = new SqlDataAdapter(cmd);
+                        DataTable ds = new DataTable();
+                        da.Fill(ds);
+
+                        string restname = "", result = "", nvalue = "";
+                        decimal subnetamount = 0, subpaidamount = 0, subbalance = 0, grandNet = 0, grandpaid = 0, grandbalance = 0;
+                        string mobno = "", formatch = "", newdata = "";
+                        decimal netAmount = 0, paidamount = 0, balance = 0;
+                        Int64 peachi_data = 0, howmanyDataHasbyPatient = 0;
+
+
+
+
+                        foreach (var groupItem in groupRestgr)
+                        {
+                            peachi_data = 0;
+                            subbalance = 0;
+                            subpaidamount = 0;
+                            subnetamount = 0;
+
+                            foreach (DataRow row in ds.Rows)
+                            {
+                                if (groupItem.RESTGR == row["RESTGR"].ToString())
+                                {
+                                    if (peachi_data == 0)
+                                    {
+                                        <tr style="outline: thin solid">
+                                            <td colspan="18" style="font-weight:bold">Group : @groupItem.RESTGR</td>
+                                        </tr>
+                                        peachi_data = 1;
+
+                                    }
+                                    restname = row["RESTNM"].ToString();
+                                    result = row["RESULT"].ToString();
+                                    nvalue = row["NVALUE"].ToString();
+                                    <tr>
+                                        <td colspan="7" style="color: black; padding: 4px; font-size: small" align="center">@restname</td>
+                                        <td colspan="7" style="color: black; padding: 4px; font-size: small" align="center">@result</td>
+                                        <td colspan="6" style="color: black; padding: 4px; font-size: small" align="center">@mobno</td>
+
+
+                                    </tr>
+
+                                }
+
+
+
+
+
+
+                            }
+
+
+
+                        }
+
+
+
+                        conn.Close();
+                    }
+                    else if (Model.Type == "Test")
+                    {
+                        var groupRestgr = (from n in db.HMS_TESTNV where n.COMPID == compid select new { n.RESTGR }).Distinct().ToList();
+                        System.Data.SqlClient.SqlConnection conn = new System.Data.SqlClient.SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["AslLabApiContext"].ToString());
+                        string query = string.Format(
+                            "SELECT RESTGR, RESTNM, RESULT+' '+ISNULL(RESTMU,' ') RESULT, NVALUE " +
+                            "FROM HMS_RESULT INNER JOIN HMS_TESTNV ON HMS_RESULT.COMPID = HMS_TESTNV.COMPID AND HMS_RESULT.TESTID = HMS_TESTNV.TESTID AND HMS_RESULT.RESTID = HMS_TESTNV.RESTID " +
+                            "WHERE HMS_RESULT.COMPID = '{0}' AND HMS_RESULT.PATIENTID = '{1}' " +
+                            "AND HMS_RESULT.TESTID = '{2}' ",
+
+                            compid, Model.PatientID, Model.TestCategoryId);
+
+                        System.Data.SqlClient.SqlCommand cmd = new System.Data.SqlClient.SqlCommand(query, conn);
+                        conn.Open();
+                        SqlDataAdapter da = new SqlDataAdapter(cmd);
+                        DataTable ds = new DataTable();
+                        da.Fill(ds);
+
+                        string restname = "", result = "", nvalue = "";
+                        decimal subnetamount = 0, subpaidamount = 0, subbalance = 0, grandNet = 0, grandpaid = 0, grandbalance = 0;
+                        string mobno = "", formatch = "", newdata = "";
+                        decimal netAmount = 0, paidamount = 0, balance = 0;
+                        Int64 peachi_data = 0, howmanyDataHasbyPatient = 0;
+
+
+
+
+                        foreach (var groupItem in groupRestgr)
+                        {
+                            peachi_data = 0;
+                            subbalance = 0;
+                            subpaidamount = 0;
+                            subnetamount = 0;
+
+                            foreach (DataRow row in ds.Rows)
+                            {
+                                if (groupItem.RESTGR == row["RESTGR"].ToString())
+                                {
+                                    if (peachi_data == 0)
+                                    {
+                                        <tr style="outline: thin solid">
+                                            <td colspan="18">Rest Group : @groupItem.RESTGR</td>
+                                        </tr>
+                                        peachi_data = 1;
+                                        @*<tr style="background-color: #00689b; outline: thin solid">
+                                            <td colspan="7" style="color: white; padding: 4px; font-size: small" align="center">Rest Name</td>
+                                            <td colspan="7" style="color: white; padding: 4px; font-size: small" align="center">Result</td>
+                                            <td colspan="6" style="color: white; padding: 4px; font-size: small" align="center">Normal Values</td>
+
+
+
+
+
+                                        </tr>*@
+                                    }
+                                    restname = row["RESTNM"].ToString();
+                                    result = row["RESULT"].ToString();
+                                    nvalue = row["NVALUE"].ToString();
+                                    <tr>
+                                        <td colspan="7" style="color: black; padding: 4px; font-size: small" align="center">@restname</td>
+                                        <td colspan="7" style="color: black; padding: 4px; font-size: small" align="center">@result</td>
+                                        <td colspan="6" style="color: black; padding: 4px; font-size: small" align="center">@mobno</td>
+
+
+                                    </tr>
+
+                                }
+
+
+
+
+
+
+                            }
+
+
+
+                        }
+
+
+
+                        conn.Close();
+                    }
+
+
+                }
+
+            </tbody>
+        </table>
+
+    </div>
+
+
+
+
+
+
+
+</body>
+
+</html>

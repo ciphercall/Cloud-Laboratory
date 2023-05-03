@@ -1,0 +1,300 @@
+﻿@model AslLabApi.Models.AslUserco
+
+@{
+    ViewBag.Title = "Edit";
+
+    if (HttpContext.Current.Session["LoggedUserType"] == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+    
+    //Remote validation binding(checking validation)
+    Html.EnableClientValidation(false);
+    
+    var LoggedUserTp = HttpContext.Current.Session["LoggedUserType"].ToString();
+    var LoggedUserStatus = HttpContext.Current.Session["LoggedUserStatus"].ToString();
+    var LoggedCompanyStatus = HttpContext.Current.Session["LoggedCompanyStatus"].ToString();
+
+    if ((LoggedUserTp == "CompanyAdmin" || LoggedUserTp == "AslSuperadmin") && LoggedUserStatus == "A" && LoggedCompanyStatus == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    } 
+    
+    
+    List<SelectListItem> listStatus = new List<SelectListItem>();
+    listStatus.Add(new SelectListItem { Text = "Active", Value = "A" });
+    listStatus.Add(new SelectListItem { Text = "Inactive", Value = "I" });
+
+    List<SelectListItem> listLogInBy = new List<SelectListItem>();
+    listLogInBy.Add(new SelectListItem { Text = "Mobile Number", Value = "MOBNO" });
+    listLogInBy.Add(new SelectListItem { Text = "Email ADDRESS", Value = "EMAIL" });
+}
+
+<div><h1>@ViewBag.Message</h1></div>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+
+    @Html.HiddenFor(model => model.AslUsercoId)
+    @Html.HiddenFor(model => model.COMPID)
+    @Html.HiddenFor(model => model.USERID)
+
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-2"></div>
+            <div class="col-md-8">
+                <div class="panel panel-info">
+                    <div class="panel-heading text-center">
+                        <h2>Update User Information by Company</h2>
+                    </div>
+                </div>
+
+
+                <div class="jumbotron">
+
+                    <div class="form-group">
+
+                        <div class="row">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.USERNM, htmlAttributes: new { @class = "control-label" })
+                            </div>
+                            <div class="col-md-8">
+                                @Html.TextBoxFor(model => model.USERNM, htmlAttributes: new { @class = "form-control", data_val = false, @readonly = "readonly" })
+                                @Html.ValidationMessageFor(model => model.USERNM, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <br />
+                        <div class="row">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.DEPTNM, htmlAttributes: new { @class = "control-label" })
+                            </div>
+
+                            <div class="col-md-8">
+                                @Html.TextBoxFor(model => model.DEPTNM, htmlAttributes: new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.DEPTNM, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <br />
+                        <div class="row">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.OPTP, htmlAttributes: new { @class = "control-label" })
+                            </div>
+
+                            <div class="col-md-8">
+                                @Html.TextBoxFor(model => model.OPTP, htmlAttributes: new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.OPTP, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <br />
+                        <div class="row">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.ADDRESS, htmlAttributes: new { @class = "control-label" })
+                            </div>
+
+                            <div class="col-md-8">
+                                @Html.TextBoxFor(model => model.ADDRESS, htmlAttributes: new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.ADDRESS, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <br />
+                        <div class="row">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.MOBNO, htmlAttributes: new { @class = "control-label" })
+                            </div>
+
+                            <div class="col-md-8">
+                                @Html.TextBoxFor(model => model.MOBNO, htmlAttributes: new { id = "txtMobileID", @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.MOBNO, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <br />
+                        <div class="row">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.EMAILID, htmlAttributes: new { @class = "control-label" })
+                            </div>
+
+                            <div class="col-md-8">
+                                @Html.TextBoxFor(model => model.EMAILID, htmlAttributes: new { id = "txtEmailID", @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.EMAILID, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <br />
+                        <div class="row">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.LOGINBY, htmlAttributes: new { @class = "control-label" })
+                            </div>
+                            <div class="col-md-8">
+                                @Html.DropDownListFor(model => model.LOGINBY, listLogInBy, "--Select LOGINBY--", htmlAttributes: new { id = "dropdownBoxId", @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.LOGINBY, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <br />
+                        <div class="row">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.LOGINID, htmlAttributes: new { @class = "control-label" })
+                            </div>
+                            <div class="col-md-8">
+                                @Html.TextBoxFor(model => model.LOGINID, htmlAttributes: new { id = "loginTextID", @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.LOGINID, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        
+                        <br />
+                        <div class="row">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.LOGINPW, htmlAttributes: new { @class = "control-label" })
+                            </div>
+                            <div class="col-md-8">
+                                @Html.TextBoxFor(model => model.LOGINPW, htmlAttributes: new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.LOGINPW, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <br />
+                        <div class="row">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.TIMEFR, htmlAttributes: new { @class = "control-label" })
+                            </div>
+                            <div class="col-md-8">
+                                <div class="input-group clockpicker" data-align="top" data-autoclose="true">
+                                    @Html.TextBoxFor(model => model.TIMEFR, htmlAttributes: new { @class = "form-control", @Value = "00:00" })
+                                    <span class="input-group-addon">
+                                        <span class="glyphicon glyphicon-time"></span>
+                                    </span>
+                                </div>
+                                @Html.ValidationMessageFor(model => model.TIMEFR, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <br />
+                        <div class="row">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.TIMETO, htmlAttributes: new { @class = "control-label" })
+                            </div>
+                            <div class="col-md-8">
+                                <div class="input-group clockpicker" data-align="top" data-autoclose="true">
+                                    @Html.TextBoxFor(model => model.TIMETO, htmlAttributes: new { @class = "form-control", @Value = "00:00" })
+                                    <span class="input-group-addon">
+                                        <span class="glyphicon glyphicon-time"></span>
+                                    </span>
+                                </div>
+                                @Html.ValidationMessageFor(model => model.TIMETO, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <br />
+                        <div class="row">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.STATUS, htmlAttributes: new { @class = "control-label" })
+                            </div>
+                            <div class="col-md-8">
+                                @Html.DropDownListFor(model => model.STATUS, listStatus, "--Select STATUS--", htmlAttributes: new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.STATUS, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        @Html.HiddenFor(model => model.USERPC)
+                        @Html.HiddenFor(model => model.INSTIME)
+                        @Html.HiddenFor(model => model.INSIPNO)
+                        @Html.HiddenFor(model => model.INSLTUDE)
+                        @Html.HiddenFor(model=>model.INSUSERID)
+
+                        @Html.TextBoxFor(model => model.UPDLTUDE, new { id = "latlon", style = "display: none;" })
+                        <input id="lat" type="hidden" />
+                        <input id="lon" type="hidden" />
+
+                        <br />
+                        <div class="row">
+                            <div class="col-md-3"></div>
+                            <div class="col-md-8">
+                                <input type="submit" class="btn btn-info" value="Save" />
+                            </div>
+
+                        </div>
+                        
+                        <br />
+                        <div class="row">
+                            <div class="col-md-3">
+                                @Html.ActionLink("Back to List", "Index")
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-md-2"></div>
+        </div>
+
+    </div>
+
+
+    //datatime picker script
+    <script type="text/javascript">
+        $('.clockpicker').clockpicker();
+    </script>
+
+
+
+    //Latitute & longitude
+    <script src="http://maps.google.com/maps/api/js?sensor=false"></script>
+
+    <script language="javascript" type="text/javascript">
+        $(function () {
+            navigator.geolocation.getCurrentPosition(showPosition);
+            //navigator.geolocation.getCurrentPosition(showPosition, positionError);
+
+            function showPosition(position) {
+                var coordinates = position.coords;
+                $("#lat").val(coordinates.latitude);
+                $("#lon").val(coordinates.longitude);
+
+                $("#latlon").val(
+                    $("#lat").val() + "," + $("#lon").val()
+                );
+            }
+        });
+
+        
+        //passing value from textBox(Mobile Number,Email ID) to another textBox(Login By phoneNo/EmailId?) by selected dropdownList
+        $(function () {
+            $('#dropdownBoxId').change(function () {
+                // gets the value from the drop down box
+                var selected = $("#dropdownBoxId option:selected").text();
+
+                var txtMobile = $("#txtMobileID").val();
+                var txtEmail = $("#txtEmailID").val();
+                // puts the value into the textbox
+                var txtBox = document.getElementById('loginTextID');
+
+                if (selected == "Mobile Number") {
+                    txtBox.value = txtMobile;
+                }
+                else if (selected == "Email ADDRESS") {
+                    txtBox.value = txtEmail;
+                }
+            });
+        });
+
+    </script>
+}
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

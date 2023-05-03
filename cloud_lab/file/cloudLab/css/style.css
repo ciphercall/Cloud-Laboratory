@@ -1,0 +1,560 @@
+@import url(http://fonts.googleapis.com/css?family=Lobster|Slabo+27px|Open+Sans+Condensed:300);
+@import url(http://fonts.googleapis.com/css?family=Titillium+Web:400,700|Bree+Serif);
+@import url(http://fonts.googleapis.com/css?family=Droid+Serif:400,700);
+@import url(http://fonts.googleapis.com/css?family=Satisfy);
+hr {
+  color: #f4f4f4;
+}
+body {
+  background-color: #fff;
+  color: #352f2f;
+}
+a:hover {
+  text-decoration: none;
+}
+.active {
+  background-color: #25a25a;
+  color: #fff!important;
+}
+#backToTop {
+  position: fixed;
+  bottom: 107px;
+  right: 6px;
+  font-size: 20px;
+}
+.btn {
+  background-color: #ecf0f1;
+  color: #504747;
+  font-size: 0.875em;
+  text-transform: uppercase;
+  padding: 10px 15px;
+  border: 1px solid #EEE;
+  margin-top: 10px;
+  display: inline-block;
+  border-radius: none !important;
+  width: 100px;
+}
+.centered {
+  margin: 0px auto;
+  float: none;
+}
+/*featuredApp section*/
+#featuredApp {
+  position: absolute;
+  bottom: 140px;
+  left: 0px;
+  z-index: 400;
+  right: 0px;
+}
+#featuredApp img {
+  margin: 0 auto;
+  display: block;
+  width: 100%;
+  height: 100px;
+}
+/*end featuredApp*/
+section.headerThemeSection {
+  background-image: url(../images/faq_header.png);
+  height: 100px;
+  -webkit-background-size: cover !important;
+  -moz-background-size: cover !important;
+  -o-background-size: cover !important;
+  background-size: cover;
+}
+#subHeader {
+  background-color: rgba(58, 82, 105, 0.6);
+  height: 100px;
+  width: 100%;
+}
+#subHeader h2 {
+  padding-top: 25px;
+  margin: 0px;
+  color: #ffffff;
+  text-align: center;
+  font-size: 33px;
+}
+/*header part*/
+#header {
+  height: 100px;
+  border-bottom: 4px solid #2ecc71;
+}
+#header h1 {
+  margin-top: 32px;
+  font-family: 'Droid Serif', serif;
+  color: #2ecc71;
+  font-size: 30px;
+  font-weight: 700;
+}
+#header #logo a {
+  text-decoration: none;
+}
+#header #logo img {
+  margin-top: 9px;
+}
+#header #leftMenu ul {
+  list-style: none;
+  margin: 0px;
+  padding: 0px;
+  margin-top: 20px;
+  /*li:last-child a:hover{
+				background-color: @fontColor;
+			}*/
+}
+#header #leftMenu ul a {
+  padding: 20px;
+  display: block;
+  color: #25a25a;
+  font-family: 'Open Sans', sans-serif;
+  text-transform: uppercase;
+  font-size: 0.875em;
+  text-decoration: none;
+  transition: all ease 600ms;
+}
+#header #leftMenu ul a:hover {
+  background-color: #2ecc71;
+  color: #fff;
+}
+#header #leftMenu ul li {
+  display: inline-block;
+  float: left;
+  border-left: 1px solid #3D3D3D;
+}
+#header #rightMenu ul {
+  list-style: none;
+  margin: 0px;
+  padding: 0px;
+  margin-top: 35px;
+  margin-left: 30px;
+}
+#header #rightMenu ul a {
+  padding: 5px;
+  color: #2ecc71;
+  font-family: 'Open Sans', sans-serif;
+  text-transform: uppercase;
+  font-size: 0.875em;
+  text-decoration: none;
+  transition: all ease 600ms;
+}
+#header #rightMenu ul li {
+  display: inline-block;
+  float: right;
+}
+/*end header part*/
+#secondaryHeader {
+  background-color: #352f2f;
+  height: 85px;
+  border-bottom: 2px solid #2ecc71;
+  display: none;
+}
+#secondaryHeader #menu ul {
+  list-style: none;
+  margin: 0px;
+  padding: 0px;
+  margin-top: 15px;
+  margin-left: 0px;
+  /*li:last-child a:hover{
+				background-color: @fontColor;
+			}*/
+}
+#secondaryHeader #menu ul a {
+  padding: 20px;
+  display: block;
+  color: #FFFFFF;
+  font-family: 'Open Sans', sans-serif;
+  text-transform: uppercase;
+  font-size: 0.875em;
+  text-decoration: none;
+  transition: all ease 600ms;
+}
+#secondaryHeader #menu ul a:hover {
+  background-color: #2ecc71;
+}
+#secondaryHeader #menu ul li {
+  display: inline-block;
+  float: left;
+  border-left: 1px solid #3D3D3D;
+}
+#faq p {
+  margin-left: 23px;
+}
+#faq #serviceList p {
+  margin-left: 40px;
+}
+#faq strong,
+#faq h4 {
+  color: #504747;
+}
+/*slider part*/
+#slider {
+  position: relative;
+}
+#slider #owl-rs {
+  width: 100%;
+  margin: 0px auto;
+  height: 600px;
+  overflow: hidden;
+}
+#slider img {
+  width: 100%;
+  margin: 0px auto;
+  display: block;
+}
+/*end slider part*/
+/*sliderbox part*/
+#sliderBox .box {
+  background-color: rgba(46, 204, 113, 0.3);
+  border-top: 4px solid #2ecc71;
+  height: 200px;
+  position: absolute;
+  top: -200px;
+  text-align: center;
+  margin-bottom: 20px;
+  -webkit-box-shadow: 0px 56px 36px -60px #121d12;
+  -moz-box-shadow: 0px 56px 36px -60px #121d12;
+  -o-box-shadow: 0px 56px 36px -60px #121d12;
+}
+#sliderBox .box i {
+  margin-top: 40px;
+  color: #fff;
+}
+#sliderBox .box h2 {
+  font-family: 'Slabo 27px', serif;
+  font-weight: bold;
+  color: #fff;
+  font-size: 1.5em;
+  text-transform: uppercase;
+}
+#sliderBox .box p {
+  /*color: darken(@baseColor,20%);*/
+  padding: 0px 10px;
+  color: #fff;
+}
+#sliderBox .box:hover {
+  background-color: #2ecc71;
+  transition: all 600ms;
+}
+/*end sliderbox*/
+/*welcome message*/
+#welcomeMsg {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-bottom: 5px solid #2ecc71;
+  padding: 20px;
+  text-align: center;
+  bottom: 110px;
+  left: 0px;
+  right: 0px;
+}
+#welcomeMsg h2 {
+  font-family: 'Bree Serif', serif;
+  font-weight: 400;
+  color: #fff;
+  text-align: center;
+  font-size: 2em;
+}
+#welcomeMsg h4 {
+  color: #fff;
+  font-weight: normal;
+  font-size: 16px;
+}
+#welcomeMsg p {
+  line-height: 1.8em;
+  color: #fff;
+}
+#welcomeMsg #welcomeRight h3,
+#welcomeMsg #welcomeRight a {
+  color: #fff;
+}
+/*end welcome msg*/
+/*info part*/
+#info h2 {
+  font-family: 'Satisfy', cursive;
+  text-align: left;
+  background: #2ecc71;
+  color: #fff;
+  padding: 8px;
+  margin-top: 5px;
+}
+#info #features a,
+#info #benefits a {
+  text-align: center;
+  margin: 0px auto;
+  display: block;
+  color: #504747;
+  margin-top: 10px;
+  float: left;
+}
+#info #features ul,
+#info #benefits ul {
+  margin: 0px;
+  padding: 0px;
+}
+#info #features ul li,
+#info #benefits ul li {
+  list-style-type: none;
+  padding-left: 10px;
+  line-height: 29px;
+  text-align: left;
+  font-size: 16px;
+  color: #867777;
+  font-weight: 100;
+  margin-bottom: 6px;
+}
+#info #features ul li:nth-child(2n+1),
+#info #benefits ul li:nth-child(2n+1) {
+  background: #f2f2f2;
+}
+#info h3 {
+  color: #25a25a;
+}
+#info h4 {
+  color: #2ecc71;
+  font-size: 15px;
+}
+#info a {
+  color: #352f2f;
+  display: block;
+  line-height: 30px;
+}
+#info a:hover {
+  color: #2ecc71;
+  text-decoration: none;
+}
+#info .btn {
+  line-height: normal;
+  width: 40%;
+  color: #fff;
+}
+#info .btn:hover {
+  color: #352f2f;
+}
+#info #featuresTable,
+#info #benefitTable {
+  padding: 0px;
+  margin: 0px;
+}
+#info #featuresTable i,
+#info #benefitTable i {
+  color: #45C15C;
+}
+#info #featuresTable tr:nth-child(2n),
+#info #benefitTable tr:nth-child(2n) {
+  background: #EAE4D8;
+}
+#info #featuresTable tr:hover,
+#info #benefitTable tr:hover {
+  background: #2ecc71;
+  color: #fff;
+}
+#info #featuresTable td,
+#info #benefitTable td {
+  padding: 5px;
+}
+/*end info part*/
+.featuresImg ul {
+  margin: 0;
+  padding: 0;
+  margin-top: 5px;
+}
+.featuresImg ul li {
+  list-style-type: none;
+  float: left;
+  margin-right: 5px;
+  margin-bottom: 5px;
+}
+.featuresImg ul li img {
+  width: 70px;
+  height: 60px;
+}
+/*client slider*/
+#clientsSlider {
+  position: absolute;
+  bottom: 10px;
+  left: 0px;
+  right: 0px;
+}
+#clientsSlider #owl-clients img {
+  width: 80px;
+  height: 80px;
+  filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'grayscale\'><feColorMatrix type=\'matrix\' values=\'0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0\'/></filter></svg>#grayscale");
+  /* Firefox 3.5+ */
+  filter: gray;
+  /* IE6-9 */
+  -webkit-filter: grayscale(100%);
+  /* Chrome 19+ & Safari 6+ */
+}
+/*top footer*/
+#topFooter {
+  background-color: #2ecc71;
+  padding-top: 20px;
+  color: #fff;
+  line-height: 1.8em;
+}
+#topFooter .clientLoginBtn {
+  background: #4D5E92;
+  padding: 0px 2px;
+  font-size: 11px;
+  text-transform: capitalize;
+  color: #FFF;
+  text-shadow: 0px -1px 0px #354c8c;
+  width: 47px;
+  background: #4c69ba;
+  background: -webkit-gradient(linear, center top, center bottom, from(#4c69ba), to(#3b55a0));
+  background: -webkit-linear-gradient(#4c69ba, #3b55a0);
+  border: none;
+  -webkit-border-radius: 2px;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+  height: 20px;
+  line-height: 20px;
+  padding: 0;
+  text-shadow: 0 -1px 0 #354c8c;
+  white-space: nowrap;
+}
+#topFooter h3 {
+  text-transform: uppercase;
+  color: color: #fff;
+  font-size: 1.2em;
+}
+#topFooter ul {
+  list-style: none;
+  margin: 0px;
+  padding: 0px;
+  margin-top: -6px;
+}
+#topFooter ul li {
+  display: block;
+  padding-top: 5px;
+}
+#topFooter ul li a {
+  background: none;
+  padding: 0px;
+  color: #fff;
+  margin: 5px;
+  border-bottom: 1px ridge rgba(192, 192, 192, 0.13);
+  padding: 0px 0px 9px 0px;
+}
+#topFooter ul li a:hover {
+  text-decoration: none;
+  color: #fff;
+}
+#topFooter #u_0_1 a {
+  color: #fff;
+}
+/*end top footer*/
+/*footer part*/
+#footer {
+  text-align: center;
+  padding: 10px;
+  padding-top: 20px;
+  background-color: #10161c;
+  color: #98afc6;
+}
+#footer a {
+  color: #98afc6;
+  text-transform: uppercase;
+  text-align: center;
+}
+#footer a:hover {
+  color: #2ecc71;
+  text-decoration: none;
+}
+/*end footer part*/
+#overview .overviewBox {
+  margin: 10px;
+  margin-bottom: 30px;
+}
+#overview .overviewBox .overviewIcon {
+  margin-right: 10px;
+  background-color: #2ecc71;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  float: left;
+}
+#overview .overviewBox p {
+  clear: left;
+  padding-top: 9px;
+}
+#overview .overviewBox i {
+  margin-left: 12px;
+  margin-top: 8px;
+  color: #fff;
+  font-size: 20px;
+}
+#overview .overviewBox h4 {
+  position: relative;
+  top: 11px;
+  font-size: 18px;
+  color: #504747;
+}
+#features i,
+#benefits i {
+  color: #45C15C;
+}
+#customizeSc p,
+#readySoftwarePakage p {
+  margin-left: 15px;
+}
+/* Large desktops and laptops */
+/* Landscape tablets and medium desktops */
+/* Portrait tablets and small desktops */
+/* Landscape phones and portrait tablets */
+@media (max-width: 1100px) {
+  #featuredApp {
+    display: none;
+  }
+  #welcomeMsg {
+    background: #2ecc71;
+    position: absolute;
+    top: 183px;
+  }
+  #welcomeMsg h2 {
+    font-size: 25px;
+  }
+  #sliderBox {
+    position: relative;
+  }
+  #sliderBox .box {
+    position: relative;
+    top: 10px;
+    padding: 5px;
+    background: #EAE4D8;
+  }
+  #sliderBox .box i {
+    margin-top: 40px;
+    color: #2ecc71;
+  }
+  #sliderBox .box h2 {
+    font-family: 'Slabo 27px', serif;
+    font-weight: bold;
+    color: #444;
+    font-size: 1.5em;
+    text-transform: uppercase;
+  }
+  #sliderBox .box p {
+    color: #1b7943;
+  }
+  #sliderBox .box:hover {
+    background: #EAE4D8;
+  }
+  #header {
+    height: auto;
+  }
+  #header #leftMenu {
+    padding-left: 0px;
+    margin-left: 0px;
+  }
+  #header #leftMenu ul {
+    /*li:last-child{
+				display: none;
+				}*/
+  }
+  #header #leftMenu ul li a {
+    padding: 10px;
+  }
+  #header #rightMenu ul li a {
+    padding: 5px;
+  }
+}

@@ -1,0 +1,175 @@
+﻿@using System.Data
+@using System.Data.SqlClient
+
+@{
+    if (HttpContext.Current.Session["LoggedUserType"] == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedUserTp = HttpContext.Current.Session["LoggedUserType"].ToString();
+    var LoggedCompId = HttpContext.Current.Session["loggedCompID"].ToString();
+    var LoggedUserStatus = HttpContext.Current.Session["LoggedUserStatus"].ToString();
+    var loggedUserID = HttpContext.Current.Session["loggedUserID"].ToString();
+    var LoggedCompanyStatus = HttpContext.Current.Session["LoggedCompanyStatus"].ToString();
+
+    if ((LoggedUserTp == "CompanyAdmin" || LoggedUserTp == "UserAdmin" || LoggedUserTp == "User") && LoggedUserStatus == "A" && LoggedCompanyStatus == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+
+
+    var createStatus = "";
+    var updateStatus = "";
+    var deleteStatus = "";
+    var status = "";
+
+    System.Data.SqlClient.SqlConnection conn = new System.Data.SqlClient.SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["AslLabApiContext"].ToString());
+
+    string query = string.Format("SELECT STATUS, INSERTR, UPDATER, DELETER FROM ASL_ROLE WHERE  CONTROLLERNAME='AslUserCo' AND COMPID='{0}' AND USERID = '{1}'", LoggedCompId, loggedUserID);
+
+    System.Data.SqlClient.SqlCommand cmd = new System.Data.SqlClient.SqlCommand(query, conn);
+    conn.Open();
+
+    SqlDataAdapter da = new SqlDataAdapter(cmd);
+    DataTable ds = new DataTable();
+    da.Fill(ds);
+
+    foreach (DataRow row in ds.Rows)
+    {
+        status = row["STATUS"].ToString();
+        createStatus = row["INSERTR"].ToString();
+        updateStatus = row["UPDATER"].ToString();
+        deleteStatus = row["DELETER"].ToString();
+    }
+
+    conn.Close();
+
+
+}
+
+
+@using (Html.BeginForm())
+{
+    <div class="container">
+        <br />
+        <div class="container">
+
+            <div class="row">
+                <div class="col-md-1"></div>
+                <div class="col-md-10">
+                    <div class="btn-group btn-group-justified" role="group" aria-label="...">
+                        @if (createStatus == 'A'.ToString() && updateStatus == 'A'.ToString() && deleteStatus == 'A'.ToString())
+                        {
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-primary btn-lg" data-url="@Url.Action("Create", "AslUserCo")">Create</button>
+                            </div>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-success btn-lg" data-url="@Url.Action("UpdateForm", "AslUserCo")">Update</button>
+                            </div>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-danger btn-lg" data-url="@Url.Action("DeleteForm", "AslUserCo")">Delete</button>
+                            </div>
+                        }
+                        else if (updateStatus == 'A'.ToString() && deleteStatus == 'A'.ToString())
+                        {
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-success btn-lg" data-url="@Url.Action("UpdateForm", "AslUserCo")">Update</button>
+                            </div>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-danger btn-lg" data-url="@Url.Action("DeleteForm", "AslUserCo")">Delete</button>
+                            </div>
+                        }
+                        else if (createStatus == 'A'.ToString() && updateStatus == 'A'.ToString())
+                        {
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-primary btn-lg" data-url="@Url.Action("Create", "AslUserCo")">Create</button>
+                            </div>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-success btn-lg" data-url="@Url.Action("UpdateForm", "AslUserCo")">Update</button>
+                            </div>
+                        }
+                        else if (createStatus == 'A'.ToString() && deleteStatus == 'A'.ToString())
+                        {
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-primary btn-lg" data-url="@Url.Action("Create", "AslUserCo")">Create</button>
+                            </div>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-danger btn-lg" data-url="@Url.Action("DeleteForm", "AslUserCo")">Delete</button>
+                            </div>
+                        }
+                        else if (createStatus == 'A'.ToString())
+                        {
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-primary btn-lg" data-url="@Url.Action("Create", "AslUserCo")">Create</button>
+                            </div>
+                        }
+                        else if (updateStatus == 'A'.ToString())
+                        {
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-success btn-lg" data-url="@Url.Action("UpdateForm", "AslUserCo")">Update</button>
+                            </div>
+                        }
+                        else if (deleteStatus == 'A'.ToString())
+                        {
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-danger btn-lg" data-url="@Url.Action("DeleteForm", "AslUserCo")">Delete</button>
+                            </div>
+                        }
+                    </div>  
+                </div>
+                <div class="col-md-1"></div>
+            </div>
+        </div>
+
+
+        <div id="load">
+            @if (TempData["UserCreationMessage"] != null)
+            {
+                <div class="panel-heading text-center">
+                    <h4 style="color: #226699">@TempData["UserCreationMessage"]</h4>
+                </div>
+            }
+            else if (TempData["UserUpdateMessage"] != null)
+            {
+                <div class="panel-heading text-center">
+                    <h4 style="color: #226699">@TempData["UserUpdateMessage"]</h4>
+                </div>
+            }
+            else if (TempData["UserDeleteMessage"] != null)
+            {
+                <div class="panel-heading text-center">
+                    <h4 style="color: #226699">@TempData["UserDeleteMessage"]</h4>
+                </div>
+            }
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            $(':button').click(function () {
+                $.ajax({
+                    url: $(this).data('url'),
+                    type: 'GET',
+                    cache: false,
+                    contentType: "application/html; charset=utf-8",
+                    success: function (result) {
+                        $('#load').html(result);
+                    }
+                });
+                return true;
+            });
+        });
+
+    </script>
+
+}
+
+
+<script src="~/Scripts/jquery-1.9.1.min.js"></script>
+

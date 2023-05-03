@@ -1,0 +1,246 @@
+﻿
+@using System.Web.UI.WebControls
+@using AslLabApi.Models
+@model AslLabApi.Models.DTO.SignByDTO
+
+@{
+    ViewBag.Title = "Create";
+
+    if (HttpContext.Current.Session["LoggedUserType"] == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedUserTp = HttpContext.Current.Session["LoggedUserType"].ToString();
+    var LoggedUserStatus = HttpContext.Current.Session["LoggedUserStatus"].ToString();
+    var LoggedCompanyStatus = HttpContext.Current.Session["LoggedCompanyStatus"].ToString();
+    var LoggedUserId = Convert.ToInt64(System.Web.HttpContext.Current.Session["loggedUserID"]);
+    
+
+    if ((LoggedUserTp == "CompanyAdmin" || LoggedUserTp == "AslSuperadmin") && LoggedUserStatus == "A" && LoggedCompanyStatus == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+
+    var LoggedCompId = HttpContext.Current.Session["loggedCompID"].ToString();
+
+
+
+
+
+
+}
+
+
+
+
+
+@* new added..................................... *@
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+<script src="~/Content/AdminPanel/js/jquery-2.1.3.js"></script>
+@*<link href="~/Content/AdminPanel/css/bootstrap.min.css" rel="stylesheet" />*@
+<link href="~/Content/AdminPanel/css/font-awesome.min.css" rel="stylesheet" />
+
+
+
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+
+
+    @Html.HiddenFor(model => model.COMPID, new { id = "txtCompid", @Value = LoggedCompId })
+    @Html.HiddenFor(model => model.SignId, new { id = "SignId" })
+
+
+
+    AslLabApiContext db = new AslLabApiContext();
+
+    <div id="contentHeaderBox">
+        <h1 style="padding-left:16px">SignBy Info Create</h1>
+        @*@if (TempData["message"] != null)
+        {
+            <div class="text-center">
+                <h6 style="color: #BD7F1C">@TempData["message"] </h6>
+            </div>
+            <br />
+        }*@
+        <div class="btn-group pull-right" id="editOption">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" aria-expanded="false">
+                <i class="fa fa-cog"></i>
+            </button>
+            <ul class="dropdown-menu pull-right" style="" role="menu">
+
+                <li>
+                    <a href="@Url.Action("Create", "SignBy")"><i class="fa fa-plus"></i> Create</a>
+                </li>
+                <li>
+                    <a href="@Url.Action("Update", "SignBy")"><i class="fa fa-edit"></i> Update</a>
+                </li>
+                @*<li>
+                        <a href="@Url.Action("Delete", "JobInformation")"><i class="fa fa-times"></i> Delete</a>
+                    </li>*@
+
+            </ul>
+        </div>
+    </div>
+
+
+    <div class="col-md-12">
+        <div class="form-group">
+            <div class="row">
+
+
+
+                <div class="col-md-2">
+                    @Html.Label("Authorized Name", htmlAttributes: new { @class = "control-label" })
+                </div>
+                <div class="col-md-4">
+                    @Html.TextBoxFor(model => model.AuthorName, new { @class = "form-control", id = "AuthorName", @placeholder = "Author Name", autofocus = true })
+
+                </div>
+
+
+                <div class="col-md-2">
+                    @Html.Label("Title", htmlAttributes: new { @class = "control-label" })
+                </div>
+                <div class="col-md-4">
+                    @Html.TextBoxFor(model => model.Title, new { @class = "form-control", id = "Title" })
+
+                </div>
+
+                
+            </div>
+            <br/>
+            <div class="row">
+
+
+
+                <div class="col-md-2">
+                    @Html.Label("Department Name", htmlAttributes: new { @class = "control-label" })
+                </div>
+                <div class="col-md-4">
+                    @Html.TextBoxFor(model => model.DepartmentName, new { @class = "form-control", id = "DepartmentName", @placeholder = "Department Name", autofocus = true })
+
+                </div>
+
+
+                <div class="col-md-2">
+                    @Html.Label("Institute", htmlAttributes: new { @class = "control-label" })
+                </div>
+                <div class="col-md-4">
+                    @Html.TextBoxFor(model => model.Institute, new { @class = "form-control", id = "Institute" })
+
+                </div>
+
+
+
+
+
+
+
+
+              
+
+
+            </div>
+            <br/>
+
+
+
+
+
+            <div class="row">
+                <div class="col-md-10">
+                    
+                </div>
+                <div class="col-md-2">
+
+
+
+                    <input id="SubmitId" type="submit" class="btn btn-info" value="Submit" />
+
+                    @Html.TextBoxFor(model => model.INSLTUDE, new { id = "latlonPos", style = "display: none;" })
+                    <input id="lat" type="hidden" />
+                    <input id="lon" type="hidden" />
+                    @Html.TextBoxFor(model => model.INSUSERID, new { id = "InsUserID", style = "display: none;", @Value = LoggedUserId })
+
+                </div>
+            </div>
+        </div>
+
+        <div id="result-Table">
+            @Html.Partial("~/Views/SignBy/_SignByInfo.cshtml")
+        </div>
+
+    </div>
+
+    //Latitute & longitude
+    <script src="http://maps.google.com/maps/api/js?sensor=false">
+    </script>
+
+    <script language="javascript" type="text/javascript">
+        $(function () {
+            navigator.geolocation.getCurrentPosition(showPosition);
+            //navigator.geolocation.getCurrentPosition(showPosition, positionError);
+
+            function showPosition(position) {
+                var coordinates = position.coords;
+                $("#lat").val(coordinates.latitude);
+                $("#lon").val(coordinates.longitude);
+
+                $("#latlonPos").val(
+                    $("#lat").val() + "," + $("#lon").val()
+                );
+                $("#latlonRms").val(
+                    $("#lat").val() + "," + $("#lon").val()
+                );
+            }
+        });
+    </script>
+
+
+
+}
+<script>
+    $(document).ready(function () {
+        //var id = $("#txtCompid").val();
+        //var authorname = $("#AuthorName").val();
+        //var title = $("#Title").val();
+        //var departmentname = $("#DepartmentName").val();
+        //var institute = $("#Institute").val();
+
+    $('#SubmitId').click(function (e) {
+        var id = $("#txtCompid").val();
+        var authorname = $("#AuthorName").val();
+        var title = $("#Title").val();
+        var departmentname = $("#DepartmentName").val();
+        var institute = $("#Institute").val();
+        var insltude = $('#latlonPos').val();
+        var insuserid = $('#InsUserID').val();
+
+        e.preventDefault();
+        $('#result-Table').load('@Url.Action("SignByInfo", "SignBy")', {
+            companyID: id, AuthorName: authorname, Title: title, Departmentname: departmentname, Institute: institute, Insltude: insltude,Insuserid: insuserid});
+        $("#AuthorName").val("");
+        $("#Title").val("");
+        $("#DepartmentName").val("");
+        $("#Institute").val("");
+    });
+        
+        @*$('#result-Table').load('@Url.Action("SignByInfo", "SignBy")', { companyID: id, AuthorName: authorname, Title: title, Departmentname: departmentname, Institute: institute });*@
+    });
+</script>
+
+
+
+
+

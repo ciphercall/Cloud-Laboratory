@@ -1,0 +1,1068 @@
+﻿
+@using AslLabApi.Models
+@model AslLabApi.Models.DTO.OpdDTO
+
+@{
+    ViewBag.Title = "Update";
+    if (HttpContext.Current.Session["LoggedUserType"] == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedUserTp = HttpContext.Current.Session["LoggedUserType"].ToString();
+    var LoggedUserStatus = HttpContext.Current.Session["LoggedUserStatus"].ToString();
+    var LoggedCompanyStatus = HttpContext.Current.Session["LoggedCompanyStatus"].ToString();
+
+    var InUserId = Convert.ToInt64(System.Web.HttpContext.Current.Session["loggedUserID"]);
+
+    if ((LoggedUserTp == "CompanyAdmin" || LoggedUserTp == "UserAdmin" || LoggedUserTp == "User") && LoggedUserStatus == "A" && LoggedCompanyStatus == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+    var LoggedCompId = HttpContext.Current.Session["loggedCompID"].ToString();
+    Int64 compid = Convert.ToInt64(LoggedCompId);
+
+    AslLabApiContext db = new AslLabApiContext();
+
+    List<SelectListItem> type = new List<SelectListItem>();
+
+
+    type.Add(new SelectListItem { Text = "Test", Value = "Test" });
+    type.Add(new SelectListItem { Text = "Group", Value = "Group" });
+
+    List<SelectListItem> gender = new List<SelectListItem>();
+
+
+    gender.Add(new SelectListItem { Text = "Male", Value = "Male" });
+    gender.Add(new SelectListItem { Text = "Female", Value = "Female" });
+
+    TimeZoneInfo timeZoneInfo;
+    timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Central Asia Standard Time");
+    DateTime currentDateTime = TimeZoneInfo.ConvertTime(DateTime.Now, timeZoneInfo);
+
+}
+<style>
+    .selectClass {
+        font-size: 11px;
+        /*font-family: 'Impact', cursive;*/
+    }
+</style>
+
+
+<link href="~/Content/newcss/jquery-ui.css" rel="stylesheet" />
+
+
+<link href="~/Content/newcss/ng-grid.css" rel="stylesheet" />
+<link rel="stylesheet" href="~/Content/style.css" />
+
+@*<link href="~/Content/bootstrap_datepicker_css/datepicker.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap_datepicker_css/datepicker3.css" rel="stylesheet" />
+
+    <script src="~/Scripts/bootstrap-datepicker.js"></script>*@
+
+<script src="~/Content/jquery1.8.0/jquery.min.js"></script>
+
+
+<script src="~/Content/jquery1.9.1/jquery-1.9.1.js"></script>
+
+
+<script src="~/Content/jquery1.10.3/jquery-ui.js"></script>
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <div id="contentHeaderBox">
+        <h1 style="padding-left:16px">Outdoor Information-Update</h1>
+
+        <div class="btn-group pull-right" id="editOption">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" aria-expanded="false">
+                <i class="fa fa-cog"></i>
+            </button>
+            <ul class="dropdown-menu pull-right" style="" role="menu">
+
+                <li>
+                    <a href="@Url.Action("Index", "Opd")"><i class="fa fa-plus"></i> Create</a>
+                </li>
+                <li>
+                    <a href="@Url.Action("Update", "Opd")"><i class="fa fa-edit"></i> Update</a>
+                </li>
+                @*<li>
+                        <a href="@Url.Action("Delete", "JobInformation")"><i class="fa fa-times"></i> Delete</a>
+                    </li>*@
+
+            </ul>
+        </div>
+
+    </div>
+    @*<br />*@
+
+    <div class="col-md-12">
+        <div class="form-group">
+            @Html.HiddenFor(model => model.CompanyID, new { id = "txtcompid", style = "width:3em;", @Value = compid })
+            @Html.HiddenFor(model => model.TestID, new { id = "TestID", style = "width:5em;" })
+
+            @Html.HiddenFor(model => model.TestCategoryId, new { id = "HiddentCatId", style = "width:6em;" })
+            @Html.HiddenFor(model => model.ForPrintOrPreview, new { id = "forprintOrpreview", style = "width:6em;" })
+            @Html.HiddenFor(model => model.UPDUSERID, new { id = "InUserID", style = "width:5em;", @Value = InUserId })
+
+            @if (LoggedUserTp == "CompanyAdmin")
+            {
+                @Html.HiddenFor(model => model.LoggedUserTp, new { id = "User", style = "width:6em;", @Value = "CompanyAdmin" })
+            }
+            else
+            {
+                @Html.HiddenFor(model => model.LoggedUserTp, new { id = "User", style = "width:6em;", @Value = "User" })
+            }
+
+            <div ng-app="OpdApp" data-ng-controller="ApiOpdController">
+                <div class="row">
+                    <div class="col-md-9">
+                        <div class="panel panel-primary">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <tr hidden><td><input type="submit" value="Refresh" class="btn btn-primary" id="refreshid" /></td></tr>
+                                    <tr>
+                                        <td><label>Patient ID</label></td>
+                                        <td>@Html.TextBoxFor(model => model.PatientID, new { id = "PatientID", @class = "form-control input-sm",autofocus=true })</td>
+                                      
+                                        @*<td><input type="submit" value="Complete" class="btn btn-primary" id="complete" /></td>*@
+
+
+                                    </tr>
+                                    <tr>
+                                        <td class="col-md-2"><label>Date</label></td>
+                                        <td><label>Patient Name</label>
+                                        <td class="col-md-2"><label>RF(%)</label></td>
+
+
+                                    </tr>
+                                    <tr>
+
+                                        <td class="col-md-2">@Html.TextBoxFor(model => model.TransactionDate, new
+                                                        {
+                                                            id = "TransactionDate",
+                                                            @class = "form-control input-sm",
+                                                            tabindex = "-1"@*, @Value = currentDateTime.ToString("dd-MMM-yyyy")*@ })</td>
+
+                                        <td>@Html.TextBoxFor(model => model.PatientName, new { id = "PatientName", @class = "form-control input-sm", tabindex = "-1" })</td>
+                                        <td class="col-md-2">@Html.TextBoxFor(model => model.RfPercentage, new { id = "RfPercentage", @class = "form-control input-sm", tabindex = "-1" })</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="col-md-2"></td>
+                                        <td></td>
+                                        <td class="col-md-2"><input type="submit" value="Search" data-ng-click="add($event)" class="btn btn-primary" id="submitid" /></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        @Html.TextBoxFor(model => model.INSLTUDE, new { id = "latlonPos", style = "display: none;" })
+                        <input id="lat" type="hidden" />
+                        <input id="lon" type="hidden" />
+
+                        <div class="panel panel-primary">
+                            <div class="table-responsive">
+                                <table class="table table-striped" ng-init=" items.total={}">
+                                    <tr>
+                                        <td class="col-md-2"><label>Type</label></td>
+                                        <td class="col-md-2"><label>Group Head</label>
+                                        <td class="col-md-4"><label>Test Name</label></td>
+                                        <td class="col-md-1"><label>Amount</label></td>
+                                        <td class="col-md-1"><label>R(%)</label></td>
+                                        <td class="col-md-1"><label>D(%)</label></td>
+                                        <td class="col-md-1"><label>Disc(R)</label></td>
+                                        <td></td>
+
+                                    </tr>
+                                    <tr>
+
+
+                                        <td class="col-md-2">
+                                            @Html.DropDownListFor(model => model.Type, type, new
+                                            {
+                                                id = "Type", @*data_ng_model = "newChild.Type",*@ @class = "form-control input-sm selectClass"
+                                            })
+                                        </td>
+
+                                        <td class="col-md-2">
+
+                                            <input data-ng-model="newChild.TestCategoryName" id="TCatId" class="form-control input-sm" tabindex="-1" />
+                                        </td>
+
+                                        <td class="col-md-4"><input data-ng-model="newChild.TestName" id="TestName" class="form-control input-sm" /></td>
+
+                                        <td class="col-md-1"><input data-ng-model="newChild.Amount" id="Amount" readonly="readonly" class="form-control input-sm" tabindex="-1" /></td>
+                                        <td class="col-md-1"><input data-ng-model="newChild.Pcntr" id="Pcntr" readonly="readonly" class="form-control input-sm" tabindex="-1" /></td>
+                                        <td class="col-md-1"><input data-ng-model="newChild.Pcntd" id="Pcntd" readonly="readonly" class="form-control input-sm" tabindex="-1" /></td>
+                                        <td class="col-md-1"><input data-ng-model="newChild.Discr" id="Discr" readonly="readonly" class="form-control input-sm" tabindex="-1" /></td>
+                                        <td class="col-md-1"><input type="submit" value="Insert" data-ng-click="addrow($event)" class="btn btn-primary" /></td>
+                                        @*<td class="col-md-1"></td>*@
+                                    </tr>
+
+
+
+                                    <tr data-ng-repeat="item in Opdata">
+
+                                        <td hidden><strong data-ng-hide="item.editMode">{{item.ID}}</strong></td>
+                                        <td colspan="1">
+                                            @*<p data-ng-hide="item.editMode">{{ item.TestCategoryName }}</p>*@
+                                            @Html.DropDownListFor(model => model.Type, type, new
+                                            {
+
+                                                //data_ng_model = "item.TestCategoryName",
+                                                data_ng_show = "item.editMode",
+                                                @class = "form-control input-sm"
+                                            })
+                                            @*<input data-ng-show="item.editMode" type="text" data-ng-model="item.TestCategoryName" class="form-control input-sm" />*@
+                                        </td>
+
+                                        <td colspan="1">
+                                            <p data-ng-hide="item.editMode">{{ item.TestCategoryName }}</p>
+                                            <input data-ng-show="item.TestCategoryName.editMode" type="text" id="gridCategoryID" data-ng-model="item.TestCategoryName" class="form-control input-sm gridCategory" />
+                                        </td>
+                                        <td colspan="1">
+                                            <p data-ng-hide="item.editMode">{{ item.TestName }}</p>
+
+                                            <input data-ng-show="item.editMode" type="text" data-ng-model="item.TestName" class="form-control input-sm" />
+                                        </td>
+                                        <td colspan="1">
+                                            <p data-ng-hide="item.editMode">{{ item.Amount }}</p>
+
+                                            <input data-ng-show="item.editMode" type="text" data-ng-model="item.Amount" class="form-control input-sm" />
+
+                                        </td>
+                                        <td colspan="1">
+                                            <p data-ng-hide="item.editMode">{{ item.Pcntr }}</p>
+
+                                            <input data-ng-show="item.editMode" type="text" data-ng-model="item.Pcntr" class="form-control input-sm" />
+                                        </td>
+                                        <td colspan="1">
+                                            <p data-ng-hide="item.editMode">{{ item.Pcntd }}</p>
+
+                                            <input data-ng-show="item.editMode" type="text" data-ng-model="item.Pcntd" class="form-control input-sm" />
+                                        </td>
+                                        <td colspan="1">
+                                            <p data-ng-hide="item.editMode">{{ item.Discr }}</p>
+
+                                            <input data-ng-show="item.editMode" type="text" data-ng-model="item.Discr" class="form-control input-sm" @*style="width:5em;"*@ />
+                                        </td>
+
+                                        <td colspan="2">
+                                            <p data-ng-hide="item.editMode">@*<a data-ng-click="toggleEdit(item)" href="javascript:;">Edit</a> |*@ <a data-ng-click="deleteitem(item)" href="javascript:;">Delete</a></p>
+                                            @*<p data-ng-show="item.editMode"><a data-ng-click="save(item)" href="javascript:;">Save</a> | <a data-ng-click="toggleEdit(item)" href="javascript:;">Cancel</a></p>*@
+
+                                        </td>
+
+
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3"><b>Total:</b> </td>
+                                        <td colspan="1"><p id="gridTotalamount">{{GetSummOfAmount(Opdata)}}</p></td>
+                                        <td colspan="1"></td>
+                                        <td colspan="1"></td>
+                                        <td colspan="1" id="gridTotalDiscr">{{GetSummOfDiscr(Opdata)}}</td>
+                                        <td colspan="3"></td>
+                                    </tr>
+
+                                </table>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="row">
+                            <ul class="nav nav-tabs nav-justified" role="tablist" style="background-color: #D3D3D3;">
+                                <li role="presentation" class="active"><a href="#basic" aria-controls="home" role="tab" data-toggle="tab" style="color:black ">Basic Info</a></li>
+                                <li role="presentation"><a href="#accounts" aria-controls="profile" role="tab" data-toggle="tab" style="color:black " id="Acc">Collection</a></li>
+
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="basic">
+                            <div class="col-md-3">
+                                <div class="row">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <tr>
+                                                <td colspan="1"><label>Gender</label></td>
+                                                <td colspan="2">
+                                                    @Html.DropDownListFor(model => model.Gender, gender, new
+                                            {
+                                                id = "Gender", @*data_ng_model = "newChild.Type",*@ @class = "form-control input-sm"
+
+                                            })
+                                                </td>
+                                                @*<td colspan="2">@Html.TextBoxFor(model => model.Gender, new { id = "Gender", @class = "form-control input-sm" })</td>*@
+                                            </tr>
+                                            <tr>
+                                                <td colspan="1"><label>Age</label></td>
+                                                <td colspan="2">@Html.TextBoxFor(model => model.Age, new { id = "Age", @class = "form-control input-sm", @Value = "0" })</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="1"><label>Address</label></td>
+                                                <td colspan="5">@Html.TextBoxFor(model => model.Address, new { id = "Address", @class = "form-control input-sm" })</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="1"><label>Mobile No</label></td>
+                                                <td colspan="2">@Html.TextBoxFor(model => model.MObileNo, new { id = "MObileNo", @class = "form-control input-sm" })</td>
+
+                                                @*@Html.ValidationMessageFor(model => model.MObileNo, "", new { @class = "text-danger" })*@
+                                            </tr>
+                                            <tr hidden>
+                                                <td colspan="1"><label> REFER ID</label></td>
+                                                <td colspan="2">@Html.TextBoxFor(model => model.ReferID, new { id = "ReferID", @class = "form-control input-sm" })</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="1"><label> Doctor Name</label></td>
+                                                <td colspan="2">
+                                                    @Html.TextBoxFor(model => model.DoctorName, new
+                                                                {
+                                                                    id = "DoctorName",
+                                                                    @class = "form-control input-sm"
+                                                                })
+                                                </td>
+                                            </tr>
+                                            <tr hidden>
+                                                <td colspan="1"><label> DOCTOR ID</label></td>
+                                                <td colspan="2">@Html.TextBoxFor(model => model.DoctorID, new { id = "DoctorID", @class = "form-control input-sm" })</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="1"><label>Refer Name</label></td>
+                                                <td colspan="5">@Html.TextBoxFor(model => model.Refername, new { id = "ReferName", @class = "form-control input-sm" })</td>
+                                            </tr>
+
+
+                                            <tr>
+                                                <td colspan="1"><label> Delivery Date</label></td>
+                                                <td colspan="2">@Html.TextBoxFor(model => model.DvDate, new { id = "DvDate", @class = "form-control input-sm", @Value = currentDateTime.ToString("dd-MMM-yyyy") })</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="1"><label>Delivery Time</label></td>
+                                                <td colspan="2">@Html.TextBoxFor(model => model.Dvtm, new { id = "Dvtm", @class = "form-control input-sm", @Value = "07:30 PM" })</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="accounts">
+                            <div class="col-md-3">
+                                <div class="row">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+
+
+                                            <tr>
+                                                <td colspan="1"><label> Total Amount</label></td>
+                                                <td colspan="2">@Html.TextBoxFor(model => model.TotalAmount, new { id = "TotalAmount", @class = "form-control input-sm", tabindex = "-1", @Value = "0" })</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="1"><label> Discount(R)</label></td>
+                                                <td colspan="2">@Html.TextBoxFor(model => model.DiscountRefer, new { id = "DiscountRefer", @class = "form-control input-sm", tabindex = "-1", @Value = "0" })</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="1"><label>Discount(Lab)</label></td>
+                                                <td colspan="2">@Html.TextBoxFor(model => model.DiscountHos, new { id = "DiscountHos", @class = "form-control input-sm", autofocus = true, @Value = "0" })</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="1"><label>Discount(Net)</label></td>
+                                                <td colspan="2">@Html.TextBoxFor(model => model.Discountnet, new { id = "Discountnet", @class = "form-control input-sm", tabindex = "-1", @Value = "0" })</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="1"><label>Net Amount</label></td>
+                                                <td colspan="2">@Html.TextBoxFor(model => model.NetAmount, new { id = "NetAmount", @class = "form-control input-sm", tabindex = "-1", @Value = "0" })</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="1"><label>Paid</label></td>
+                                                <td colspan="2">@Html.TextBoxFor(model => model.ReceiveAmount, new { id = "ReceiveAmount", @class = "form-control input-sm", @Value = "0" })</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="1"><label> Due</label></td>
+                                                <td colspan="2">@Html.TextBoxFor(model => model.DueAmount, new { id = "DueAmount", @class = "form-control input-sm", tabindex = "-1", @Value = "0" })</td>
+                                            </tr>
+                                            <tr>
+
+                                                <td colspan="1"><input type="submit" value="Update" @*data-ng-click="add2ndPart($event)"*@ class="btn btn-primary" id="2ndSubmit" name="command" tabindex="-1" /></td>
+                                                <td colspan="2">
+
+                                                    @*<input type="submit" value="Submit & Print" data-ng-click="add2ndPart($event)" class="btn btn-primary" formtarget="_blank" id="print" />*@
+                                                    <input type="submit" value="Update & Print" data-ng-click="add2ndPart($event)" class="btn btn-primary" formtarget="_blank" id="preview" />
+
+
+
+                                                </td>
+
+                                            </tr>
+                                            @*<tr>
+
+                                                <td colspan="1"></td>
+                                                <td colspan="2">
+
+
+                                                    <input type="submit" value="Print" class="btn btn-primary" data-ng-click="add2ndPart($event)" id="opdPrint" formtarget="_blank" />
+
+
+
+                                                </td>
+
+                                            </tr>*@
+
+                                        </table>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+
+
+
+
+            </div>
+        </div>
+    </div>
+
+    //Latitute & longitude
+    <script src="http://maps.google.com/maps/api/js?sensor=false">
+    </script>
+
+    <script language="javascript" type="text/javascript">
+        $(function () {
+            navigator.geolocation.getCurrentPosition(showPosition);
+            //navigator.geolocation.getCurrentPosition(showPosition, positionError);
+
+            function showPosition(position) {
+                var coordinates = position.coords;
+                $("#lat").val(coordinates.latitude);
+                $("#lon").val(coordinates.longitude);
+
+                $("#latlonPos").val(
+                    $("#lat").val() + "," + $("#lon").val()
+                );
+                $("#latlonRms").val(
+                    $("#lat").val() + "," + $("#lon").val()
+                );
+            }
+        });
+    </script>
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            //$("#secondPart").hide();
+
+            document.getElementById('TCatId').readOnly = true;
+            document.getElementById('TransactionDate').readOnly = true;
+            document.getElementById('PatientName').readOnly = true;
+            document.getElementById('Dvtm').readOnly = true;
+            document.getElementById('TotalAmount').readOnly = true;
+            document.getElementById('DiscountRefer').readOnly = true;
+            document.getElementById('Discountnet').readOnly = true;
+            document.getElementById('NetAmount').readOnly = true;
+            document.getElementById('DueAmount').readOnly = true;
+            
+            //document.getElementById('RfPercentage').readOnly = true;
+
+            $('#PatientID').autocomplete({
+                source: function (request, response) {
+                    var changedText2 = $("#txtcompid").val();
+
+                    $.ajax({
+
+                        url: '/api/OpdUpdate/PatientId',
+                        type: 'GET',
+                        cache: false,
+                        data: { query: request.term, query2: changedText2 },
+                        dataType: 'json',
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return {
+                                    label: item.PatientID,
+                                    value: item.PatientID,
+                                    name: item.PatientName,
+                                    date: item.TDateBrother,
+                                    rf: item.RfPercentage
+                                    //gender: item.Gender,
+                                    //age: item.Age,
+                                    //mobileno: item.MObileNo,
+                                    //doctorname: item.DoctorName,
+                                    //doctorid:item.DoctorID,
+                                    //refername: item.Refername,
+                                    //referid: item.ReferID,
+                                    //dvDate: item.DvDate
+                                };
+                            }));
+                        }
+                    });
+                },
+                select: function (event, ui) {
+                    $('#PatientName').val(ui.item.name);
+                    $('#PatientID').val(ui.item.label);
+
+                    $('#TransactionDate').val(ui.item.date);
+                    $('#RfPercentage').val(ui.item.rf);
+                    
+                    //$('#Gender').val(ui.item.gender);
+                    //$('#Age').val(ui.item.age);
+
+                    //$('#MObileNo').val(ui.item.mobileno);
+                    //$('#DoctorName').val(ui.item.doctorname);
+                    
+                    //$('#DoctorID').val(ui.item.doctorid);
+                    //$('#Refername').val(ui.item.refername);
+
+                    //$('#ReferID').val(ui.item.referid);
+                    //$('#DvDate').val(ui.item.dvDate);
+
+                    txtOneChanged2();
+
+                    return false;
+                },
+                change: $('#PatientID').keyup(_.debounce(txtOneChanged2, 1000))
+            });
+
+
+         
+
+            $("#DvDate").datepicker({ dateFormat: 'dd-M-yy', changeYear: true });
+
+            $("#opdPrint").click(function () {
+                $("#forprintOrpreview").val("1");
+            });
+
+            $("#preview").click(function () {
+                $("#forprintOrpreview").val("0");
+            });
+
+            $("#Acc").click(function () {
+
+                var gridamount = document.getElementById('gridTotalamount').innerHTML;
+                var gridDiscr = document.getElementById('gridTotalDiscr').innerHTML;
+
+                $("#TotalAmount").val(gridamount);
+                $("#DiscountRefer").val(gridDiscr);
+                //document.getElementById('DiscountHos').focus();
+                var a = parseFloat($("#DiscountRefer").val());
+                var b = parseFloat($("#DiscountHos").val());
+
+                $("#Discountnet").val(a + b);
+
+                var c = parseFloat($("#TotalAmount").val());
+                var d = parseFloat($("#Discountnet").val());
+
+                $("#NetAmount").val(c - d);
+                $("#ReceiveAmount").val(c - d);
+
+                var e = parseFloat($("#NetAmount").val());
+                var f = parseFloat($("#ReceiveAmount").val());
+                $("#DueAmount").val(e - f);
+
+            });
+
+            $("#DiscountHos").change(function () {
+
+                //var Discnet = document.getElementById('DiscountRefer').value + document.getElementById('DiscountHos').value;
+                var a = parseFloat($("#DiscountRefer").val());
+                var b = parseFloat($("#DiscountHos").val());
+
+                $("#Discountnet").val(a + b);
+
+                var c = parseFloat($("#TotalAmount").val());
+                var d = parseFloat($("#Discountnet").val());
+
+                $("#NetAmount").val(c - d);
+                $("#ReceiveAmount").val(c - d);
+
+            });
+
+            $("#ReceiveAmount").change(function () {
+                var a = parseFloat($("#NetAmount").val());
+                var b = parseFloat($("#ReceiveAmount").val());
+                $("#DueAmount").val(a - b);
+                //document.getElementById("preview").focus();
+            });
+
+            $("#Type").change(function () {
+                if ($("#Type").val() == "Group") {
+
+                    document.getElementById("TCatId").focus();
+                    document.getElementById('TCatId').readOnly = false;
+
+                } else {
+                    document.getElementById("TestName").focus();
+                }
+            });
+
+
+            $("#submitid").click(function () {
+                var rfpercent = $("#RfPercentage").val();
+                $("#Pcntr").val(rfpercent);
+                
+
+                var changedText = $("#PatientID").val();
+                var changedText2 = $("#txtcompid").val();
+          
+
+                var txtBox = document.getElementById('Gender');
+                var txtBox1 = document.getElementById('Age');
+                var txtBox2 = document.getElementById('Address');
+
+                var txtBox3 = document.getElementById('MObileNo');
+                var txtBox4 = document.getElementById('DoctorID');
+                var txtBox5 = document.getElementById('ReferID');
+
+                var txtBox6 = document.getElementById('DvDate');
+                
+                var txtBox7 = document.getElementById('DoctorName');
+                var txtBox8 = document.getElementById('ReferName');
+           
+                $.getJSON(
+                  '/api/Opd2ndPartdata_fetch', { "ChangedText": changedText, "ChangedText2": changedText2},
+                  function (result) {
+                      txtBox.value = result[0].Gender;
+                      txtBox1.value = result[0].Age;
+                      txtBox2.value = result[0].Address;
+                     
+                      txtBox3.value = result[0].MObileNo;
+                      txtBox4.value = result[0].DoctorID;
+                      txtBox5.value = result[0].ReferID;
+                      txtBox6.value = result[0].TDateBrother;
+                      txtBox7.value = result[0].DoctorName;
+                      txtBox8.value = result[0].Refername;
+
+
+                  });
+
+
+            });
+
+
+            $('#TestName').autocomplete({
+                source: function (request, response) {
+                    var changedText2 = $("#txtcompid").val();
+                    var changedText3 = $("#HiddentCatId").val();
+                    $.ajax({
+
+                        url: '/api/TestNameList',
+                        type: 'GET',
+                        cache: false,
+                        data: { query: request.term, query2: changedText2, query3: changedText3 },
+                        dataType: 'json',
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                var pcntd = 0;
+                                if (item.Pcntd == null) {
+                                    pcntd = 0;
+                                } else {
+                                    pcntd = item.Pcntd;
+                                }
+                                return {
+                                    label: item.TestName,
+                                    value: item.TestName,
+                                    id: item.TestID,
+                                    amount: item.Amount,
+                                    pcntd: pcntd,
+                                    TestCategoryName: item.TestCategoryName,
+                                    TestCatid: item.TestCategoryId
+                                };
+                            }));
+                        }
+                    });
+                },
+                select: function (event, ui) {
+                    $('#TestName').val(ui.item.label);
+                    $('#TestID').val(ui.item.id);
+                    $('#Amount').val(ui.item.amount);
+                    $('#Pcntd').val(ui.item.pcntd);
+                    $('#TCatId').val(ui.item.TestCategoryName);
+                    $('#HiddentCatId').val(ui.item.TestCatid);
+                    txtOneChanged();
+                    return false;
+                },
+                change: $('#TestName').keyup(_.debounce(txtOneChanged, 1000))
+            });
+
+
+
+
+            $('#TCatId').autocomplete({
+                source: function (request, response) {
+                    var changedText2 = $("#txtcompid").val();
+                    //var changedText3 = $("#TransactionDate").val();
+                    $.ajax({
+
+                        url: '/api/CatNameList',
+                        type: 'GET',
+                        cache: false,
+                        data: { query: request.term, query2: changedText2 },
+                        dataType: 'json',
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return {
+                                    label: item.TestCategoryName,
+                                    value: item.TestCategoryName,
+                                    id: item.TestCategoryId,
+
+
+
+                                };
+                            }));
+                        }
+                    });
+                },
+                select: function (event, ui) {
+                    $('#TCatId').val(ui.item.label);
+                    $('#HiddentCatId').val(ui.item.id);
+
+                    txtOneChanged3();
+
+
+
+                    return false;
+                },
+                change: $('#TCatId').keyup(_.debounce(txtOneChanged3, 1000))
+            });
+
+
+            $('#ReferName').autocomplete({
+                source: function (request, response) {
+                    var changedText2 = $("#txtcompid").val();
+                    //var changedText3 = $("#TransactionDate").val();
+                    $.ajax({
+
+                        url: '/api/OpdReferNameList',
+                        type: 'GET',
+                        cache: false,
+                        data: { query: request.term, query2: changedText2 },
+                        dataType: 'json',
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return {
+                                    label: item.Refername,
+                                    value: item.Refername,
+                                    id: item.ReferID,
+
+
+
+                                };
+                            }));
+                        }
+                    });
+                },
+                select: function (event, ui) {
+                    $('#ReferName').val(ui.item.label);
+                    $('#ReferID').val(ui.item.id);
+
+
+
+
+
+
+                    return false;
+                },
+                change: $('#ReferName').keyup(_.debounce(txtOneChanged4, 1000))
+            });
+
+            $('#DoctorName').autocomplete({
+                source: function (request, response) {
+                    var changedText2 = $("#txtcompid").val();
+                    //var changedText3 = $("#TransactionDate").val();
+                    $.ajax({
+
+                        url: '/api/OpdReferNameList',
+                        type: 'GET',
+                        cache: false,
+                        data: { query: request.term, query2: changedText2 },
+                        dataType: 'json',
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return {
+                                    label: item.Refername,
+                                    value: item.Refername,
+                                    id: item.ReferID,
+
+
+
+                                };
+                            }));
+                        }
+                    });
+                },
+                select: function (event, ui) {
+                    $('#DoctorName').val(ui.item.label);
+                    $('#DoctorID').val(ui.item.id);
+
+
+
+
+
+
+                    return false;
+                },
+                change: $('#DoctorName').keyup(_.debounce(txtOneChanged4, 1000))
+            });
+
+
+            $("#MObileNo").change(function () {
+                validateFeedback();
+
+
+
+
+            });
+
+        });
+
+
+
+
+        function txtOneChanged() {
+
+
+            var changedText = $("#TestName").val();
+            var changedText2 = $("#txtcompid").val();
+            var changedText3 = $("#HiddentCatId").val();
+
+            var Name = document.getElementById('TestName');
+            var txtBox = document.getElementById('TestID');
+            var txtBox2 = document.getElementById('Amount');
+
+            var txtBox3 = document.getElementById('Pcntd');
+            var txtBox4 = document.getElementById('Pcntr').value;
+            var txtBox5 = document.getElementById('Discr');
+
+            var catname = document.getElementById('TCatId');
+            var catid = document.getElementById('HiddentCatId');
+            if (changedText != "") {
+
+                $.getJSON(
+                    '/api/DynamicTestName', { "ChangedText": changedText, "ChangedText2": changedText2, "ChangedText3": changedText3 },
+                    function (result) {
+                        Name.value = result[0].TestName;
+                        txtBox.value = result[0].TestID;
+                        txtBox2.value = result[0].Amount;
+                        if (result[0].Pcntd == null) {
+                            result[0].Pcntd = 0;
+                        }
+                        txtBox3.value = result[0].Pcntd;
+                        catname.value = result[0].TestCategoryName;
+                        catid.value = result[0].TestCategoryId;
+                        var x = result[0].Pcntd;
+                        if (x * 1 < txtBox4 * 1) {
+                            var pcntr = txtBox2.value * (txtBox3.value * .01);
+                            txtBox5.value = pcntr;
+                        } else {
+                            var pcntr2 = txtBox2.value * (txtBox4 * .01);
+                            txtBox5.value = pcntr2;
+                        }
+
+                    });
+
+
+            }
+
+
+
+        }
+        function txtOneChanged2() {
+
+
+            var changedText = $("#PatientID").val();
+            var changedText2 = $("#txtcompid").val();
+
+
+            var Name = document.getElementById('PatientName');
+            var txtBox = document.getElementById('PatientID');
+            var txtBox2 = document.getElementById('TransactionDate');
+
+            var txtBox3 = document.getElementById('RfPercentage');
+
+
+
+
+            if (changedText != "") {
+
+                $.getJSON(
+                    '/api/Opd/DynamicPatientName', { "ChangedText": changedText, "ChangedText2": changedText2 },
+                    function (result) {
+                        Name.value = result[0].PatientName;
+                        txtBox.value = result[0].PatientID;
+
+                        txtBox2.value = result[0].TDateBrother;
+
+                        txtBox3.value = result[0].RfPercentage;
+
+
+                    });
+
+
+
+            }
+
+
+
+        }
+
+
+        function txtOneChanged3() {
+
+
+            var changedText = $("#TCatId").val();
+            var changedText2 = $("#txtcompid").val();
+
+
+            var Name = document.getElementById('TCatId');
+            var txtBox = document.getElementById('HiddentCatId');
+
+
+
+
+
+            if (changedText != "") {
+
+                $.getJSON(
+                    '/api/DynamicCatName', { "ChangedText": changedText, "ChangedText2": changedText2 },
+                    function (result) {
+                        Name.value = result[0].TestCategoryName;
+                        txtBox.value = result[0].TestCategoryId;
+
+
+                    });
+
+
+            }
+
+
+
+        }
+        function txtOneChanged4() {
+
+
+            var changedText = $("#ReferName").val();
+            var changedText2 = $("#txtcompid").val();
+
+
+            var Name = document.getElementById('ReferName');
+            var txtBox = document.getElementById('ReferID');
+
+
+            if (changedText != "") {
+
+                $.getJSON(
+                    '/api/DynamicRefName', { "ChangedText": changedText, "ChangedText2": changedText2 },
+                    function (result) {
+                        Name.value = result[0].Refername;
+                        txtBox.value = result[0].ReferID;
+
+
+                    });
+
+
+            }
+
+
+
+        }
+
+        function txtOneChanged5() {
+
+
+            var changedText = $("#DoctorName").val();
+            var changedText2 = $("#txtcompid").val();
+
+
+            var Name = document.getElementById('DoctorName');
+            var txtBox = document.getElementById('DoctorID');
+
+
+            if (changedText != "") {
+
+                $.getJSON(
+                    '/api/DynamicRefName', { "ChangedText": changedText, "ChangedText2": changedText2 },
+                    function (result) {
+                        Name.value = result[0].Refername;
+                        txtBox.value = result[0].ReferID;
+
+
+                    });
+
+
+            }
+
+
+
+        }
+
+        function validateFeedback() {
+            var phone = document.getElementById("MObileNo");
+            var MObileNo = $("#MObileNo").val();
+            var RE = /^[\d\.\-]+$/;
+            if (!RE.test(phone.value)) {
+                alert("You have entered an invalid phone number");
+                $("#MObileNo").val("");
+                document.getElementById("MObileNo").focus();
+                return false;
+            }
+
+            else if ((MObileNo.substring(0, 3) != "016" && MObileNo.substring(0, 3) != "017" && MObileNo.substring(0, 3) != "018" && MObileNo.substring(0, 3) != "019") || MObileNo.length != 11) {
+
+                alert("Check Mobile No length or You have entered other operator");
+                $("#MObileNo").val("");
+                document.getElementById("MObileNo").focus();
+                return false;
+
+            }
+
+            return true;
+        }
+
+    </script>
+
+
+}
+
+<link href="~/Content/themes/base/jquery-ui.css" rel="stylesheet" />
+
+<script src="~/Scripts/jquery-ui-1.10.4.min.js"></script>
+
+
+
+
+
+<script src="~/Scripts/angularjs/1.0.5/angular.js"></script>
+
+<script src="~/Scripts/Opd/Opd2.js"></script>
+
+<script src="~/Scripts/angularjs/ui-bootstrap-tpls-0.4.0.js"></script>
+
+
+
+
+<script src="~/Scripts/Underscore.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

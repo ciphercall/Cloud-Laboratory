@@ -1,0 +1,283 @@
+﻿@using System.Data
+@using System.Data.SqlClient
+
+@using AslLabApi.Models
+@using AslLabApi.DataAccess
+@model AslLabApi.Models.PageModel
+@{
+    Layout = null;
+    if (HttpContext.Current.Session["LoggedUserType"] == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedUserTp = HttpContext.Current.Session["LoggedUserType"].ToString();
+    var LoggedUserStatus = HttpContext.Current.Session["LoggedUserStatus"].ToString();
+    var LoggedCompanyStatus = HttpContext.Current.Session["LoggedCompanyStatus"].ToString();
+
+    if ((LoggedUserTp == "CompanyAdmin" || LoggedUserTp == "UserAdmin" || LoggedUserTp == "User") && LoggedUserStatus == "A" && LoggedCompanyStatus == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedCompId = HttpContext.Current.Session["loggedCompID"].ToString();
+    Int64 compid = Convert.ToInt64(LoggedCompId);
+
+
+    string companyName = "", address = "", contactNo = "";
+    AslLabApiContext db = new AslLabApiContext();
+    var SelectCompanyName = from n in db.AslCompanyDbSet
+
+                            where n.COMPID == compid
+                            select new { n.COMPNM, n.ADDRESS, n.CONTACTNO };
+
+    foreach (var n in SelectCompanyName)
+    {
+        companyName = n.COMPNM;
+        address = n.ADDRESS;
+        contactNo = n.CONTACTNO;
+    }
+    var compNm = companyName;
+    var Address = address;
+    var contactno = contactNo;
+
+   
+
+  
+
+    TimeZoneInfo timeZoneInfo;
+    timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Central Asia Standard Time");
+    DateTime currentDateTime = TimeZoneInfo.ConvertTime(DateTime.Now, timeZoneInfo);
+
+    DateTime todate = Convert.ToDateTime(currentDateTime);
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>MissMatchReport</title>
+</head>
+<body style=" background-color:#fafafa;">
+
+
+
+    @*<input id="print" tabindex="1" type="button" value="Print" onclick="ClosePrint()" />*@
+    <div style="width: 100%; margin: 0px auto; border: 1px solid #d3d3d3; border-radius: 5px; box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); background: none repeat scroll 0 0 white;">
+        <table id="mainTable" border="0" width="100%">
+            <thead>
+                <tr>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="10%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+
+                </tr>
+                <tr style="background-color: white">
+                    <td colspan="12">
+                        <h3 style="color: black;padding:4px">@compNm</h3>
+                        @*<p style="color:white;padding-left:4px">@Address<span>  @contactno</span></p>*@
+                    </td>
+
+                    <td colspan="6" style="color: black;padding:8px" align="right">
+                        Powered By<br />Alchemy Software
+                    </td>
+
+                </tr>
+
+                <tr>
+                    <td colspan="12" align="left" style="padding: 4px; font-weight: bold">MisMatch Report - Outdoor</td>
+                    <td align="right" colspan="6" style="padding:8px">Print:@currentDateTime.ToString("dd-MM-yy hh:mm tt")</td>
+                </tr>
+
+
+
+            </thead>
+            <tbody>
+                @{
+
+
+                    System.Data.SqlClient.SqlConnection conn = new System.Data.SqlClient.SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["AslLabApiContext"].ToString());
+                    string query = string.Format(
+                    "SELECT A.TRANSDT, A.PATIENTID, PATIENTNM, USERNM, B.INSTIME, SUM(ISNULL(TESTAMT,0)) TESTAMT, SUM(ISNULL(A.TOTAMT,0)) TOTAMT FROM( "+
+"SELECT COMPID, TRANSDT, PATIENTID, SUM(ISNULL(AMOUNT,0)) TESTAMT, 0 TOTAMT FROM HMS_OPD "+
+"WHERE  COMPID = '{0}' AND TRANSDT = '{1}' GROUP BY COMPID, TRANSDT, PATIENTID "+
+"UNION "+
+"SELECT COMPID, TRANSDT, PATIENTID, 0 TESTAMT, ISNULL(TOTAMT,0) TOTAMT FROM HMS_OPDMST "+
+"WHERE  COMPID = '{0}' AND TRANSDT = '{1}' "+
+") A LEFT OUTER JOIN HMS_OPDMST B ON A.COMPID = B.COMPID AND A.TRANSDT = B.TRANSDT AND A.PATIENTID = B.PATIENTID "+
+"LEFT OUTER JOIN ASLUSERCOES C ON B.COMPID = C.COMPID AND B.INSUSERID = C.USERID "+
+"GROUP BY A.TRANSDT, A.PATIENTID, PATIENTNM, B.INSTIME, USERNM HAVING SUM(ISNULL(TESTAMT,0)) <> SUM(ISNULL(A.TOTAMT,0)) "+
+"ORDER BY A.TRANSDT, A.PATIENTID" ,compid, todate);
+                    System.Data.SqlClient.SqlCommand cmd = new System.Data.SqlClient.SqlCommand(query, conn);
+                    conn.Open();
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable ds = new DataTable();
+                    da.Fill(ds);
+
+                    string patientname = "";
+                    decimal totalamount = 0, testamount = 0;
+
+                    string patientid = "", username = "", time = "";
+                
+
+                    var testname = (from n in db.HMS_TEST where n.COMPID == compid select n).ToList();
+
+
+                    string ffdt2 = todate.ToString("dd-MMM-yyyy");
+
+                    decimal subtotal = 0, subtestamount = 0;
+
+                    <tr style="outline: thin solid">
+                        <td colspan="18">@ffdt2</td>
+                    </tr>
+                    <tr style="background-color: white; outline: thin solid">
+                        <td colspan="3" style="color: black; padding: 4px; font-size: small" align="center">Patient ID</td>
+                        <td colspan="4" style="color:black; padding: 4px; font-size: small" align="center">Patient Name</td>
+                        <td colspan="4" style="color: black; padding: 4px; font-size: small" align="center">User Name</td>
+                        <td colspan="2" style="color: black; padding: 4px; font-size: small" align="center">Time</td>
+                        <td colspan="2" style="color: black; padding: 4px; font-size: small" align="center">Test Amount</td>
+                        <td colspan="3" style="color: black; padding: 4px; font-size: small" align="center">Total Amount</td>
+
+                        
+
+
+
+
+                    </tr>
+
+
+                    foreach (DataRow row in ds.Rows)
+                    {
+                        patientid = row["PATIENTID"].ToString();
+                        patientname = row["PATIENTNM"].ToString();
+                        username = row["USERNM"].ToString();
+                        time=row["INSTIME"].ToString();
+                        var testamt = row["TESTAMT"].ToString();
+                        if (row["TESTAMT"].ToString()!="")
+                        {
+                            testamount = Convert.ToDecimal(row["TESTAMT"]);
+                        }
+                        else
+                        {
+                            testamount = 0;
+                        }
+                      
+                        var s = row["TOTAMT"].ToString();
+                        if (row["TOTAMT"].ToString() != "")
+                        {
+                            totalamount = Convert.ToDecimal(row["TOTAMT"]);
+                        }
+                        else
+                        {
+                            totalamount = 0;
+                        }
+
+                       
+                       
+
+
+                    
+
+
+
+
+
+                        <tr style="outline:thin solid">
+                           
+                           
+                                <td align="left" colspan="3" style="font-size: small">
+                                    @patientid
+                                </td>
+                                <td align="left" colspan="4" style="font-size: small">
+                                    @patientname
+                                </td>
+                                <td colspan="4" align="left" style="font-size: small">
+                                    @username
+                                </td>
+                          
+                           
+                                    <td colspan="2" style="font-size: small" align="left">
+                                        @time
+                                    </td>
+                                   
+                             
+
+                            <td colspan="2" style="font-size: small" align="right">
+                                @testamount
+                            </td>
+                          
+                                <td colspan="3" style="font-size: small" align="right">
+                                    @totalamount
+                                </td>
+
+
+
+
+
+                           
+                     
+                           
+
+
+                        </tr>
+                           
+
+                          
+
+
+
+                    }
+
+
+                    <tr>
+                        <td colspan="13" style="font-weight:bold; padding: 4px; font-size: small" align="right">SubTotal :</td>
+                        <td colspan="2" style="font-weight: bold; font-size: small" align="right">@subtestamount</td>
+                        <td colspan="3" style="font-weight: bold;  font-size: small" align="right">@subtotal</td>
+                        
+                    </tr>
+               
+                    conn.Close();
+                }
+
+              
+
+           
+
+
+              
+
+             
+            </tbody>
+        </table>
+
+    </div>
+
+
+
+
+
+
+
+</body>
+
+</html>

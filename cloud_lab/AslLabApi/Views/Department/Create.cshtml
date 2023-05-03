@@ -1,0 +1,232 @@
+﻿@using System.Web.UI.WebControls
+@using AslLabApi.Models
+@model AslLabApi.Models.DTO.DepartmentDTO
+
+@{
+    ViewBag.Title = "Create";
+
+    if (HttpContext.Current.Session["LoggedUserType"] == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedUserTp = HttpContext.Current.Session["LoggedUserType"].ToString();
+    var LoggedUserStatus = HttpContext.Current.Session["LoggedUserStatus"].ToString();
+    var LoggedCompanyStatus = HttpContext.Current.Session["LoggedCompanyStatus"].ToString();
+    var LoggedUserId = Convert.ToInt64(System.Web.HttpContext.Current.Session["loggedUserID"]);
+
+    if ((LoggedUserTp == "CompanyAdmin" || LoggedUserTp == "AslSuperadmin") && LoggedUserStatus == "A" && LoggedCompanyStatus == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+
+    var LoggedCompId = HttpContext.Current.Session["loggedCompID"].ToString();
+
+    Int64 compid = Convert.ToInt64(LoggedCompId);
+
+
+
+
+}
+
+
+
+
+
+@* new added..................................... *@
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+<script src="~/Content/AdminPanel/js/jquery-2.1.3.js"></script>
+@*<link href="~/Content/AdminPanel/css/bootstrap.min.css" rel="stylesheet" />*@
+<link href="~/Content/AdminPanel/css/font-awesome.min.css" rel="stylesheet" />
+
+
+
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+
+
+    @Html.HiddenFor(model => model.COMPID, new { id = "txtCompid", @Value = LoggedCompId })
+    @Html.HiddenFor(model => model.DepartmentId, new { id = "txtCOSTCID" })
+
+
+
+    AslLabApiContext db = new AslLabApiContext();
+
+    <div id="contentHeaderBox">
+        <h1 style="padding-left:16px">Department Creation</h1>
+        @if (TempData["CategoryMessage"] != null)
+        {
+            <div class="text-center">
+                <h6 style="color: #BD7F1C">@TempData["CategoryMessage"] </h6>
+            </div>
+            <br />
+        }
+        <div class="btn-group pull-right" id="editOption">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" aria-expanded="false">
+                <i class="fa fa-cog"></i>
+            </button>
+            <ul class="dropdown-menu pull-right" style="" role="menu">
+
+                <li>
+                    <a href="@Url.Action("Create", "Department")"><i class="fa fa-plus"></i> Create</a>
+                </li>
+                <li>
+                    <a href="@Url.Action("Update", "Department")"><i class="fa fa-edit"></i> Update</a>
+                </li>
+                @*<li>
+                    <a href="@Url.Action("Delete", "JobInformation")"><i class="fa fa-times"></i> Delete</a>
+                </li>*@
+
+            </ul>
+        </div>
+    </div>
+    
+    
+    <div class="col-md-12">
+        <div class="form-group">
+            <div class="row">
+
+
+
+                <div class="col-md-2">
+                    @Html.Label("Department Name", htmlAttributes: new { @class = "control-label" })
+                </div>
+                <div class="col-md-3">
+                    @Html.TextBoxFor(model => model.DepartmentName, new { @class = "form-control", id = "deptName", @placeholder = "Department Name", autofocus = true })
+
+                </div>
+
+
+                <div class="col-md-2">
+                    @Html.Label("Remarks", htmlAttributes: new { @class = "control-label" })
+                </div>
+                <div class="col-md-3">
+                    @Html.TextBoxFor(model => model.Remarks,new { @class = "form-control", id = "levelGroup" })
+
+                </div>
+
+
+                <div class="col-md-2">
+
+
+
+                    <input id="SubmitId" type="submit" class="btn btn-info" value="Submit" />
+
+
+
+                </div>
+
+
+
+
+
+                <div class="col-md-3">
+                    @if (TempData["message"] != null)
+                    {
+
+                        <h6 style="color: #BD7F1C">@TempData["message"] </h6>
+
+                        <br />
+                    }
+                </div>
+
+
+            </div>
+
+           
+
+
+
+
+          
+        </div>
+        @{
+    var listofdata = (from n in db.HMS_DEPT where n.COMPID == compid select n).ToList();
+        }
+        @*<div class="panel-heading">Department Information</div>*@
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <tr>
+
+                    <th>
+                        Department Name
+                    </th>
+
+                    <th>
+                        Remarks
+                    </th>
+                   
+                </tr>
+
+                @foreach (var item in listofdata)
+                {
+                 
+                    <tr>
+
+                        <td>
+                            @Html.DisplayFor(modelItem => item.DEPTNM)
+                        </td>
+
+                        <td>
+                            @Html.DisplayFor(modelItem => item.REMARKS)
+                        </td>
+
+                     
+
+
+                    </tr>
+                }
+
+            </table>
+            @Html.TextBoxFor(model => model.INSLTUDE, new { id = "latlonPos", style = "display: none;" })
+            <input id="lat" type="hidden" />
+            <input id="lon" type="hidden" />
+            @Html.TextBoxFor(model => model.INSUSERID, new { id = "InsUserID", style = "display: none;", @Value = LoggedUserId })
+            
+
+        </div>
+    </div>
+
+    //Latitute & longitude
+<script src="http://maps.google.com/maps/api/js?sensor=false">
+</script>
+
+<script language="javascript" type="text/javascript">
+    $(function () {
+        navigator.geolocation.getCurrentPosition(showPosition);
+        //navigator.geolocation.getCurrentPosition(showPosition, positionError);
+
+        function showPosition(position) {
+            var coordinates = position.coords;
+            $("#lat").val(coordinates.latitude);
+            $("#lon").val(coordinates.longitude);
+
+            $("#latlonPos").val(
+                $("#lat").val() + "," + $("#lon").val()
+            );
+            $("#latlonRms").val(
+                $("#lat").val() + "," + $("#lon").val()
+            );
+        }
+    });
+</script>
+
+
+
+
+}
+
+
+ 
+
+

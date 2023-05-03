@@ -1,0 +1,189 @@
+﻿@using System.Web.UI.WebControls
+@using AslLabApi.Models
+@model AslLabApi.Models.DTO.OpdReceiveDTO
+
+
+
+@{
+    ViewBag.Title = "Details";
+
+    if (HttpContext.Current.Session["LoggedUserType"] == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedUserTp = HttpContext.Current.Session["LoggedUserType"].ToString();
+    var LoggedUserStatus = HttpContext.Current.Session["LoggedUserStatus"].ToString();
+    var LoggedCompanyStatus = HttpContext.Current.Session["LoggedCompanyStatus"].ToString();
+
+    if ((LoggedUserTp == "CompanyAdmin" || LoggedUserTp == "UserAdmin" || LoggedUserTp == "User") && LoggedUserStatus == "A" && LoggedCompanyStatus == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+
+    var LoggedCompId = HttpContext.Current.Session["loggedCompID"].ToString();
+
+    AslLabApiContext db = new AslLabApiContext();
+    Int64 compid = Convert.ToInt64(System.Web.HttpContext.Current.Session["loggedCompID"]);
+    //permission check
+
+    Int64 loggedUserID = Convert.ToInt64(HttpContext.Current.Session["loggedUserID"].ToString());
+
+
+    var permission_Check = from m in db.AslRoleDbSet
+                           where m.COMPID == compid && m.USERID == loggedUserID
+                               && m.CONTROLLERNAME == "UserWiseCollection" && m.ACTIONNAME == "UserWiseCollectionDetails"
+                           select m;
+    var Status = "";
+    foreach (var check in permission_Check)
+    {
+        Status = check.STATUS;
+    }
+
+    if (Status == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+    
+    TimeZoneInfo timeZoneInfo;
+    timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Central Asia Standard Time");
+    DateTime currentDateTime = TimeZoneInfo.ConvertTime(DateTime.Now, timeZoneInfo);
+    
+}
+
+
+<link href="~/Content/bootstrap_datepicker_css/datepicker.css" rel="stylesheet" />
+<link href="~/Content/bootstrap_datepicker_css/datepicker3.css" rel="stylesheet" />
+<script src="~/Scripts/bootstrap-datepicker.js"></script>
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    @Html.HiddenFor(model => model.COMPID, new { id = "txtCompId", @Value = LoggedCompId })
+    @*@Html.HiddenFor(model => model.AGlMaster.DEBITCD, new { id = "txtHeadId", @Value = TempData["HeadCD"] })*@
+
+    <div id="contentHeaderBox">
+        <h1 style="padding-left:16px">User Wise Collection - Details</h1>
+    </div>
+    <br />
+    <div class="col-md-12">
+        <div class="form-group">
+            <div class="row">
+
+
+
+                <div class="col-md-3">
+                    <span>@Html.Label("name", "From", htmlAttributes: new { @class = "control-label" })</span>
+                    @Html.TextBoxFor(model => model.FromDate, new { @class = "form-control input-sm", id = "idFromdate", @Value = currentDateTime.ToString("dd-MMM-yyyy"), autofocus = true })
+
+                </div>
+
+                <div class="col-md-3">
+                    <span>@Html.Label("name", "To", htmlAttributes: new { @class = "control-label" })</span>
+                    @Html.TextBoxFor(model => model.ToDate, new { @class = "form-control input-sm", id = "idTodate", @Value = currentDateTime.ToString("dd-MMM-yyyy")})
+
+                </div>
+
+
+                <div class="col-md-2">
+                    <span><br /></span>
+                    <input id="SubmitId" type="submit" class="btn btn-info" value="Print" name="command" formtarget="_blank" />
+                </div>
+
+            </div>
+        </div>
+
+
+
+
+    </div>
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            //$('#idFromdate').datepicker({
+            //    format: "dd-M-yyyy",
+            //    autoclose: true
+            //    //format: "yyyy-M-dd"
+            //}).on('hide', function () {
+            //    document.getElementById("idTodate").focus();
+            //});
+            //$('#idTodate').datepicker({
+            //    format: "dd-M-yyyy",
+            //    autoclose: true
+            //    //format: "yyyy-M-dd"
+            //}).on('hide', function () {
+            //    document.getElementById("SubmitId").focus();
+            //});
+            $('#idFromdate').datepicker({
+                format: "dd-M-yyyy",
+                autoclose: true,
+                todayHighlight: true,
+                showOnFocus: true,
+            }).on('show', function (e) {
+                if (e.date) {
+                    $(this).data('stickyDate', e.date);
+                }
+                else {
+                    $(this).data('stickyDate', null);
+
+                }
+            }).on('hide', function (e) {
+                var stickyDate = $(this).data('stickyDate');
+
+                if (!e.date && stickyDate) {
+                    $(this).datepicker('setDate', stickyDate);
+                    $(this).data('stickyDate', null);
+                }
+                document.getElementById("idTodate").focus();
+            });
+
+            $('#idTodate').datepicker({
+                format: "dd-M-yyyy",
+                autoclose: true,
+                todayHighlight: true,
+                showOnFocus: true,
+            }).on('show', function (e) {
+                if (e.date) {
+                    $(this).data('stickyDate', e.date);
+                }
+                else {
+                    $(this).data('stickyDate', null);
+
+                }
+            }).on('hide', function (e) {
+                var stickyDate = $(this).data('stickyDate');
+
+                if (!e.date && stickyDate) {
+                    $(this).datepicker('setDate', stickyDate);
+                    $(this).data('stickyDate', null);
+                }
+                document.getElementById("SubmitId").focus();
+            });
+        });
+    </script>
+
+
+
+
+
+}
+
+
+
+
+
+
+
+

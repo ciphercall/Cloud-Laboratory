@@ -1,0 +1,548 @@
+﻿@using AslLabApi.Models
+@model AslLabApi.Models.DTO.OpdReceiveDTO
+
+@{
+    ViewBag.Title = "Index";
+    if (HttpContext.Current.Session["LoggedUserType"] == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedUserTp = HttpContext.Current.Session["LoggedUserType"].ToString();
+    var LoggedUserStatus = HttpContext.Current.Session["LoggedUserStatus"].ToString();
+    var LoggedCompanyStatus = HttpContext.Current.Session["LoggedCompanyStatus"].ToString();
+
+    if ((LoggedUserTp == "CompanyAdmin" || LoggedUserTp == "UserAdmin" || LoggedUserTp == "User") && LoggedUserStatus == "A" && LoggedCompanyStatus == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+    var LoggedCompId = HttpContext.Current.Session["loggedCompID"].ToString();
+    Int64 compid = Convert.ToInt64(LoggedCompId);
+
+    AslLabApiContext db = new AslLabApiContext();
+
+    List<SelectListItem> type = new List<SelectListItem>();
+
+
+    type.Add(new SelectListItem { Text = "Test", Value = "Test" });
+    type.Add(new SelectListItem { Text = "Group", Value = "Group" });
+
+    List<SelectListItem> gender = new List<SelectListItem>();
+
+
+    gender.Add(new SelectListItem { Text = "Male", Value = "Male" });
+    gender.Add(new SelectListItem { Text = "Female", Value = "Female" });
+
+    TimeZoneInfo timeZoneInfo;
+    timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Central Asia Standard Time");
+    DateTime currentDateTime = TimeZoneInfo.ConvertTime(DateTime.Now, timeZoneInfo);
+
+}
+<style>
+    .selectClass {
+        font-size: 11px;
+        /*font-family: 'Impact', cursive;*/
+    }
+</style>
+
+
+<link href="~/Content/newcss/jquery-ui.css" rel="stylesheet" />
+
+
+<link href="~/Content/newcss/ng-grid.css" rel="stylesheet" />
+<link rel="stylesheet" href="~/Content/style.css" />
+
+@*<link href="~/Content/bootstrap_datepicker_css/datepicker.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap_datepicker_css/datepicker3.css" rel="stylesheet" />
+
+    <script src="~/Scripts/bootstrap-datepicker.js"></script>*@
+
+<script src="~/Content/jquery1.8.0/jquery.min.js"></script>
+
+
+<script src="~/Content/jquery1.9.1/jquery-1.9.1.js"></script>
+
+
+<script src="~/Content/jquery1.10.3/jquery-ui.js"></script>
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <div id="contentHeaderBox">
+        <h1 style="padding-left:16px">Due Collection - Update</h1>
+
+        <div class="btn-group pull-right" id="editOption">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" aria-expanded="false">
+                <i class="fa fa-cog"></i>
+            </button>
+            <ul class="dropdown-menu pull-right" style="" role="menu">
+
+                <li>
+                    <a href="@Url.Action("Index", "OpdReceive")"><i class="fa fa-plus"></i> Create</a>
+                </li>
+                <li>
+                    <a href="@Url.Action("Update", "OpdReceive")"><i class="fa fa-edit"></i> Update</a>
+                </li>
+                @*<li>
+                        <a href="@Url.Action("Delete", "JobInformation")"><i class="fa fa-times"></i> Delete</a>
+                    </li>*@
+
+            </ul>
+        </div>
+
+    </div>
+    @*<br />*@
+
+    <div class="col-md-12">
+        <div class="form-group">
+            @Html.HiddenFor(model => model.COMPID, new { id = "txtcompid", style = "width:3em;", @Value = compid })
+
+            @Html.TextBoxFor(model => model.INSLTUDE, new { id = "latlonPos", style = "display: none;" })
+            <input id="lat" type="hidden" />
+            <input id="lon" type="hidden" />
+            @*@if (LoggedUserTp == "CompanyAdmin")
+                {
+                    @Html.HiddenFor(model => model.PatientID, new { id = "User", style = "width:6em;", @Value = "CompanyAdmin" })
+                }
+                else
+                {
+                    @Html.HiddenFor(model => model.PatientID, new { id = "User", style = "width:6em;", @Value = "User" })
+                }*@
+
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="panel panel-primary">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <table class="table">
+                                    <tr>
+                                        <td class=" col-md-2">
+                                            <label>Voucher No</label>
+                                        </td>
+                                        <td class="col-md-2"><label>Date</label></td>
+                                        <td class="col-md-2"><label>Month</label></td>
+
+
+
+                                    </tr>
+                                    <tr>
+                                        <td class="col-md-2">@Html.TextBoxFor(model => model.TransNo, new { id = "TransNo", @class = "form-control input-sm" })</td>
+                                        <td class="col-md-2">
+                                            @Html.TextBoxFor(model => model.TransactionDate, new
+                                                         {
+                                                             id = "TransactionDate",
+                                                             @class = "form-control input-sm"@*, @Value = currentDateTime.ToString("dd-MMM-yyyy")*@ ,
+                                                             tabindex = "-1"
+                                                         })
+                                        </td>
+
+                                        <td class="col-md-2">@Html.TextBoxFor(model => model.TransMonthYear, new { id = "TransMonthYear", @class = "form-control input-sm", tabindex = "-1" })</td>
+
+                                    </tr>
+                                </table>
+
+                                <table class="table">
+                                    <tr>
+                                        <td class="col-md-2"><label>PatientID</label></td>
+                                        <td class="col-md-4"><label>Patient Name</label></td>
+
+
+
+                                    </tr>
+                                    <tr>
+
+                                        <td class="col-md-2">
+                                            @Html.TextBoxFor(model => model.PatientID, new
+                                        {
+                                            id = "PatientID",
+                                            @class = "form-control input-sm",
+                                            tabindex = "-1"
+                                        })
+                                        </td>
+
+                                        <td class="col-md-4">@Html.TextBoxFor(model => model.PatientName, new { id = "PatientName", @class = "form-control input-sm", tabindex = "-1" })</td>
+
+                                    </tr>
+                                </table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="col-md-6">
+                    <div class="panel panel-primary">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+
+
+
+                                <table class="table">
+
+
+                                    <tr>
+                                        <td class="col-md-2"><label>Due Amount</label></td>
+                                        <td class="col-md-2">@Html.TextBoxFor(model => model.PatientDueAmount, new { id = "PatientDueAmount", @class = "form-control input-sm", tabindex = "-1" })</td>
+                                        <td class="col-md-2"></td>
+
+
+                                    </tr>
+
+
+                                    <tr>
+                                        <td class="col-md-2"><label>Discount(Lab)</label></td>
+                                        <td class="col-md-2">
+                                            @Html.TextBoxFor(model => model.DiscountHos, new
+                                        {
+                                            id = "DiscountHos",
+                                            @class = "form-control input-sm"@*, @Value = currentDateTime.ToString("dd-MMM-yyyy")*@
+                                        })
+                                        </td>
+                                        <td class="col-md-2"></td>
+
+
+                                    </tr>
+                                    <tr>
+
+                                        <td class="col-md-2"><label>Net Amount</label>
+
+
+                                        <td class="col-md-2">@Html.TextBoxFor(model => model.NetAmount, new { id = "NetAmount", @class = "form-control input-sm", tabindex = "-1" })</td>
+                                        <td class="col-md-2"></td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="col-md-2"><label>Receive Amount</label></td>
+                                        <td class="col-md-2">@Html.TextBoxFor(model => model.ReceiveAmount, new { id = "ReceiveAmount", @class = "form-control input-sm" })</td>
+
+
+                                        <td class="col-md-2"></td>
+
+
+                                    </tr>
+                                    <tr>
+                                        <td class="col-md-2"><label>Due</label></td>
+                                        <td class="col-md-2">
+                                            @Html.TextBoxFor(model => model.DueAmount, new
+                                        {
+                                            id = "DueAmount",
+                                            @class = "form-control input-sm",
+                                            tabindex = "-1"
+                                        })
+                                        </td>
+
+
+                                        <td class="col-md-2"></td>
+                                    </tr>
+                                </table>
+                                <table class="table" width="100%">
+                                    <tr>
+                                        <td width="10%"><label>Remarks</label></td>
+                                     
+                                        <td width="90%">@Html.TextBoxFor(model => model.Remarks, new { id = "Remarks", @class = "form-control input-sm" })</td>
+
+
+                                    </tr>
+                                    <tr>
+                                        <td width="10%"><input type="submit" value="Update" class="btn btn-primary" id="submitid" name="command" /></td>
+                                        <td width="10%"><input type="submit" value="Update & Print" id="updatePrint" class="btn btn-primary" name="command" formtarget="_blank" /></td>
+
+
+                                    </tr>
+                                </table>
+
+
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+
+
+            </div>
+
+
+
+
+
+        </div>
+    </div>
+
+
+    //Latitute & longitude
+    <script src="http://maps.google.com/maps/api/js?sensor=false">
+    </script>
+
+    <script language="javascript" type="text/javascript">
+        $(function () {
+            navigator.geolocation.getCurrentPosition(showPosition);
+            //navigator.geolocation.getCurrentPosition(showPosition, positionError);
+
+            function showPosition(position) {
+                var coordinates = position.coords;
+                $("#lat").val(coordinates.latitude);
+                $("#lon").val(coordinates.longitude);
+
+                $("#latlonPos").val(
+                    $("#lat").val() + "," + $("#lon").val()
+                );
+                $("#latlonRms").val(
+                    $("#lat").val() + "," + $("#lon").val()
+                );
+            }
+        });
+    </script>
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#updatePrint').click(function () {
+                setTimeout(function () { window.location.reload(); }, 100);
+            });
+
+            document.getElementById('TransMonthYear').readOnly = true;
+            //document.getElementById('TransNo').readOnly = true;
+            document.getElementById('TransactionDate').readOnly = true;
+            document.getElementById('PatientID').readOnly = true;
+            document.getElementById('PatientName').readOnly = true;
+            document.getElementById('PatientDueAmount').readOnly = true;
+
+            document.getElementById('NetAmount').readOnly = true;
+            document.getElementById('DueAmount').readOnly = true;
+
+
+
+            //$("#TransactionDate").datepicker({ dateFormat: 'dd-M-yy', changeYear: true });
+
+
+            //$('#TransactionDate').change(function () {
+
+            //    var changedtxt = $('#TransactionDate').val();
+
+
+            //    var TransMonthYear = document.getElementById('TransMonthYear');
+            //    var TransNo = document.getElementById('TransNo');
+
+            //    $("#TransMonthYear").val("");
+
+            //    $("#TransNo").val("");
+
+            //    $.getJSON(
+            //        "/OpdReceive/DateChanged_getMonth", { "Changedtxt": changedtxt },
+            //        function (myData) {
+            //            TransMonthYear.value = myData.month;
+            //            TransNo.value = myData.TransNo;
+
+
+
+
+            //            document.getElementById("PatientID").focus();
+            //        });
+
+            //});
+
+            $("#DiscountHos").change(function () {
+
+
+                var a = parseFloat($("#PatientDueAmount").val());
+                var b = parseFloat($("#DiscountHos").val());
+
+                $("#NetAmount").val(a - b);
+                $("#ReceiveAmount").val(a - b);
+                //var c = parseInt($("#TotalAmount").val());
+                //var d = parseInt($("#Discountnet").val());
+
+                //$("#NetAmount").val(c - d);
+                //$("#ReceiveAmount").val(c - d);
+
+            });
+            $("#ReceiveAmount").change(function () {
+                var a = parseFloat($("#NetAmount").val());
+                var b = parseFloat($("#ReceiveAmount").val());
+                $("#DueAmount").val(a - b);
+            });
+
+            $('#TransNo').autocomplete({
+                source: function (request, response) {
+                    var changedText2 = $("#txtcompid").val();
+                    //var changedText3 = $("#TransactionDate").val();
+                    $.ajax({
+
+                        url: '/api/TransNo',
+                        type: 'GET',
+                        cache: false,
+                        data: { query: request.term, query2: changedText2 },
+                        dataType: 'json',
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return {
+                                    label: item.TransNo,
+                                    value: item.TransNo,
+                                    patientid: item.PatientID,
+                                  
+                                    date: item.TransactionDate,
+                                    month: item.TransMonthYear,
+
+                                    patientdue: item.PatientDueAmount,
+                                    discountlab: item.DiscountHos,
+                                    netamount: item.NetAmount,
+                                    receiveamount: item.ReceiveAmount,
+                                    dueamount: item.DueAmount,
+                                    remarks: item.Remarks
+
+
+                                };
+                            }));
+                        }
+                    });
+                },
+                select: function (event, ui) {
+                 
+                    $('#TransNo').val(ui.item.value);
+                    $('#PatientID').val(ui.item.patientid);
+                   
+                    $('#TransactionDate').val(ui.item.date);
+                    $('#TransMonthYear').val(ui.item.month);
+
+                    $('#PatientDueAmount').val(ui.item.patientdue);
+                    $('#DiscountHos').val(ui.item.discountlab);
+
+                    $('#NetAmount').val(ui.item.netamount);
+                    $('#ReceiveAmount').val(ui.item.receiveamount);
+                    $('#DueAmount').val(ui.item.dueamount);
+                    $('#Remarks').val(ui.item.remarks);
+
+                    var changedText2 = $("#txtcompid").val();
+                    var changedText = $("#TransNo").val();
+                    var pname = document.getElementById('PatientName');
+                    $.getJSON(
+                  '/apiOpdReceive/PatientName', { "ChangedText": changedText, "ChangedText2": changedText2 },
+                  function (result) {
+                      pname.value = result;
+                     
+
+
+                  });
+
+
+                    return false;
+                }
+                //change: $('#PatientID').keyup(_.debounce(txtOneChanged2, 1000))
+            });
+
+
+
+
+
+
+
+
+
+
+        });
+
+
+
+
+        function txtOneChanged2() {
+
+
+            var changedText = $("#PatientID").val();
+            var changedText2 = $("#txtcompid").val();
+            var changedText3 = $("#TransactionDate").val();
+
+            var Name = document.getElementById('PatientName');
+            var txtBox = document.getElementById('PatientID');
+            var txtBox2 = document.getElementById('PatientDueAmount');
+
+
+
+
+
+            if (changedText != "") {
+
+                $.getJSON(
+                    '/api/DynamicPatientName', { "ChangedText": changedText, "ChangedText2": changedText2, "ChangedText3": changedText3 },
+                    function (result) {
+                        Name.value = result[0].PatientName;
+                        txtBox.value = result[0].PatientID;
+                        txtBox2.value = result[0].DueAmount;
+
+
+                    });
+
+
+            }
+
+
+
+        }
+
+
+
+
+
+
+
+    </script>
+
+
+}
+
+<link href="~/Content/themes/base/jquery-ui.css" rel="stylesheet" />
+
+<script src="~/Scripts/jquery-ui-1.10.4.min.js"></script>
+
+
+
+
+
+<script src="~/Scripts/angularjs/1.0.5/angular.js"></script>
+
+@*<script src="~/Scripts/Opd/Opd.js"></script>*@
+
+<script src="~/Scripts/angularjs/ui-bootstrap-tpls-0.4.0.js"></script>
+
+
+
+
+<script src="~/Scripts/Underscore.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

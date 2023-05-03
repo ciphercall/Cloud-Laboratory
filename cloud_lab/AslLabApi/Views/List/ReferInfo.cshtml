@@ -1,0 +1,204 @@
+﻿@using AslLabApi.Models
+@using AslLabApi.Models.DTO
+@using AslLabApi.Models.HMS
+@model AslLabApi.Models.DTO.ReferDTO
+
+@{
+    ViewBag.Title = "ReferInformation";
+    Layout = null;
+
+    if (HttpContext.Current.Session["LoggedUserType"] == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedUserTp = HttpContext.Current.Session["LoggedUserType"].ToString();
+    var LoggedUserStatus = HttpContext.Current.Session["LoggedUserStatus"].ToString();
+    var LoggedCompanyStatus = HttpContext.Current.Session["LoggedCompanyStatus"].ToString();
+
+    if ((LoggedUserTp == "CompanyAdmin" || LoggedUserTp == "UserAdmin" || LoggedUserTp == "User") && LoggedUserStatus == "A" && LoggedCompanyStatus == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+
+    var LoggedCompId = HttpContext.Current.Session["loggedCompID"].ToString();
+    Int64 compid = Convert.ToInt64(LoggedCompId);
+
+    string companyName = "", address = "", contactNo = "";
+
+    AslLabApiContext db = new AslLabApiContext();
+
+    var SelectCompanyName = from n in db.AslCompanyDbSet
+
+                            where n.COMPID == compid
+                            select new { n.COMPNM, n.ADDRESS, n.CONTACTNO };
+
+    foreach (var n in SelectCompanyName)
+    {
+        companyName = n.COMPNM;
+        address = n.ADDRESS;
+        contactNo = n.CONTACTNO;
+    }
+    var compNm = companyName;
+    var Address = address;
+    var contactno = contactNo;
+
+    List<Refer> refer = new List<Refer>();
+    refer = db.HMS_REFER.Where(e => e.COMPID == compid).ToList();
+
+
+    TimeZoneInfo timeZoneInfo;
+    timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Central Asia Standard Time");
+    DateTime currentDateTime = TimeZoneInfo.ConvertTime(DateTime.Now, timeZoneInfo);
+
+
+    //permission check
+
+    Int64 loggedUserID = Convert.ToInt64(HttpContext.Current.Session["loggedUserID"].ToString());
+
+
+    var permission_Check = from m in db.AslRoleDbSet
+                           where m.COMPID == compid && m.USERID == loggedUserID
+                               && m.CONTROLLERNAME == "List" && m.ACTIONNAME == "ReferInfo"
+                           select m;
+    var Status = "";
+    foreach (var check in permission_Check)
+    {
+        Status = check.STATUS;
+    }
+
+    if (Status == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+
+
+
+}
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+
+    <link href="~/Content/reportcss/style.css" rel="stylesheet" />
+    @*<script type="text/javascript">
+            function ClosePrint() {
+                var print = document.getElementById("print");
+                print.style.visibility = "hidden";
+                //            print.display = false;
+
+                window.print();
+            }
+        </script>*@
+
+</head>
+
+<body style=" background-color:#fafafa;">
+
+
+
+    @*<input id="print" tabindex="1" type="button" value="Print" onclick="ClosePrint()" />*@
+    <div style="width: 960px; margin: 0px auto; border: 1px solid #d3d3d3; border-radius: 5px; box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); background: none repeat scroll 0 0 white;">
+        <table id="mainTable" border="0" width="100%">
+            <thead>
+                <tr>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="10%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+
+                </tr>
+                <tr style="background-color: #00689b">
+                    <td colspan="12">
+                        <h3 style="color: white;padding:4px">@compNm</h3>
+                        @*<p style="color:white;padding-left:4px">@Address<span>  @contactno</span></p>*@
+                    </td>
+
+                    <td colspan="6" style="color: white;padding:8px" align="right">
+                        Powered By<br />Alchemy Software
+                    </td>
+
+                </tr>
+
+                <tr>
+                    <td colspan="12" align="left" style="padding: 4px; font-weight: bold">Refer Information</td>
+                    <td align="right" colspan="6" style="padding:8px">Print:@currentDateTime.ToString("dd-MM-yy hh:mm tt")</td>
+                </tr>
+                @*<tr style="outline: thin solid">
+                        <td colspan="5" style="padding:4px">User Name: <span style="font-weight: bold">@userNm</span></td>
+
+                        <td colspan="1" align="right">From:</td>
+                        <td colspan="1" style="font-weight: bold">@ViewBag.FromDate</td>
+                        <td colspan="1" align="right">To:</td>
+                        <td colspan="1" style="font-weight: bold">@ViewBag.ToDate</td>
+
+                    </tr>*@
+
+                <tr style="background-color: #00689b; outline: thin solid">
+                    <td colspan="3" style="color: white; padding: 4px" align="center">Refer Name</td>
+
+                    <td colspan="3" style="color: white; padding: 4px" align="center">Title</td>
+                    <td colspan="3" style="color: white; padding: 4px" align="center">Address</td>
+
+                    <td colspan="3" style="color: white; padding: 4px" align="center">Mobile No(1)</td>
+                    <td colspan="3" style="color: white; padding: 4px" align="center">Mobile No(2)</td>
+
+                    <td colspan="3" style="color: white; padding: 4px" align="center">Email</td>
+
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in refer)
+                {
+                    <tr style="outline:thin solid">
+                        <td colspan="3" style="padding: 4px;font-size:small" align="center">@Html.DisplayFor(modelItem => item.REFERNM)</td>
+
+                        <td colspan="3" style="padding: 4px" align="center">@Html.DisplayFor(modelItem => item.TITLE)</td>
+                        <td colspan="3" style="padding: 4px;font-size:small" align="center">@Html.DisplayFor(modelItem => item.ADDRESS)</td>
+
+                        <td colspan="3" style="padding: 4px" align="center">@Html.DisplayFor(modelItem => item.MOBNO1)</td>
+                        <td colspan="3" style="padding: 4px;font-size:small" align="center">@Html.DisplayFor(modelItem => item.MOBNO2)</td>
+
+                        <td colspan="3" style="padding: 4px" align="center">@Html.DisplayFor(modelItem => item.EMAILID)</td>
+                    </tr>
+
+                }
+
+            </tbody>
+        </table>
+
+    </div>
+
+
+
+
+
+
+
+</body>
+
+</html>

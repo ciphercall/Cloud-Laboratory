@@ -1,0 +1,302 @@
+﻿@{
+    ViewBag.Title = "Today";
+    //var userCookie = Request.Cookies["user"];
+    //if (userCookie == null)
+    //{
+    //    Response.Redirect(Url.Action("Index", "Login"));
+    //}
+
+    if (System.Web.HttpContext.Current.Session["loggedCompID"] == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+}
+<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+
+<script type="text/javascript">
+    google.load("visualization", "1", { packages: ["corechart"] });
+</script>
+
+
+<script type="text/javascript">
+    $(function () {
+        $.ajax({
+            url: '@Url.Action("Topcategories", "DashBoard")',
+            dataType: 'json',
+            data: {
+                d: '0',
+            },
+            success: function (chartsdata) {
+
+               
+
+                var data = new google.visualization.DataTable();
+
+                data.addColumn('string', 'Time');
+                data.addColumn('number', 'Bill Amount');
+
+                for (var i = 0; i < chartsdata.length; i++) {
+                    data.addRow([chartsdata[i].PlanName, chartsdata[i].PaymentAmount]);
+                }
+                // Instantiate and draw our chart, passing in some options
+                var chart = new google.visualization.PieChart(document.getElementById('Topcategories'));
+
+                chart.draw(data,
+                  {
+                      title: "Top Categories",
+                      position: "top",
+                      fontsize: "14px",
+                      chartArea: { width: '100%' },
+                      is3D: true,
+                  });
+            },
+            error: function () {
+                alert("Error loading data! Please try again.");
+            }
+        });
+    })
+
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        $.ajax({
+            url: '@Url.Action("TopItemsByQty", "DashBoard")',
+            dataType: 'json',
+            data: {
+                d: '0',
+            },
+            success: function (chartsdata) {
+
+                // Callback that creates and populates a data table,
+                // instantiates the pie chart, passes in the data and
+                // draws it.
+
+                var data = new google.visualization.DataTable();
+
+                data.addColumn('string', 'PlanName');
+                data.addColumn('number', 'Qty Amount');
+
+                for (var i = 0; i < chartsdata.length; i++) {
+                    data.addRow([chartsdata[i].PlanName, chartsdata[i].PaymentAmount]);
+                }
+                // Instantiate and draw our chart, passing in some options
+                var chart = new google.visualization.ColumnChart(document.getElementById('TopItemsByQty'));
+
+                chart.draw(data,
+                  {
+                      title: "Top Tests By Qty",
+                      hAxis: {
+                          title: 'Time of Day',
+                          format: 'h:mm a',
+                          gridlines: { count: 10 }
+                      },
+                      vAxis: {
+                          title: ''
+                      },
+                      //position: "top",
+                      //fontsize: "14px",
+                      //chartArea: { width: '100%' },
+                      legend: { position: 'right' }
+                  });
+            },
+            error: function () {
+                alert("Error loading data! Please try again.");
+            }
+        });
+    })
+
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        $.ajax({
+            url: '@Url.Action("TopItemsByValue", "DashBoard")',
+            dataType: 'json',
+            data: {
+                d: '0',
+            },
+            success: function (chartsdata) {
+
+                // Callback that creates and populates a data table,
+                // instantiates the pie chart, passes in the data and
+                // draws it.
+
+                var data = new google.visualization.DataTable();
+
+                data.addColumn('string', 'PlanName');
+                data.addColumn('number', 'Test Amount');
+
+                for (var i = 0; i < chartsdata.length; i++) {
+                    data.addRow([chartsdata[i].PlanName, chartsdata[i].PaymentAmount]);
+                }
+                // Instantiate and draw our chart, passing in some options
+                var chart = new google.visualization.PieChart(document.getElementById('TopItemsByValue'));
+
+                chart.draw(data,
+                  {
+                      title: "Top Tests By Value",
+                      position: "top",
+                      fontsize: "14px",
+                      chartArea: { width: '100%' },
+                      pieHole: 0.4,
+                  });
+            },
+            error: function () {
+                alert("Error loading data! Please try again.");
+            }
+        });
+    })
+
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        $.ajax({
+            url: '@Url.Action("CollectionData", "DashBoard")',
+            dataType: 'json',
+            data: {
+                d: '6',
+            },
+            success: function (chartsdata) {
+
+                // Callback that creates and populates a data table,
+                // instantiates the pie chart, passes in the data and
+                // draws it.
+
+                var data = new google.visualization.DataTable();
+
+                data.addColumn('string', 'PlanName');
+                data.addColumn('number', 'Bill Amount');
+
+                for (var i = 0; i < chartsdata.length; i++) {
+                    data.addRow([chartsdata[i].PlanName, chartsdata[i].PaymentAmount]);
+                }
+                // Instantiate and draw our chart, passing in some options
+                var chart = new google.visualization.LineChart(document.getElementById('CollectionData'));
+
+                chart.draw(data,
+                  {
+                      title: "Collection Data",
+                      hAxis: {
+                          title: 'Date',
+
+                      },
+                      vAxis: {
+                          title: ''
+                      },
+                      //position: "top",
+                      //fontsize: "14px",
+                      //chartArea: { width: '100%' },
+
+                  });
+            },
+            error: function () {
+                alert("Error loading data! Please try again.");
+            }
+        });
+    })
+
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        $.ajax({
+            url: '@Url.Action("TimeWiseSellData", "DashBoard")',
+            dataType: 'json',
+            data: {
+                d: '0',
+            },
+            success: function (chartsdata) {
+
+                // Callback that creates and populates a data table,
+                // instantiates the pie chart, passes in the data and
+                // draws it.
+
+                var data = new google.visualization.DataTable();
+
+                data.addColumn('string', 'PlanName');
+                data.addColumn('number', 'Bill Amount');
+
+                for (var i = 0; i < chartsdata.length; i++) {
+                    data.addRow([chartsdata[i].PlanName, chartsdata[i].PaymentAmount]);
+                }
+                // Instantiate and draw our chart, passing in some options
+                var chart = new google.visualization.ColumnChart(document.getElementById('TimeWiseSellData'));
+
+                chart.draw(data,
+                  {
+                      title: "Time Wise Bill Data",
+                      hAxis: {
+                          title: 'Time of Day',
+                          format: 'h:mm a',
+                          gridlines: { count: 13 }
+                      },
+                      vAxis: {
+                          title: ''
+                      },
+                      //position: "top",
+                      //fontsize: "14px",
+                      //chartArea: { width: '100%' },
+                      legend: { position: 'right' }
+
+                  });
+            },
+            error: function () {
+                alert("Error loading data! Please try again.");
+            }
+        });
+    })
+
+</script>
+
+
+@using (Html.BeginForm())
+{
+    if (System.Web.HttpContext.Current.Session["LoggedUserType"] != null && System.Web.HttpContext.Current.Session["LoggedUserStatus"].ToString() == "A" && (System.Web.HttpContext.Current.Session["LoggedUserType"].ToString() == "CompanyAdmin" || System.Web.HttpContext.Current.Session["LoggedUserType"].ToString() == "UserAdmin" || System.Web.HttpContext.Current.Session["LoggedUserType"].ToString() == "User"))
+    {
+        <div id="contentHeaderBox" style="border-bottom: none;height: auto">
+            <ul class="nav nav-tabs" role="tablist">
+                <li>@Html.ActionLink("Today Patient", "Index", "DashBoard", new { style = "color: black" })</li>
+                <li class="active">@Html.ActionLink("Today", "Today", "DashBoard", new { style = "color: black;background-color: gainsboro;" })</li>
+                @if (System.Web.HttpContext.Current.Session["LoggedUserType"].ToString() != "User")
+                {
+                    <li>@Html.ActionLink("Yesterday", "LastOneDay", "DashBoard", new { style = "color: black" })</li>
+                    <li>@Html.ActionLink("Last 7 Day", "Last7Day", "DashBoard", new { style = "color: black" })</li>
+                    <li>@Html.ActionLink("Last 1 Month", "LastOneMonth", "DashBoard", new { style = "color: black" })</li>
+                    <li>@Html.ActionLink("Last 1 Year", "LastOneYear", "DashBoard", new { style = "color: black" })</li>
+                }
+
+            </ul>
+        </div>
+        <br>
+        <div class="col-md-12">
+            <div id="TimeWiseSellData" style="width: 600px; height: 350px;">
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div id="TopItemsByValue" style="width: 600px; height: 350px;">
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div id="TopItemsByQty" style="width: 600px; height: 350px;">
+            </div>
+        </div>
+
+
+        <div class="col-md-12">
+            <div id="Topcategories" style="width: 600px; height: 350px; align-content:center">
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div id="CollectionData" style="width: 600px; height: 350px;align-content:center">
+            </div>
+        </div>
+
+    }
+
+}
+
+

@@ -1,0 +1,327 @@
+﻿@using AslLabApi.Models
+@model AslLabApi.Models.DTO.TestVDTO
+
+
+@{
+    ViewBag.Title = "Index";
+
+    if (HttpContext.Current.Session["LoggedUserType"] == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedUserTp = HttpContext.Current.Session["LoggedUserType"].ToString();
+    var LoggedUserStatus = HttpContext.Current.Session["LoggedUserStatus"].ToString();
+    var LoggedCompanyStatus = HttpContext.Current.Session["LoggedCompanyStatus"].ToString();
+    var LoggedUserId = Convert.ToInt64(System.Web.HttpContext.Current.Session["loggedUserID"]);
+    
+
+    if ((LoggedUserTp == "CompanyAdmin" || LoggedUserTp == "AslSuperadmin") && LoggedUserStatus == "A" && LoggedCompanyStatus == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+    var LoggedCompId = HttpContext.Current.Session["loggedCompID"].ToString();
+    Int64 compid = Convert.ToInt64(LoggedCompId);
+
+    AslLabApiContext db = new AslLabApiContext();
+
+    List<SelectListItem> listCategory = new List<SelectListItem>();
+    var listofCategory = (from n in db.HMS_TESTMST where n.COMPID == compid select n).ToList();
+    foreach (var item in listofCategory)
+    {
+        listCategory.Add(new SelectListItem { Text = item.TCATNM, Value = Convert.ToString(item.TCATID) });
+    }
+
+    List<SelectListItem> listTest = new List<SelectListItem>();
+    var listofTestName = (from n in db.HMS_TEST where n.COMPID == compid select n).ToList();
+    foreach (var item in listofTestName)
+    {
+        listTest.Add(new SelectListItem { Text = item.TESTNM, Value = Convert.ToString(item.TESTID) });
+    }
+
+    List<SelectListItem> listVacData = new List<SelectListItem>();
+    Int64 tcatid = Convert.ToInt64(Convert.ToString(compid) + "01");
+    var listoftestV = (from n in db.HMS_TEST where n.COMPID == compid && n.TCATID == tcatid select n).ToList();
+    foreach (var item in listoftestV)
+    {
+        listVacData.Add(new SelectListItem { Text = item.TESTNM, Value = Convert.ToString(item.TESTID) });
+    }
+
+}
+
+<link href="~/Content/newcss/jquery-ui.css" rel="stylesheet" />
+
+
+<link href="~/Content/newcss/ng-grid.css" rel="stylesheet" />
+<link rel="stylesheet" href="~/Content/style.css" />
+
+
+
+
+
+
+
+
+<script src="~/Content/jquery1.8.0/jquery.min.js"></script>
+
+
+<script src="~/Content/jquery1.9.1/jquery-1.9.1.js"></script>
+
+
+<script src="~/Content/jquery1.10.3/jquery-ui.js"></script>
+
+
+
+
+
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+
+
+
+    <div id="contentHeaderBox">
+        <h1 style="padding-left:16px">Test Vaccum Information</h1>
+    </div>
+    <br />
+    <div class="form-group">
+        <div class="col-md-12">
+            
+            <div ng-app="testVApp" data-ng-controller="ApiTestVController" @*class="container"*@>
+
+                <div class="row">
+                    @Html.HiddenFor(model => model.COMPID, new { id = "txtcompid", style = "width:3em;", @Value = compid })
+                    <div class="col-md-3">
+                        <label>Category Name</label>
+                        <span>
+                            @Html.DropDownListFor(model => model.TestCatId, listCategory, "--Select--", new { id = "testCatId", @class = "form-control" })
+                        </span>
+                    </div>
+                    <div class="col-md-6">
+                        <label>Test Name</label>
+                        <span>
+                            @Html.DropDownListFor(model => model.TestId, new SelectList(string.Empty, "Value", "Text"), "--Select--", new { id = "TestId", @class = "form-control" })
+                        </span>
+                    </div>
+                    <div class="col-md-3">
+                        <input style="margin-top: 22px" type="submit" value="Submit" data-ng-click="add($event)" class="btn btn-primary" />
+                    </div>
+                </div>
+             
+                <br/>
+               
+
+
+
+              
+
+
+                <table class="table table-bordered table-hover col-md-12">
+
+                    <tr>
+                        @*<input type="hidden" data-ng-model="newChild.FilterGroupid" />*@
+                        <td class="col-md-3"><label>Test Vaccum Name</label></td>@*<input type="text" data-ng-model="newChild.TestName" id="testnm" required />*@
+                        <td class="col-md-6">@Html.DropDownListFor(model => model.TestVACID, listVacData, "-Select-", new { id = "TestVACID", data_ng_model = "newChild.TestVACID", @class = "form-control input-sm" })</td>
+                        <td class="col-md-3"><input type="submit" value="Insert" data-ng-click="addrow($event)" class="btn btn-primary" style="margin-left: 20px" /></td>
+                    </tr>
+                    <tr data-ng-repeat="testitem in TestVData">
+
+                        <td hidden><strong data-ng-hide="testitem.editMode">{{testitem.ID}}</strong></td>
+                        <td hidden>
+                            <p data-ng-hide="testitem.editMode">{{ testitem.TestCatId }}</p>
+
+                        </td>
+                        <td hidden>
+                            <p data-ng-hide="testitem.editMode">{{ testitem.TestId }}</p>
+
+                        </td>
+                        <td class="col-md-3"></td>
+                        <td>
+                            <p data-ng-hide="testitem.editMode">{{ testitem.TestVName }}</p>
+                            @Html.DropDownListFor(model => model.TestVACID, listVacData, "-Select-", new { data_ng_show = "testitem.editMode", data_ng_model = "testitem.TestVACID", @class = "form-control input-sm" })
+                            @*<input data-ng-show="testitem.editMode" type="text" data-ng-model="testitem.TestVACID" id="gridTestName" />*@
+                        </td>
+
+
+                        <td>
+                            <p data-ng-hide="testitem.editMode"><a data-ng-click="toggleEdit(testitem)" href="javascript:;">Edit</a> | <a data-ng-click="deleteTestitem(testitem)" href="javascript:;">Delete</a></p>
+                            <p data-ng-show="testitem.editMode"><a data-ng-click="save(testitem)" href="javascript:;">Save</a> | <a data-ng-click="toggleEdit(testitem)" href="javascript:;">Cancel</a></p>
+
+                        </td>
+                    </tr>
+                </table>
+                <hr />
+
+                @Html.TextBoxFor(model => model.INSLTUDE, new { id = "latlonPos", style = "display: none;" })
+                <input id="lat" type="hidden" />
+                <input id="lon" type="hidden" />
+                @Html.TextBoxFor(model => model.INSUSERID, new { id = "InsUserID", style = "display: none;", @Value = LoggedUserId })
+
+
+
+
+
+
+
+
+            </div>
+        </div>
+    </div>
+
+
+
+
+     //Latitute & longitude
+    <script src="http://maps.google.com/maps/api/js?sensor=false">
+    </script>
+
+    <script language="javascript" type="text/javascript">
+        $(function () {
+            navigator.geolocation.getCurrentPosition(showPosition);
+            //navigator.geolocation.getCurrentPosition(showPosition, positionError);
+
+            function showPosition(position) {
+                var coordinates = position.coords;
+                $("#lat").val(coordinates.latitude);
+                $("#lon").val(coordinates.longitude);
+
+                $("#latlonPos").val(
+                    $("#lat").val() + "," + $("#lon").val()
+                );
+                $("#latlonRms").val(
+                    $("#lat").val() + "," + $("#lon").val()
+                );
+            }
+        });
+    </script>
+
+
+
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $('#testCatId').change(function () {
+                var changedtxt = $('#testCatId').val();
+                var changedtxt2 = $('#txtcompid').val();
+                
+
+                $.ajax
+                ({
+                    @*url: '@Url.Action("Debitcdload", "Transaction")',*@
+                    url: 'api/ApiTestV/TestNameLoad/',
+                   type: 'GET',
+                   dataType: "json",
+                   data: { Catid: changedtxt,Compid:changedtxt2 },
+                   success: function (data) {
+                       $("#TestId").empty();
+
+                       $("#TestId").append('<option value="'
+                           + '">'
+                           + "--Select--" + '</option>');
+
+
+
+                       $.each(data, function (i, memo) {
+
+                           $("#TestId").append('<option value="'
+                               + memo.Value + '">'
+                               + memo.Text + '</option>');
+
+
+
+
+                       });
+
+                   }
+               });
+
+
+            });
+
+        });
+        //function txtOneChanged() {
+
+
+        //    var changedText = $("#TestCatName").val();
+
+        //    var Name = document.getElementById('TestCatName');
+        //    var txtBox = document.getElementById('TestCatId');
+        //    var txtBox2 = document.getElementById('DepartmentId');
+
+
+        //    if (changedText != "") {
+
+        //        $.getJSON(
+        //            '/api/DynamicTestMasterCat', { "ChangedText": changedText },
+        //            function (result) {
+        //                Name.value = result[0].TestCatName;
+        //                txtBox.value = result[0].TestCatId;
+
+        //                txtBox2.value = result[0].DepartmentId;
+        //                if (result[0].TestCatId != 0) {
+        //                    $("#DepartmentId").attr("disabled", "disabled");
+        //                } else {
+
+        //                    $('#DepartmentId').removeAttr('disabled');
+        //                }
+
+
+
+        //            });
+
+        //    }
+
+
+
+        //}
+
+    </script>
+
+
+
+
+
+}
+
+<link href="~/Content/themes/base/jquery-ui.css" rel="stylesheet" />
+<script src="~/Scripts/jquery-1.9.1.min.js"></script>
+<script src="~/Scripts/jquery-ui-1.10.4.min.js"></script>
+@*<script src="~/Content/jquery1.8.0/jquery.min.js"></script>
+    <script src="~/Content/jquery1.9.1/jquery-1.9.1.js"></script>*@
+
+
+@*<script src="~/Content/jquery1.10.3/jquery-ui.js"></script>*@
+
+
+
+
+<script src="~/Scripts/angularjs/1.0.5/angular.js"></script>
+
+<script src="~/Scripts/TestV/TestV.js"></script>
+
+<script src="~/Scripts/angularjs/ui-bootstrap-tpls-0.4.0.js"></script>
+
+
+
+
+<script src="~/Scripts/Underscore.js"></script>
+
+@*<script src="~/Scripts/angularjs/ng-grid.debug.js"></script>*@
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,542 @@
+﻿@using System.Text.RegularExpressions
+@using AslLabApi.Models
+@model AslLabApi.Models.DTO.TestNVDTO
+
+
+@{
+    ViewBag.Title = "Index";
+
+    if (HttpContext.Current.Session["LoggedUserType"] == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedUserTp = HttpContext.Current.Session["LoggedUserType"].ToString();
+    var LoggedUserStatus = HttpContext.Current.Session["LoggedUserStatus"].ToString();
+    var LoggedCompanyStatus = HttpContext.Current.Session["LoggedCompanyStatus"].ToString();
+    var LoggedUserId = Convert.ToInt64(System.Web.HttpContext.Current.Session["loggedUserID"]);
+
+    if ((LoggedUserTp == "CompanyAdmin" || LoggedUserTp == "AslSuperadmin") && LoggedUserStatus == "A" && LoggedCompanyStatus == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+    var LoggedCompId = HttpContext.Current.Session["loggedCompID"].ToString();
+    Int64 compid = Convert.ToInt64(LoggedCompId);
+
+    AslLabApiContext db = new AslLabApiContext();
+
+    //List<SelectListItem> listTestnm = new List<SelectListItem>();
+ 
+
+ 
+    //var listofTestname = (from n in db.HMS_TEST where n.COMPID == compid select n).ToList();
+    //foreach (var item in listofTestname)
+    //{
+
+    //    if (item.TCATID.ToString().Substring(3, 2) != "01")
+    //    {
+    //        listTestnm.Add(new SelectListItem { Text = item.TESTNM, Value = Convert.ToString(item.TESTID) });
+    //    }
+
+
+    //}
+
+    List<SelectListItem> listshowtype = new List<SelectListItem>();
+
+
+
+    listshowtype.Add(new SelectListItem { Text = "STRING", Value = "STRING" });
+    listshowtype.Add(new SelectListItem { Text = "NUMBER", Value = "NUMBER" });
+
+    List<SelectListItem> groupshow = new List<SelectListItem>();
+
+
+
+    groupshow.Add(new SelectListItem { Text = "YES", Value = "Y" });
+    groupshow.Add(new SelectListItem { Text = "NO", Value = "N" });
+
+
+}
+
+<link href="~/Content/newcss/jquery-ui.css" rel="stylesheet" />
+
+
+<link href="~/Content/newcss/ng-grid.css" rel="stylesheet" />
+<link rel="stylesheet" href="~/Content/style.css" />
+
+
+
+
+
+
+
+
+<script src="~/Content/jquery1.8.0/jquery.min.js"></script>
+
+
+<script src="~/Content/jquery1.9.1/jquery-1.9.1.js"></script>
+
+
+<script src="~/Content/jquery1.10.3/jquery-ui.js"></script>
+
+
+
+
+
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+
+
+
+    <div id="contentHeaderBox">
+        <h1 style="padding-left:16px">Test Information - Normal Values</h1>
+    </div>
+    <br />
+    <div class="col-md-12">
+        <div class="form-group">
+            <div ng-app="testNVApp" data-ng-controller="ApiTestNVController" @*class="container"*@>
+                <div class="row">
+                    <div class="form-group">
+
+
+
+                        @Html.HiddenFor(model => model.COMPID, new { id = "txtcompid", style = "width:3em;", @Value = compid })
+                        @Html.HiddenFor(model => model.RestId, new { id = "RestId", style = "width: 4em;" })
+                        @Html.HiddenFor(model => model.TestId, new { id = "TestId", style = "width: 4em;" })
+                        <div class="col-md-2">
+                            <label>Test Name</label>
+                        </div>
+                        <div class="col-md-7">
+                            @Html.TextBoxFor(model => model.TestName, new { id = "TestName", @class = "form-control" })
+
+                        </div>
+
+                        <div class="col-md-3">
+                            <input type="submit" value="Submit" data-ng-click="add($event)" class="btn btn-primary" />
+                        </div>
+
+
+
+
+
+                    </div>
+                </div>
+                <br />
+                <div class="col-md-12">
+                    <div class="row">
+
+
+
+                        <div class="col-md-12">
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">Result Parameters With Normal Values </div>
+                            </div>
+                        </div>
+                    </div>
+
+                        <br />
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label>Result Particulars</label>
+                        </div>
+                        <div class="col-md-3">
+                            <label>Result Group</label>
+                        </div>
+                        <div class="col-md-2">
+                            <label>M.Unit</label>
+                        </div>
+                        <div class="col-md-2">
+                            <label>Type</label>
+                        </div>
+                        <div class="col-md-1">
+                            <label>Length</label>
+                        </div>
+                        <div class="col-md-1">
+                            <label>Decimal</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" data-ng-model="newChild.RestName" id="RestName" required />
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" data-ng-model="newChild.RestGroupName" id="RestGroupName" required />
+                        </div>
+                        <div class="col-md-2">
+                            <input type="text" class="form-control" data-ng-model="newChild.RestMU" id="RestMU" required />
+                        </div>
+                        <div class="col-md-2">
+                            @Html.DropDownListFor(model => model.ShowType, listshowtype, "-Select-", new { id = "ShowType", data_ng_model = "newChild.ShowType", @class = "form-control input-sm" })
+                        </div>
+                        <div class="col-md-1">
+                            <input type="text" class="form-control" data-ng-model="newChild.Length" id="Length" required />
+                        </div>
+                        <div class="col-md-1">
+                            <input type="text" class="form-control" data-ng-model="newChild.Decimal" id="Decimal" required />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                       
+                        <div class="col-md-6">
+                            <label>Normal Values</label>
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <label>Default</label>
+                        </div>
+                        <div class="col-md-2">
+                            <label>Group Show</label>
+                        </div>
+                        <div class="col-md-1">
+                            <label>SL.No</label>
+                        </div>
+                        <div class="col-md-1"></div>
+                    </div>
+                    <div class="row">
+                        @*<div class="col-md-3">
+                            <input type="text" class="form-control" data-ng-model="newChild.Decimal" id="Decimal" required />
+                        </div>*@
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" data-ng-model="newChild.NValue" id="NValue" required />
+                        </div>
+                        <div class="col-md-2">
+                            <input type="text" class="form-control" data-ng-model="newChild.DValue" id="DValue" required />
+                        </div>
+                        <div class="col-md-2">
+                            @Html.DropDownListFor(model => model.GroupShow, groupshow, "-Select-", new { id = "GroupShow", data_ng_model = "newChild.GroupShow", @class = "form-control input-sm" })
+                            @*<input type="text" class="form-control" data-ng-model="newChild.RESTGRV" id="RESTGRV" required />*@
+                        </div>
+                        <div class="col-md-1">
+                            <input type="text" class="form-control" data-ng-model="newChild.SerialNo" id="SerialNo" required />
+                        </div>
+                        <div class="col-md-1">
+                            <input type="submit" value="Insert" data-ng-click="addrow($event)" class="btn btn-primary" />
+                        </div>
+
+                    </div>
+                    <br/>
+                    <div class="row">
+                        <div class="panel panel-primary">
+                           
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <tr style="width: 100%">
+                                        <th style="width: 20%">Result Particulars </th>
+                                        <th style="width: 15%">Result Group </th>
+                                        <th style="width: 5%">M.Unit</th>
+                                        <th style="width: 10%">Type</th>
+                                        <th style="width: 5%">Length</th>
+                                        <th style="width: 5%">Decimal</th>
+                                        <th style="width: 10%">Normal Values</th>
+                                        <th style="width: 5%">Default</th>
+                                      
+                                        <th style="width: 15%">Group Show</th>
+                                        <th style="width: 5%"> SL.No</th>
+                                        <th style="width: 5%"></th>
+                                    </tr>
+                                    @*<tr>
+                                        <td><input type="text" class="form-control" data-ng-model="newChild.RestName" id="RestName" required /></td>
+                                        <td><input type="text" class="form-control" data-ng-model="newChild.RestGroupName" id="RestGroupName" required /></td>
+                                        <td>
+                                            <input type="text" class="form-control" data-ng-model="newChild.RestMU" id="RestMU" required />
+                                        </td>
+                                        <td>
+                                         
+                                            @Html.DropDownListFor(model => model.ShowType, listshowtype, "-Select-", new { id = "ShowType", data_ng_model = "newChild.ShowType", @class = "form-control input-sm" })
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control" data-ng-model="newChild.Length" id="Length" required />
+
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control" data-ng-model="newChild.Decimal" id="Decimal" required />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control" data-ng-model="newChild.NVALUE" id="NVALUE" required />
+                                        </td>
+                                        <td><input type="submit" value="Insert" data-ng-click="addrow($event)" class="btn btn-primary" /></td>
+                                    </tr>*@
+
+                                    <tr style="width: 100%" data-ng-repeat="testitem in TestNVData">
+                                        <td hidden><strong data-ng-hide="testitem.editMode">{{testitem.ID}}</strong></td>
+                                        <td style="width: 20%">
+                                            <p data-ng-hide="testitem.editMode">{{ testitem.RestName }}</p>
+
+                                            <input data-ng-show="testitem.editMode" type="text" data-ng-model="testitem.RestName" class="gridRestName form-control" id="idgridRestName" ng-change="x(testitem.RestName)" />
+
+                                        </td>
+                                        <td hidden><strong data-ng-hide="testitem.editMode" class="gridRestId" id="idgridRestId">{{testitem.RestId}}</strong></td>
+
+
+
+                                        <td style="width: 15%">
+                                            <p data-ng-hide="testitem.editMode">{{ testitem.RestGroupName }}</p>
+                                            <input class="form-control" data-ng-show="testitem.editMode" type="text" data-ng-model="testitem.RestGroupName" id="gridRestGroupName" />
+                                        </td>
+                                        <td style="width: 5%">
+                                            <p data-ng-hide="testitem.editMode">{{ testitem.RestMU }}</p>
+                                            <input class="form-control" data-ng-show="testitem.editMode" type="text" data-ng-model="testitem.RestMU" id="gridRestMU" />
+                                        </td>
+                                        <td style="width: 10%">
+                                            <p data-ng-hide="testitem.editMode">{{ testitem.ShowType }}</p>
+
+                                            @Html.DropDownListFor(model => model.ShowType, listshowtype, "-Select-", new { data_ng_show = "testitem.editMode", data_ng_model = "testitem.ShowType", @class = "form-control input-sm" })
+                                        </td>
+                                        <td style="width: 5%">
+                                            <p data-ng-hide="testitem.editMode">{{ testitem.Length }}</p>
+                                            <input class="form-control  input-sm" data-ng-show="testitem.editMode" type="text" data-ng-model="testitem.Length" id="gridLength" />
+                                        </td>
+                                        <td style="width: 5%">
+                                            <p data-ng-hide="testitem.editMode">{{ testitem.Decimal }}</p>
+                                            <input class="form-control  input-sm" data-ng-show="testitem.editMode" type="text" data-ng-model="testitem.Decimal" id="gridDecimal" />
+                                        </td>
+                                        <td style="width: 10%">
+                                            <p data-ng-hide="testitem.editMode">{{ testitem.NValue }}</p>
+                                        @Html.TextArea("name", "NValue", new { rows=10, columns=40,@class="form-control", data_ng_show="testitem.editMode", type="text", data_ng_model="testitem.NValue", id="gridNVALUE" })
+                                            @*<input class="form-control" data-ng-show="testitem.editMode" type="text" data-ng-model="testitem.NValue" id="gridNVALUE" />*@
+                                        </td>
+                                        <td style="width: 5%">
+                                            <p data-ng-hide="testitem.editMode">{{ testitem.DValue }}</p>
+                                            @Html.TextArea("name", "Default", new { rows = 10, columns = 40, @class = "form-control", data_ng_show = "testitem.editMode", type = "text", data_ng_model = "testitem.DValue", id = "gridDVALUE" })
+                                            @*<input class="form-control" data-ng-show="testitem.editMode" type="text" data-ng-model="testitem.NValue" id="gridNVALUE" />*@
+                                        </td>
+                                       
+                                        <td style="width: 15%">
+                                            <p data-ng-hide="testitem.editMode">{{ testitem.GroupShow }}</p>
+                                            @Html.DropDownListFor(model => model.GroupShow, groupshow, "-Select-", new { id = "gridGroupShow", data_ng_show = "testitem.editMode", data_ng_model = "testitem.GroupShow", @class = "form-control input-sm" })
+                                            @*<input class="form-control" data-ng-show="testitem.editMode" type="text" data-ng-model="testitem.GroupShow" id="gridGroupShow" />*@
+                                        </td>
+                                        <td style="width: 5%">
+                                            <p data-ng-hide="testitem.editMode">{{ testitem.SerialNo }}</p>
+                                            <input class="form-control" data-ng-show="testitem.editMode" type="text" data-ng-model="testitem.SerialNo" id="gridSerialNo" />
+                                        </td>
+                                        <td style="width: 5%">
+                                            <p data-ng-hide="testitem.editMode"><a data-ng-click="toggleEdit(testitem)" href="javascript:;">Edit</a> | <a data-ng-click="deleteItem(testitem)" href="javascript:;">Delete</a></p>
+                                            <p data-ng-show="testitem.editMode"><a data-ng-click="save(testitem)" href="javascript:;">Save</a> | <a data-ng-click="toggleEdit_Cancel(testitem)" href="javascript:;">Cancel</a></p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            @Html.TextBoxFor(model => model.INSLTUDE, new { id = "latlonPos", style = "display: none;" })
+            <input id="lat" type="hidden" />
+            <input id="lon" type="hidden" />
+            @Html.TextBoxFor(model => model.INSUSERID, new { id = "InsUserID", style = "display: none;", @Value = LoggedUserId })
+            
+            
+
+        </div>
+    </div>
+
+
+     //Latitute & longitude
+    <script src="http://maps.google.com/maps/api/js?sensor=false">
+    </script>
+
+    <script language="javascript" type="text/javascript">
+        $(function () {
+            navigator.geolocation.getCurrentPosition(showPosition);
+            //navigator.geolocation.getCurrentPosition(showPosition, positionError);
+
+            function showPosition(position) {
+                var coordinates = position.coords;
+                $("#lat").val(coordinates.latitude);
+                $("#lon").val(coordinates.longitude);
+
+                $("#latlonPos").val(
+                    $("#lat").val() + "," + $("#lon").val()
+                );
+                $("#latlonRms").val(
+                    $("#lat").val() + "," + $("#lon").val()
+                );
+            }
+        });
+    </script>
+
+
+
+
+
+
+
+
+
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            //$('#RestName').autocomplete({
+            //    source: function (request, response) {
+            //        var compid = $('#txtcompid').val();
+            //        var testid = $('#TestId').val();
+            //        $.ajax({
+
+            //            url: '/api/RestnmList',
+            //            type: 'GET',
+            //            cache: false,
+            //            data: { query: request.term, query2: compid, query3: testid },
+            //            dataType: 'json',
+            //            success: function (data) {
+            //                response($.map(data, function (item) {
+            //                    return {
+            //                        label: item.RestName,
+            //                        value: item.RestName,
+            //                        id: item.RestId,
+
+            //                    };
+            //                }));
+            //            }
+            //        });
+            //    },
+            //    select: function (event, ui) {
+            //        $('#RestName').val(ui.item.label);
+            //        $('#RestId').val(ui.item.id);
+
+
+            //        return false;
+            //    },
+               
+            //    change: $('#RestName').keyup(_.debounce(txtOneChanged, 1000))
+
+            //});
+
+            $('#TestName').autocomplete({
+                source: function (request, response) {
+                    var changedText2 = $("#txtcompid").val();
+                    //var changedText3 = $("#HiddentCatId").val();
+                    $.ajax({
+
+                        url: '/apiTestNV/TestNameList',
+                        type: 'GET',
+                        cache: false,
+                        data: { query: request.term, query2: changedText2 },
+                        dataType: 'json',
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                               return {
+                                    label: item.TestName,
+                                    value: item.TestName,
+                                    id: item.TestId,
+                                   
+                                };
+                            }));
+                        }
+                    });
+                },
+                select: function (event, ui) {
+                    $('#TestName').val(ui.item.label);
+                    $('#TestId').val(ui.item.id);
+                  
+                    //txtOneChanged();
+                    //return false;
+                },
+                //change: $('#TestName').keyup(_.debounce(txtOneChanged2, 500))
+            });
+
+
+
+
+
+        });
+        function txtOneChanged() {
+
+
+            var changedText = $("#RestName").val();
+            var changedText2 = $('#txtcompid').val();
+            var changedText3 = $('#TestId').val();
+
+            var txtBox1 = document.getElementById('RestName');
+            var txtBox = document.getElementById('RestId');
+
+
+
+            if (changedText != "") {
+
+                $.getJSON(
+                    '/api/DynamicRestname', { "ChangedText": changedText, "ChangedText2": changedText2, "ChangedText3": changedText3 },
+                    function (result) {
+                        txtBox1.value = result[0].RestName;
+                        txtBox.value = result[0].RestId;
+                    });
+
+            }
+        }
+
+
+        function txtOneChanged2() {
+
+
+            var changedText = $("#TestName").val();
+            var changedText2 = $("#txtcompid").val();
+          
+
+            var Name = document.getElementById('TestName');
+            var txtBox = document.getElementById('TestId');
+           
+            if (changedText != "") {
+
+                $.getJSON(
+                    '/apiTestNV/DynamicTestName', { "ChangedText": changedText, "ChangedText2": changedText2},
+                    function (result) {
+                        Name.value = result[0].TestName;
+                        txtBox.value = result[0].TestId;
+                       
+                       
+
+                    });
+
+
+            }
+
+
+
+        }
+
+    </script>
+
+
+
+
+
+}
+
+
+<script src="~/Scripts/jquery-ui-1.10.4.min.js"></script>
+
+
+
+
+
+<script src="~/Scripts/angularjs/1.0.5/angular.js"></script>
+<script src="~/Scripts/TestNV/TestNV.js"></script>
+
+<script src="~/Scripts/angularjs/ui-bootstrap-tpls-0.4.0.js"></script>
+
+
+
+
+<script src="~/Scripts/Underscore.js"></script>
+
+
+
+
+
+
+
+
+
+

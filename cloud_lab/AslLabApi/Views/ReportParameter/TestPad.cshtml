@@ -1,0 +1,225 @@
+﻿@using AslLabApi.Models
+@using AslLabApi.Models.DTO
+@using AslLabApi.Models.HMS
+@model AslLabApi.Models.DTO.OpdDTO
+
+@{
+    ViewBag.Title = "TestPad";
+    Layout = null;
+
+    if (HttpContext.Current.Session["LoggedUserType"] == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedUserTp = HttpContext.Current.Session["LoggedUserType"].ToString();
+    var LoggedUserStatus = HttpContext.Current.Session["LoggedUserStatus"].ToString();
+    var LoggedCompanyStatus = HttpContext.Current.Session["LoggedCompanyStatus"].ToString();
+
+    if ((LoggedUserTp == "CompanyAdmin" || LoggedUserTp == "UserAdmin" || LoggedUserTp == "User") && LoggedUserStatus == "A" && LoggedCompanyStatus == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+
+    var LoggedCompId = HttpContext.Current.Session["loggedCompID"].ToString();
+    Int64 compid = Convert.ToInt64(LoggedCompId);
+
+    string companyName = "", address = "", contactNo = "";
+
+    AslLabApiContext db = new AslLabApiContext();
+
+    var SelectCompanyName = from n in db.AslCompanyDbSet
+
+                            where n.COMPID == compid
+                            select new { n.COMPNM, n.ADDRESS, n.CONTACTNO };
+
+    foreach (var n in SelectCompanyName)
+    {
+        companyName = n.COMPNM;
+        address = n.ADDRESS;
+        contactNo = n.CONTACTNO;
+    }
+    var compNm = companyName;
+    var Address = address;
+    var contactno = contactNo;
+
+    List<Department> department = new List<Department>();
+    department = db.HMS_DEPT.Where(e => e.COMPID == compid).ToList();
+
+
+    TimeZoneInfo timeZoneInfo;
+    timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Central Asia Standard Time");
+    DateTime currentDateTime = TimeZoneInfo.ConvertTime(DateTime.Now, timeZoneInfo);
+
+
+    //permission check
+
+    Int64 loggedUserID = Convert.ToInt64(HttpContext.Current.Session["loggedUserID"].ToString());
+
+
+    var permission_Check = from m in db.AslRoleDbSet
+                           where m.COMPID == compid && m.USERID == loggedUserID
+                               && m.CONTROLLERNAME == "ReportParameter" && m.ACTIONNAME == "Index"
+                           select m;
+    var Status = "";
+    foreach (var check in permission_Check)
+    {
+        Status = check.STATUS;
+    }
+
+    if (Status == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+
+    var patientid = Model.PatientID;
+    DateTime transdate = Convert.ToDateTime(Model.TransactionDate);
+
+    //string dd = transdate.ToString("dd-MMM-yyyy");
+    
+    
+    var patientname = Model.PatientName;
+    var mobileno = Model.MObileNo;
+
+    string gender = "",doctor_name="";
+    Int64 age = 0, doctorid = 0;
+
+}
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+
+    <link href="~/Content/reportcss/style.css" rel="stylesheet" />
+   
+
+</head>
+
+<body style=" background-color:#fafafa;">
+
+
+
+  @*@for (int i = 1; i <= 2; i++)
+  {*@
+       <div style="width: 595px; height: 842px; margin: 0px auto; border: 1px solid #d3d3d3; border-radius: 5px; box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); background: none repeat scroll 0 0 white;">
+        <table id="mainTable" border="0" width="100%">
+            <thead>
+                <tr>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                </tr>
+                <tr style="background-color: White;height: 192px">
+                    <td colspan="12">
+                        @*<h3 style="color: white;padding:4px">@compNm</h3>*@
+
+                    </td>
+
+                    <td colspan="8" style="color: white;padding:8px" align="right">
+                        @*Powered By<br />Alchemy Software*@
+                    </td>
+
+                </tr>
+
+                <tr>
+                    <td colspan="12" align="left" style="padding: 4px; font-weight: bold"></td>
+                    <td align="right" colspan="8" style="padding:8px">@*Print:@currentDateTime.ToString("dd-MM-yy hh:mm tt")*@</td>
+                </tr>
+              
+
+               
+            </thead>
+            <tbody>
+                <tr style="background-color: White; outline: thin solid">
+                    <td colspan="3" style="color: black" >Patient ID </td>
+                    <td colspan="3" style="color:black">: @patientid</td>
+                    <td colspan="4" style="color: black" >Date Of Received </td>
+                    <td colspan="3" style="color: black">: @transdate.ToString("dd-MMM-yy")</td>
+                    <td colspan="4" style="color: black">Date Of Report</td>
+                    <td colspan="3" style="color: black">: @currentDateTime.ToString("dd-MM-yy")</td>
+
+                </tr>
+                @{
+                    var find_data = (from n in db.HMS_OPDMST where n.COMPID == compid && n.PATIENTID == patientid select n).ToList();
+
+                    var doctorname = (from n in db.HMS_REFER where n.COMPID == compid select n).ToList();
+                    
+                }
+                <tr style="background-color: white; outline: thin solid">
+                    <td colspan="3" style="color: black">Patient Name </td>
+                    <td colspan="10" style="color: black">: @patientname </td>
+                    @*<td colspan="3" style="color: black">Mobile No </td>
+                    <td colspan="3" style="color: black">: @mobileno</td>*@
+                    @foreach (var item in find_data)
+                    {
+                        gender = item.GENDER;
+                        age = Convert.ToInt64(item.AGE);
+                        doctorid = Convert.ToInt64(item.DOCTORID);
+                        foreach (var x in doctorname)
+                        {
+                            if (x.REFERID == doctorid)
+                            {
+                                doctor_name = x.REFERNM;
+                            }
+                        }
+                    }
+                    @*<td colspan="4" style="color: black">Age</td>
+                    <td colspan="3" style="color: black">: @age</td>*@
+                    <td colspan="4" style="color: black">Age</td>
+
+                    <td colspan="3" style="color: black">: @age- @gender</td>
+
+                </tr>
+                
+                <tr style="background-color: white; outline: thin solid">
+                   
+                    <td colspan="3" style="color: black">Doctor Name</td>
+                  
+                    <td colspan="17" style="color: black">: @doctor_name</td>
+                 
+                </tr>
+
+            </tbody>
+        </table>
+
+    </div>
+      
+  @*}*@
+   
+   
+
+
+
+
+
+
+</body>
+
+</html>

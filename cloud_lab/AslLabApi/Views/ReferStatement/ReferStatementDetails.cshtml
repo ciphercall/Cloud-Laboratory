@@ -1,0 +1,728 @@
+﻿@using System.Data
+@using System.Data.SqlClient
+@using System.Text.RegularExpressions
+@using AslLabApi.DataAccess
+@using AslLabApi.Models
+@using AslLabApi.DataAccess
+@model AslLabApi.Models.DTO.OpdDTO
+
+@{
+    Layout = null;
+    if (HttpContext.Current.Session["LoggedUserType"] == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedUserTp = HttpContext.Current.Session["LoggedUserType"].ToString();
+    var LoggedUserStatus = HttpContext.Current.Session["LoggedUserStatus"].ToString();
+    var LoggedCompanyStatus = HttpContext.Current.Session["LoggedCompanyStatus"].ToString();
+
+    if ((LoggedUserTp == "CompanyAdmin" || LoggedUserTp == "UserAdmin" || LoggedUserTp == "User") && LoggedUserStatus == "A" && LoggedCompanyStatus == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedCompId = HttpContext.Current.Session["loggedCompID"].ToString();
+    Int64 compid = Convert.ToInt64(LoggedCompId);
+
+
+    string companyName = "", address = "", contactNo = "";
+    AslLabApiContext db = new AslLabApiContext();
+    var SelectCompanyName = from n in db.AslCompanyDbSet
+
+                            where n.COMPID == compid
+                            select new { n.COMPNM, n.ADDRESS, n.CONTACTNO };
+
+    foreach (var n in SelectCompanyName)
+    {
+        companyName = n.COMPNM;
+        address = n.ADDRESS;
+        contactNo = n.CONTACTNO;
+    }
+    var compNm = companyName;
+    var Address = address;
+    var contactno = contactNo;
+
+
+
+
+
+
+    TimeZoneInfo timeZoneInfo;
+    timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Central Asia Standard Time");
+    DateTime currentDateTime = TimeZoneInfo.ConvertTime(DateTime.Now, timeZoneInfo);
+
+    var fromdate = Model.FromDate;
+    var todate = Model.ToDate;
+    var allorsingle = Model.ReferID;
+
+
+}
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <link href="~/Content/reportcss/style.css" rel="stylesheet" />
+
+    @*
+    <script src="~/Content/jquery1.9.1/jquery-1.9.1.js"></script>*@
+    @*
+    <script type="text/javascript">
+            function ClosePrint() {
+                var print = document.getElementById("print");
+                print.style.visibility = "hidden";
+                //            print.display = false;
+
+                window.print();
+                window.close();
+            }
+    </script>*@
+    <style>
+        .firstLine td {
+            border-bottom: 1px solid black;
+        }
+    </style>
+
+
+</head>
+<body style=" background-color:#fafafa;">
+
+
+    <div style="width: 1017px;margin: 0px auto; border: 1px solid #d3d3d3; border-radius: 5px; box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); background: none repeat scroll 0 0 white;">
+        <table id="mainTable" border="0" width="100%">
+            <thead>
+                <tr>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="10%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+                    <td width="5%"></td>
+
+                </tr>
+                <tr style="background-color: #00689b">
+                    <td colspan="12">
+                        <h3 style="color: white;padding:4px">@compNm</h3>
+                        <p style="color:white;padding-left:4px">@Address<span>  @contactno</span></p>
+                    </td>
+
+                    <td colspan="6" style="color: white;padding:8px" align="right">
+                        Powered By<br />Alchemy Software
+                    </td>
+
+                </tr>
+
+                <tr>
+                    <td colspan="12" align="left" style="padding: 4px; font-weight: bold">Refer Statement - Details</td>
+                    <td align="right" colspan="6" style="padding:8px">Print:@currentDateTime.ToString("dd-MM-yy hh:mm tt")</td>
+                </tr>
+
+                @{
+                string d = Convert.ToString(fromdate);
+                DateTime fdate = DateTime.Parse(d);
+                string ffdt = fdate.ToString("dd-MMM-yyyy");
+
+
+                string d2 = Convert.ToString(todate);
+                DateTime fdate2 = DateTime.Parse(d2);
+                string ffdt2 = fdate2.ToString("dd-MMM-yyyy");
+                }
+                <tr>
+                    <td colspan="6" align="left" style="padding: 4px; font-weight: bold">From: <span>@ffdt</span></td>
+                    <td align="left" colspan="6" style="padding:8px; font-weight: bold">To: <span>@ffdt2</span></td>
+                </tr>
+                <tr style="background-color: #00689b; outline: thin solid">
+                    <td colspan="12" style="color: white; padding: 4px; font-size: small" align="center">Particulars</td>
+                    <td colspan="5" style="color: white; padding: 4px; font-size: small" align="center"> Discount</td>
+                    <td colspan="1" style="color: white; padding: 4px; font-size: small" align="center">RF Payable</td>
+                </tr>
+                <tr style="background-color: #00689b; outline: thin solid">
+                    <td colspan="2" style="color: white; padding: 4px; font-size: small" align="center">Date</td>
+                    <td colspan="2" style="color: white; padding: 4px; font-size: small" align="center">Patient ID</td>
+                    <td colspan="2" style="color: white; padding: 4px; font-size: small" align="center">Patient Name</td>
+
+
+                    <td colspan="2" style="color: white; padding: 4px; font-size: small" align="center">Test Name</td>
+
+                    <td colspan="1" style="color: white; padding: 4px; font-size: small" align="center">RF(%)</td>
+                    <td colspan="1" style="color: white; padding: 4px; font-size: small" align="center">Amount</td>
+                    <td colspan="1" style="color: white; padding: 4px; font-size: small" align="center">Ref Amount</td>
+                    <td colspan="1" style="color: white; padding: 4px; font-size: small" align="center">Gross Ref</td>
+                    <td colspan="1" style="color: white; padding: 4px; font-size: small" align="center">Referer</td>
+
+                    <td colspan="1" style="color: white; padding: 4px; font-size: small" align="center">Hospital</td>
+                    <td colspan="2" style="color: white; padding: 4px; font-size: small" align="center">Due Collection</td>
+                    <td colspan="1" style="color: white; padding: 4px; font-size: small" align="center">Total</td>
+
+                    <td colspan="1" style="color: white; padding: 4px; font-size: small" align="center">Net Amount</td>
+
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @{
+
+
+                if (allorsingle == 111)
+                {
+                var referData = (from n in db.HMS_REFER where n.COMPID == compid select n).OrderBy(x => x.REFERID).ToList();
+                System.Data.SqlClient.SqlConnection conn = new System.Data.SqlClient.SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["AslLabApiContext"].ToString());
+                string query = string.Format(
+                "SELECT REFERID, TRANSDT, PATIENTID, PATIENTNM PATIENTNM, A.TESTID, TESTNM, A.PCNTD, ISNULL(AMOUNT,0) AMOUNT, " +
+                "ISNULL(REFAMT,0) REFAMT, ISNULL(DISCREF,0) DISCREF, ISNULL(DISCHOS,0) DISCHOS, " +
+                "ISNULL(DISCNETM,0) DISCNETM, " +
+                "ISNULL(DUEAMTM,0) DUEAMTM, ISNULL(DISCNETR,0) DISCNETR, ISNULL(DUEAMTR,0) DUEAMTR, " +
+                "(ISNULL(DISCREF,0)+ISNULL(DISCNETR,0)+ISNULL(DISCHOS,0)) DISCNET, (ISNULL(REFAMT,0)-(ISNULL(DISCREF,0)+ISNULL(DISCNETR,0)+ISNULL(DISCHOS,0))) REFNET " +
+                "FROM( " +
+                "SELECT A.COMPID, A.TRANSDT, A.REFERID, A.PATIENTID, PATIENTNM, TESTID, PCNTD, " +
+                "SUM(ISNULL(AMOUNT,0)) AMOUNT, CAST(SUM((ISNULL(AMOUNT,0)*ISNULL(PCNTD,0))/100) AS DECIMAL(18,2)) REFAMT, " +
+                "ISNULL(DISCREF,0) DISCREF, ISNULL(DISCHOS,0) DISCHOS, ISNULL(DISCNET,0) DISCNETM, " +
+                "ISNULL(DUEAMT,0) DUEAMTM, 0 DISCNETR, 0 DUEAMTR " +
+                "FROM( " +
+                "SELECT COMPID, TRANSDT, REFERID, PATIENTID, TESTID, PCNTD, SUM(ISNULL(AMOUNT,0)) AMOUNT, " +
+                "SUM((ISNULL(AMOUNT,0)*ISNULL(PCNTD,0))/100) REFAMT " +
+                "FROM HMS_OPD " +
+                "GROUP BY COMPID, TRANSDT, REFERID, PATIENTID, TESTID, PCNTD " +
+                ") A, HMS_OPDMST B " +
+                "WHERE A.COMPID  = B.COMPID AND   A.TRANSDT = B.TRANSDT " +
+                "AND   A.PATIENTID = B.PATIENTID " +
+                "AND   ISNULL(DUEAMT,0) = 0 " +
+                "AND   A.COMPID    = '{0}' " +
+                "AND   A.TRANSDT BETWEEN '{1}' AND '{2}' " +
+                "GROUP BY A.COMPID, A.TRANSDT, A.REFERID, A.PATIENTID, PATIENTNM, TESTID, PCNTD, " +
+                "ISNULL(DISCREF,0), ISNULL(DISCHOS,0), ISNULL(DISCNET,0), ISNULL(DUEAMT,0) " +
+                "UNION ALL " +
+                "SELECT C.TRANSDT, A.COMPID, A.REFERID, A.PATIENTID, PATIENTNM, TESTID, PCNTD, " +
+                "SUM(ISNULL(AMOUNT,0)) AMOUNT,CAST(SUM((ISNULL(AMOUNT,0)*ISNULL(PCNTD,0))/100) AS DECIMAL(18,2)) REFAMT, " +
+                "ISNULL(B.DISCREF,0) DISCREF, ISNULL(B.DISCHOS,0) DISCHOS, ISNULL(B.DISCNET,0) DISCNETM, " +
+                "ISNULL(B.DUEAMT,0) DUEAMTM, ISNULL(C.DISCHOS,0) DISCNETR, ISNULL(C.DUEAMT,0) DUEAMTR " +
+                "FROM( " +
+                "SELECT COMPID, TRANSDT, REFERID, PATIENTID, TESTID, PCNTD, SUM(ISNULL(AMOUNT,0)) AMOUNT, " +
+                "SUM((ISNULL(AMOUNT,0)*ISNULL(PCNTD,0))/100) REFAMT " +
+                "FROM HMS_OPD " +
+                "GROUP BY COMPID, TRANSDT, REFERID, PATIENTID, TESTID, PCNTD " +
+                ") A, HMS_OPDMST B, HMS_OPDRCV C " +
+                "WHERE A.COMPID = B.COMPID " +
+                "AND   A.COMPID = C.COMPID " +
+                "AND   A.TRANSDT = B.TRANSDT " +
+                "AND   A.PATIENTID = B.PATIENTID " +
+                "AND   B.PATIENTID = C.PATIENTID " +
+                "AND   ISNULL(B.DUEAMT,0) <> 0 " +
+                "AND   ISNULL(C.DUEAMT,0) = 0 " +
+                "AND   A.COMPID    = '{0}' " +
+                "AND   C.TRANSDT BETWEEN '{1}' AND '{2}' " +
+                "GROUP BY C.TRANSDT, A.COMPID, A.REFERID, A.PATIENTID, PATIENTNM, TESTID, PCNTD, " +
+                "ISNULL(B.DISCREF,0), ISNULL(B.DISCHOS,0), ISNULL(B.DISCNET,0), ISNULL(B.DUEAMT,0), " +
+                "ISNULL(C.DISCHOS,0), ISNULL(C.DUEAMT,0) " +
+                ") A INNER JOIN HMS_TEST ON A.COMPID = HMS_TEST.COMPID AND A.TESTID = HMS_TEST.TESTID " +
+                "ORDER BY REFERID, PATIENTID ",
+
+                compid, fromdate, todate);
+                System.Data.SqlClient.SqlCommand cmd = new System.Data.SqlClient.SqlCommand(query, conn);
+                conn.Open();
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable ds = new DataTable();
+                da.Fill(ds);
+
+                string patientname = "", patientid = "", gender = "";
+                decimal amount = 0, discountlab = 0, discnetm = 0, dischos = 0, dueamtm = 0, dueamtr = 0, discnetr = 0, balamtr = 0, discnet = 0, refnet = 0;
+                string testname = "", transdt = "", newdata = "", previouspatienID = "";
+                decimal pcntd = 0, refamount = 0, discountref = 0, grossref = 0;
+                Int64 peachi_data = 0, testid = 0, milpeachi = 0;
+
+                decimal subamount = 0, subrefamount = 0, subdiscountref = 0, subdiscountlab = 0, subdiscountnetm = 0, subdueamtm = 0, subdiscnetr = 0, subdueamtr = 0, subdiscnet = 0, subrefnet = 0;
+
+                decimal grandamount = 0,
+                grandrefamount = 0,
+                granddiscountref = 0,
+                granddiscountlab = 0,
+                granddiscountnetm = 0,
+                granddueamtm = 0,
+                granddiscnetr = 0,
+                granddueamtr = 0,
+                granddiscnet = 0,
+                grandrefnet = 0;
+                Int64 testcount = 0;
+
+                foreach (var groupDate in referData)
+                {
+                peachi_data = 0;
+                previouspatienID = "";
+
+                subamount = 0;
+                subrefamount = 0;
+                subdiscountref = 0;
+                subdiscountlab = 0;
+                subdiscountnetm = 0;
+                subdueamtm = 0;
+                subdiscnetr = 0;
+                subdueamtr = 0;
+                subdiscnet = 0;
+                subrefnet = 0;
+
+                testcount = 1;
+
+
+                foreach (DataRow row in ds.Rows)
+                {
+
+                if (groupDate.REFERID == Convert.ToInt64(row["REFERID"]))
+                {
+                if (peachi_data == 0)
+                {
+                <tr style="outline: thin solid">
+                    <td colspan="18">Refer Name : @groupDate.REFERNM</td>
+                </tr>
+                peachi_data = 1;
+
+                }
+                transdt = row["TRANSDT"].ToString();
+                patientid = row["PATIENTID"].ToString();
+                patientname = row["PATIENTNM"].ToString();
+
+                testid = Convert.ToInt64(row["TESTID"]);
+
+
+                testname = (row["TESTNM"]).ToString();
+                pcntd = Convert.ToDecimal(row["PCNTD"]);
+
+                amount = Convert.ToDecimal(row["AMOUNT"]);
+
+                refamount = Convert.ToDecimal(row["REFAMT"]);
+
+
+                discountref = Convert.ToDecimal(row["DISCREF"]);
+                discountlab = Convert.ToDecimal(row["DISCHOS"]);
+
+                discnetm = Convert.ToDecimal(row["DISCNETM"]);
+                dueamtm = Convert.ToDecimal(row["DUEAMTM"]);
+
+                discnetr = Convert.ToDecimal(row["DISCNETR"]);
+                dueamtr = Convert.ToDecimal(row["DUEAMTR"]);
+
+                discnet = Convert.ToDecimal(row["DISCNET"]);
+                refnet = Convert.ToDecimal(row["REFNET"]);
+                DateTime dd = DateTime.Parse(transdt);
+                string transactionDate = dd.ToString("dd-MMM-yyyy");
+
+
+
+                var find_howmany_test = (from n in db.HMS_OPD where n.COMPID == compid && n.PATIENTID == patientid && n.REFERID == groupDate.REFERID select n).ToList();
+                var count = find_howmany_test.Count();
+
+                if (previouspatienID == patientid)
+                {
+                milpeachi = 1;
+                }
+                else
+                {
+                milpeachi = 0;
+                if (previouspatienID != "")
+                {
+                <tr class="firstLine">
+                    <td colspan="18"></td>
+                </tr>
+                }
+
+                previouspatienID = patientid;
+
+                }
+
+                <tr>
+                    @if (milpeachi == 0)
+                    {
+                    <td colspan="2" style="color: black; padding: 4px; font-size: small" align="center">@transactionDate</td>
+                    <td colspan="2" style="color: black; padding: 4px; font-size: small" align="center">@patientid</td>
+                    <td colspan="2" style="color: black; padding: 4px; font-size: small" align="center">@patientname</td>
+                    grossref = refamount;
+                    }
+                    else
+                    {
+                    grossref += refamount;
+                    <td colspan="2" style="color: black; padding: 4px; font-size: small" align="center"></td>
+                    <td colspan="2" style="color: black; padding: 4px; font-size: small" align="center"></td>
+                    <td colspan="2" style="color: black; padding: 4px; font-size: small" align="center"></td>
+                    }
+                    <td colspan="2" style="color: black; padding: 4px; font-size: small" align="center">@testname</td>
+
+                    <td colspan="1" style="color: black; padding: 4px; font-size: small" align="right">@pcntd</td>
+                    <td colspan="1" style="color: black; padding: 4px; font-size: small" align="right">@amount</td>
+                    <td colspan="1" style="color: black; padding: 4px; font-size: small" align="right">@refamount</td>
+                    @if (count == testcount)
+                    {
+                    <td colspan="1" style="color: black; padding: 4px; font-size: small" align="right">@grossref</td>
+                    <td colspan="1" style="color: black; padding: 4px; font-size: small" align="right">@discountref</td>
+
+
+
+
+                    <td colspan="1" style="color: black; padding: 4px; font-size: small" align="right">@discountlab</td>
+
+                    <td colspan="2" style="color: black; padding: 4px; font-size: small" align="right">@discnetr</td>
+
+
+                    <td colspan="1" style="color: black; padding: 4px; font-size: small" align="right">@discnet</td>
+                    refnet = grossref - discnet;
+                    <td colspan="1" style="color: black; padding: 4px; font-size: small" align="right">@refnet</td>
+
+                    testcount = 1;
+                    }
+                    else
+                    {
+                    <td colspan="1" style="color: black; padding: 4px; font-size: small" align="right"></td>
+                    <td colspan="1" style="color: black; padding: 4px; font-size: small" align="right"></td>
+
+
+
+
+                    <td colspan="1" style="color: black; padding: 4px; font-size: small" align="right"></td>
+
+                    <td colspan="2" style="color: black; padding: 4px; font-size: small" align="right"></td>
+
+
+                    <td colspan="1" style="color: black; padding: 4px; font-size: small" align="right"></td>
+                    <td colspan="1" style="color: black; padding: 4px; font-size: small" align="right"></td>
+
+                    testcount++;
+                    }
+
+
+
+                </tr>
+                subamount += amount;
+                subrefamount += refamount;
+                subdiscountref += discountref;
+                subdiscountlab += discountlab;
+                subdiscountnetm += discnetm;
+                subdueamtm += dueamtm;
+                subdiscnetr += discnetr;
+                subdueamtr += dueamtr;
+                subdiscnet += discnet;
+                subrefnet += refnet;
+
+                }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                }
+                if (peachi_data != 0)
+                {
+
+                <tr class="firstLine">
+                    <td colspan="18"></td>
+                </tr>
+
+                <tr style="outline: thin solid">
+                    <td colspan="9" style="font-weight: bold" align="right">Sub Total :</td>
+
+                    <td colspan="1" style="font-weight: bold" align="right">@subamount</td>
+                    <td colspan="1" style="font-weight: bold" align="right">@subrefamount</td>
+                    <td colspan="1" style="color: black; padding: 4px; font-size: small" align="right"></td>
+                    <td colspan="1" style="font-weight: bold" align="right">@subdiscountref</td>
+
+                    <td colspan="1" style="font-weight: bold" align="right">@subdiscountlab</td>
+                    <td colspan="2" style="font-weight: bold" align="right">@subdiscnetr</td>
+
+
+                    <td colspan="1" style="font-weight: bold" align="right">@subdiscnet</td>
+                    <td colspan="1" style="font-weight: bold" align="right">@subrefnet</td>
+
+                </tr>
+                grandamount += subamount;
+                grandrefamount += subrefamount;
+                granddiscountref += subdiscountref;
+                granddiscountlab += subdiscountlab;
+                granddiscountnetm += subdiscountnetm;
+                granddueamtm += subdueamtm;
+                granddiscnetr += subdiscnetr;
+                granddueamtr += dueamtr;
+                granddiscnet += subdiscnet;
+                grandrefnet += subrefnet;
+
+                }
+
+
+
+
+                }
+                <tr></tr>
+                <tr></tr>
+                <tr></tr>
+                <tr style="outline: thin solid">
+                    <td colspan="9" style="font-weight: bold" align="right">Grand Total :</td>
+
+                    <td colspan="1" style="font-weight: bold" align="right">@grandamount</td>
+                    <td colspan="1" style="font-weight: bold" align="right">@grandrefamount</td>
+                    <td colspan="1" style="color: black; padding: 4px; font-size: small" align="right"></td>
+                    <td colspan="1" style="font-weight: bold" align="right">@granddiscountref</td>
+
+                    <td colspan="1" style="font-weight: bold" align="right">@granddiscountlab</td>
+                    <td colspan="2" style="font-weight: bold" align="right">@granddiscnetr</td>
+
+
+                    <td colspan="1" style="font-weight: bold" align="right">@granddiscnet</td>
+                    <td colspan="1" style="font-weight: bold" align="right">@grandrefnet</td>
+                </tr>
+
+                conn.Close();
+                }
+
+                else
+                {
+                var referData = (from n in db.HMS_REFER where n.COMPID == compid select n).OrderBy(x => x.REFERID).ToList();
+                System.Data.SqlClient.SqlConnection conn = new System.Data.SqlClient.SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["AslLabApiContext"].ToString());
+                string query = string.Format(
+                "SELECT REFERID, TRANSDT, PATIENTID, PATIENTNM PATIENTNM, A.TESTID, TESTNM, A.PCNTD, ISNULL(AMOUNT,0) AMOUNT, " +
+                "ISNULL(REFAMT,0) REFAMT, ISNULL(DISCREF,0) DISCREF, ISNULL(DISCHOS,0) DISCHOS, " +
+                "ISNULL(DISCNETM,0) DISCNETM, " +
+                "ISNULL(DUEAMTM,0) DUEAMTM, ISNULL(DISCNETR,0) DISCNETR, ISNULL(DUEAMTR,0) DUEAMTR, " +
+                "(ISNULL(DISCREF,0)+ISNULL(DISCNETR,0)+ISNULL(DISCHOS,0)) DISCNET, (ISNULL(REFAMT,0)-(ISNULL(DISCREF,0)+ISNULL(DISCNETR,0)+ISNULL(DISCHOS,0))) REFNET " +
+                "FROM( " +
+                "SELECT A.COMPID, A.TRANSDT, A.REFERID, A.PATIENTID, PATIENTNM, TESTID, PCNTD, " +
+                "SUM(ISNULL(AMOUNT,0)) AMOUNT, SUM((ISNULL(AMOUNT,0)*ISNULL(PCNTD,0))/100) REFAMT, " +
+                "ISNULL(DISCREF,0) DISCREF, ISNULL(DISCHOS,0) DISCHOS, ISNULL(DISCNET,0) DISCNETM, " +
+                "ISNULL(DUEAMT,0) DUEAMTM, 0 DISCNETR, 0 DUEAMTR " +
+                "FROM( " +
+                "SELECT COMPID, TRANSDT, REFERID, PATIENTID, TESTID, PCNTD, SUM(ISNULL(AMOUNT,0)) AMOUNT, " +
+                "SUM((ISNULL(AMOUNT,0)*ISNULL(PCNTD,0))/100) REFAMT " +
+                "FROM HMS_OPD " +
+                "GROUP BY COMPID, TRANSDT, REFERID, PATIENTID, TESTID, PCNTD " +
+                ") A, HMS_OPDMST B " +
+                "WHERE A.COMPID  = B.COMPID AND   A.TRANSDT = B.TRANSDT " +
+                "AND   A.PATIENTID = B.PATIENTID " +
+                "AND   ISNULL(DUEAMT,0) = 0 " +
+                "AND   A.COMPID    = '{0}' " +
+                "AND   A.TRANSDT BETWEEN '{1}' AND '{2}' " +
+                "AND   A.REFERID    = '{3}' " +
+                "GROUP BY A.COMPID, A.TRANSDT, A.REFERID, A.PATIENTID, PATIENTNM, TESTID, PCNTD, " +
+                "ISNULL(DISCREF,0), ISNULL(DISCHOS,0), ISNULL(DISCNET,0), ISNULL(DUEAMT,0) " +
+                "UNION ALL " +
+                "SELECT C.TRANSDT, A.COMPID, A.REFERID, A.PATIENTID, PATIENTNM, TESTID, PCNTD, " +
+                "SUM(ISNULL(AMOUNT,0)) AMOUNT, SUM((ISNULL(AMOUNT,0)*ISNULL(PCNTD,0))/100) REFAMT, " +
+                "ISNULL(B.DISCREF,0) DISCREF, ISNULL(B.DISCHOS,0) DISCHOS, ISNULL(B.DISCNET,0) DISCNETM, " +
+                "ISNULL(B.DUEAMT,0) DUEAMTM, ISNULL(C.DISCHOS,0) DISCNETR, ISNULL(C.DUEAMT,0) DUEAMTR " +
+                "FROM( " +
+                "SELECT COMPID, TRANSDT, REFERID, PATIENTID, TESTID, PCNTD, SUM(ISNULL(AMOUNT,0)) AMOUNT, " +
+                "SUM((ISNULL(AMOUNT,0)*ISNULL(PCNTD,0))/100) REFAMT " +
+                "FROM HMS_OPD " +
+                "GROUP BY COMPID, TRANSDT, REFERID, PATIENTID, TESTID, PCNTD " +
+                ") A, HMS_OPDMST B, HMS_OPDRCV C " +
+                "WHERE A.COMPID = B.COMPID " +
+                "AND   A.COMPID = C.COMPID " +
+                "AND   A.TRANSDT = B.TRANSDT " +
+                "AND   A.PATIENTID = B.PATIENTID " +
+                "AND   B.PATIENTID = C.PATIENTID " +
+                "AND   ISNULL(B.DUEAMT,0) <> 0 " +
+                "AND   ISNULL(C.DUEAMT,0) = 0 " +
+                "AND   A.COMPID    = '{0}' " +
+                "AND   C.TRANSDT BETWEEN '{1}' AND '{2}' " +
+                "AND   A.REFERID    = '{3}' " +
+                "GROUP BY C.TRANSDT, A.COMPID, A.REFERID, A.PATIENTID, PATIENTNM, TESTID, PCNTD, " +
+                "ISNULL(B.DISCREF,0), ISNULL(B.DISCHOS,0), ISNULL(B.DISCNET,0), ISNULL(B.DUEAMT,0), " +
+                "ISNULL(C.DISCHOS,0), ISNULL(C.DUEAMT,0) " +
+                ") A INNER JOIN HMS_TEST ON A.COMPID = HMS_TEST.COMPID AND A.TESTID = HMS_TEST.TESTID " +
+                "ORDER BY REFERID, PATIENTID ",
+
+                compid, fromdate, todate, allorsingle);
+                System.Data.SqlClient.SqlCommand cmd = new System.Data.SqlClient.SqlCommand(query, conn);
+                conn.Open();
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable ds = new DataTable();
+                da.Fill(ds);
+
+                string patientname = "", patientid = "", gender = "";
+                decimal amount = 0, discountlab = 0, discnetm = 0, dischos = 0, dueamtm = 0, dueamtr = 0, discnetr = 0, balamtr = 0, discnet = 0, refnet = 0;
+                string testname = "", transdt = "", newdata = "", previouspatienID = "";
+                decimal pcntd = 0, refamount = 0, discountref = 0, grossref=0;
+                Int64 peachi_data = 0, testid = 0, milpeachi = 0;
+                Int64 referid = 0;
+                    Int64 testcount = 1;
+
+
+
+                peachi_data = 0;
+
+                foreach (DataRow row in ds.Rows)
+                {
+                if (peachi_data == 0)
+                {
+                foreach (var refer in referData)
+                {
+                if (refer.REFERID == Convert.ToInt64(row["REFERID"]))
+                {
+                <tr style="outline: thin solid">
+                    <td colspan="18">Refer Name : @refer.REFERNM</td>
+                </tr>
+                referid = Convert.ToInt64(refer.REFERID);
+                break;
+                }
+                }
+                peachi_data = 1;
+
+                }
+                transdt = row["TRANSDT"].ToString();
+                patientid = row["PATIENTID"].ToString();
+                patientname = row["PATIENTNM"].ToString();
+
+                testid = Convert.ToInt64(row["TESTID"]);
+
+
+                testname = (row["TESTNM"]).ToString();
+                pcntd = Convert.ToDecimal(row["PCNTD"]);
+
+                amount = Convert.ToDecimal(row["AMOUNT"]);
+
+                refamount = Convert.ToDecimal(row["REFAMT"]);
+
+
+                discountref = Convert.ToDecimal(row["DISCREF"]);
+                discountlab = Convert.ToDecimal(row["DISCHOS"]);
+
+                discnetm = Convert.ToDecimal(row["DISCNETM"]);
+                dueamtm = Convert.ToDecimal(row["DUEAMTM"]);
+
+                discnetr = Convert.ToDecimal(row["DISCNETR"]);
+                dueamtr = Convert.ToDecimal(row["DUEAMTR"]);
+
+                discnet = Convert.ToDecimal(row["DISCNET"]);
+                refnet = Convert.ToDecimal(row["REFNET"]);
+                DateTime dd = DateTime.Parse(transdt);
+                string transactionDate = dd.ToString("dd-MMM-yyyy");
+
+                var find_howmany_test = (from n in db.HMS_OPD where n.COMPID == compid && n.PATIENTID == patientid && n.REFERID == referid select n).ToList();
+                var count = find_howmany_test.Count();
+
+                if (previouspatienID == patientid)
+                {
+                milpeachi = 1;
+                }
+                else
+                {
+                milpeachi = 0;
+                previouspatienID = patientid;
+                }
+
+                <tr>
+                    @if (milpeachi == 0)
+                    {
+                    <td colspan="2" style="color: black; padding: 4px; font-size: small" align="center">@transactionDate</td>
+                    <td colspan="2" style="color: black; padding: 4px; font-size: small" align="center">@patientid</td>
+                    <td colspan="2" style="color: black; padding: 4px; font-size: small" align="center">@patientname</td>
+                    grossref = refamount;
+                    }
+                    else
+                    {
+                    grossref += refamount;
+                    <td colspan="2" style="color: black; padding: 4px; font-size: small" align="center"></td>
+                    <td colspan="2" style="color: black; padding: 4px; font-size: small" align="center"></td>
+                    <td colspan="2" style="color: black; padding: 4px; font-size: small" align="center"></td>
+                    }
+
+
+                    <td colspan="2" style="color: black; padding: 4px; font-size: small" align="center">@testname</td>
+
+                    <td colspan="1" style="color: black; padding: 4px; font-size: small" align="right">@pcntd</td>
+                    <td colspan="1" style="color: black; padding: 4px; font-size: small" align="right">@amount</td>
+                    <td colspan="1" style="color: black; padding: 4px; font-size: small" align="right">@refamount</td>
+
+                    @if (count == testcount)
+                    {
+                    <td colspan="1" style="color: black; padding: 4px; font-size: small" align="right">@grossref</td>
+                    <td colspan="1" style="color: black; padding: 4px; font-size: small" align="right">@discountref</td>
+
+
+
+
+                    <td colspan="1" style="color: black; padding: 4px; font-size: small" align="right">@discountlab</td>
+
+                    <td colspan="2" style="color: black; padding: 4px; font-size: small" align="right">@discnetr</td>
+
+
+                    <td colspan="1" style="color: black; padding: 4px; font-size: small" align="right">@discnet</td>
+                    refnet = grossref - discnet;
+                    <td colspan="1" style="color: black; padding: 4px; font-size: small" align="right">@refnet</td>
+
+                    testcount = 1;
+                    }
+                    else
+                    {
+                    <td colspan="1" style="color: black; padding: 4px; font-size: small" align="right"></td>
+                    <td colspan="1" style="color: black; padding: 4px; font-size: small" align="right"></td>
+
+
+
+
+                    <td colspan="1" style="color: black; padding: 4px; font-size: small" align="right"></td>
+
+                    <td colspan="2" style="color: black; padding: 4px; font-size: small" align="right"></td>
+
+
+                    <td colspan="1" style="color: black; padding: 4px; font-size: small" align="right"></td>
+                    <td colspan="1" style="color: black; padding: 4px; font-size: small" align="right"></td>
+
+                    testcount++;
+                    }
+                </tr>
+
+
+
+
+                }
+
+
+
+
+
+
+                conn.Close();
+                }
+
+                }
+
+
+
+
+
+
+
+            </tbody>
+        </table>
+
+
+    </div>
+
+
+</body>
+</html>

@@ -1,0 +1,371 @@
+﻿@using System.Data
+@using System.Data.SqlClient
+
+@using AslLabApi.Controllers
+@using AslLabApi.Models
+@model AslLabApi.Models.PageModel
+
+
+@{
+    ViewBag.Title = "ShowJob";
+
+    if (HttpContext.Current.Session["LoggedUserType"] == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedUserTp = HttpContext.Current.Session["LoggedUserType"].ToString();
+    var LoggedUserStatus = HttpContext.Current.Session["LoggedUserStatus"].ToString();
+    var LoggedCompanyStatus = HttpContext.Current.Session["LoggedCompanyStatus"].ToString();
+
+    if ((LoggedUserTp == "CompanyAdmin" || LoggedUserTp == "AslSuperadmin") && LoggedUserStatus == "A" && LoggedCompanyStatus == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+
+    Int64 compid = Convert.ToInt64(System.Web.HttpContext.Current.Session["loggedCompID"]);
+    AslLabApiContext db = new AslLabApiContext();
+    var abc = AppController.Global.GlobalVariable;
+
+
+    TimeZoneInfo timeZoneInfo;
+    timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Central Asia Standard Time");
+    DateTime currentDateTime = TimeZoneInfo.ConvertTime(DateTime.Now, timeZoneInfo);
+
+}
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.js"></script>
+<link href="~/Content/bootstrap_datepicker_css/datepicker.css" rel="stylesheet" />
+<link href="~/Content/bootstrap_datepicker_css/datepicker3.css" rel="stylesheet" />
+
+
+<script type="text/javascript">
+
+    //function Show_Div(Div_id) {
+    //    if (false == $(Div_id).is(':visible')) {
+    //        $(Div_id).show(250);
+    //    }
+    //    else {
+    //        $(Div_id).hide(250);
+    //    }
+    //}
+</script>
+
+
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(false)
+
+    @Html.Hidden("name", "forslide", new { id = "txtslidestatus", @Value = abc })
+    @*@Html.HiddenFor(model => model.USERID, new { id = "txtUserId" })*@
+
+
+    @*<div id="Div_1" style=" background-color: #ffffdd; width: 300px;">
+
+            I am div
+            <br />
+            you can see me.
+        </div>*@
+    if (System.Web.HttpContext.Current.Session["LoggedUserType"] != null && System.Web.HttpContext.Current.Session["LoggedUserStatus"].ToString() == "A" && (System.Web.HttpContext.Current.Session["LoggedUserType"].ToString() == "CompanyAdmin" || System.Web.HttpContext.Current.Session["LoggedUserType"].ToString() == "UserAdmin" || System.Web.HttpContext.Current.Session["LoggedUserType"].ToString() == "User"))
+    {
+        <div id="contentHeaderBox" style="border-bottom: none;height: auto">
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="active">@Html.ActionLink("Today Patient", "Index", "DashBoard", new { style = "color: black;background-color: gainsboro;" })</li>
+                <li>@Html.ActionLink("Today", "Today", "DashBoard", new { style = "color: black" })</li>
+                @if (System.Web.HttpContext.Current.Session["LoggedUserType"].ToString() != "User")
+                {
+                    <li>@Html.ActionLink("Yesterday", "LastOneDay", "DashBoard", new { style = "color: black" })</li>
+                    <li>@Html.ActionLink("Last 7 Day", "Last7Day", "DashBoard", new { style = "color: black" })</li>
+                    <li>@Html.ActionLink("Last 1 Month", "LastOneMonth", "DashBoard", new { style = "color: black" })</li>
+                    <li>@Html.ActionLink("Last 1 Year", "LastOneYear", "DashBoard", new { style = "color: black" })</li>
+                }
+               
+                <li style="padding-left:200px"><button type="submit" class="btn btn-info" value="Print" name="command" formtarget="_blank">MisMatch Report</button> </li>
+            </ul>
+            @*<h1>Patient Information-Today</h1>*@
+         
+            @*<div class="btn-group pull-right" id="editOption">
+
+               
+            </div>*@
+        </div>
+    }
+    <br />
+    @*<div class="col-md-12">
+            <div class="row">
+                <div class="col-md-8">
+                    <span>@Html.Label("name", "Miss Match Date", htmlAttributes: new { @class = "control-label" })</span>
+                    @Html.TextBoxFor(model => model.ToDate, new { @class = "form-control input-sm", id = "idTodate", @Value = currentDateTime.ToString("dd-MMM-yyyy"), autofocus = true })
+                </div>
+                <div class="col-md-4">
+                    <input id="SubmitId" type="submit" class="btn btn-info" style="margin-top:20px" value="Print" name="command" formtarget="_blank" />
+                </div>
+
+            </div>
+        </div>*@
+
+    <div class="col-md-12">
+
+        <table id="mainTable" border="0" width="100%">
+            <thead>
+                <tr>
+                    <td width="10%"></td>
+                    <td width="5%"></td>
+                    <td width="10%"></td>
+                    <td width="5%"></td>
+                    <td width="10%"></td>
+                    <td width="5%"></td>
+                    <td width="10%"></td>
+                    <td width="5%"></td>
+                    <td width="10%"></td>
+                    <td width="5%"></td>
+                    <td width="10%"></td>
+                    <td width="5%"></td>
+                    <td width="10%"></td>
+                    <td width="5%"></td>
+
+
+
+
+
+
+
+
+                </tr>
+                @*<tr style="background-color: #00689b; outline: thin solid">
+                        <td colspan="9" style="color: white; padding: 4px" align="center">Import</td>
+                        <td colspan="9" style="color: white; padding: 4px" align="center">Export</td>
+                    </tr>*@
+
+
+
+                <tr style="background-color: #00689b; outline: thin solid">
+
+                    <td colspan="2" style="color: white; padding: 4px;font-size:small" align="center">Patient ID</td>
+                    <td colspan="3" style="color: white; padding: 4px;font-size:small" align="center">Patient Name</td>
+                    <td colspan="2" style="color: white; padding: 4px;font-size:small" align="center">Gender</td>
+
+                    <td colspan="2" style="color: white; padding: 4px;font-size:small" align="center">Age</td>
+                    <td colspan="2" style="color: white; padding: 4px;font-size:small" align="center">Mobile No</td>
+                    <td colspan="1" style="color: white; padding: 4px;font-size:small" align="center">Status</td>
+                    <td colspan="2" style="color: white; padding: 4px;font-size:small" align="center">Preview</td>
+
+                </tr>
+
+            </thead>
+            @{
+    //string d = Convert.ToString(fromdate);
+    //DateTime fdate = DateTime.Parse(d);
+    string ffdt = currentDateTime.ToString("dd-MMM-yyyy");
+    DateTime today_date = Convert.ToDateTime(ffdt);
+    decimal status = 0, due = 0, flag = 0;
+
+    var getpatient_data_today = (from n in db.HMS_OPDMST where n.COMPID == compid && n.TRANSDT == today_date select n).OrderBy(x => x.PATIENTID).ToList();
+    decimal discount = 0, paid = 0;
+    var due_find = (from n in db.HMS_OPDRCV where n.COMPID == compid && n.TRANSDT == today_date select n).OrderBy(x => x.PATIENTID).ToList();
+
+
+            }
+            <tbody>
+
+                @foreach (var item in getpatient_data_today)
+                {
+                    <tr>
+                        <td colspan="2" align="center" style="font-size:small">@item.PATIENTID</td>
+                        <td colspan="3" align="center" style="font-size:small">@item.PATIENTNM</td>
+                        <td colspan="2" align="center" style="font-size:small">@item.GENDER</td>
+                        <td colspan="2" align="center" style="font-size:small">@item.AGE</td>
+                        <td colspan="2" align="center" style="font-size:small">@item.MOBNO</td>
+
+
+                        @foreach (var forstatus in due_find)
+                        {
+                            discount = 0;
+                            paid = 0;
+                            if (forstatus.PATIENTID == item.PATIENTID)
+                            {
+                                //discount = Convert.ToDecimal(forstatus.DISCHOS);
+                                //paid = Convert.ToDecimal(forstatus.RCVAMT);
+                                //due = Convert.ToDecimal(forstatus.DUEAMT - discount - paid);
+                                if (forstatus.DUEAMT == 0)
+                                {
+                                    status = Convert.ToDecimal(forstatus.RCVAMT);
+                                }
+                                else
+                                {
+                                    status = Convert.ToDecimal(forstatus.DUEAMT);
+                                }
+                                flag = 1;
+                            }
+                            else
+                            {
+
+                                break;
+                            }
+                        }
+                        @if (flag == 1)
+                        {
+                            <td colspan="1" align="right" style="font-size:small">@status</td>
+                            flag = 0;
+                        }
+                        else
+                        {
+                            if (item.DUEAMT == 0 || item.DUEAMT == null)
+                            {
+                                status = Convert.ToDecimal(item.RCVAMT);
+                                <td colspan="1" align="right" style="font-size:small">@status</td>
+                            }
+                            else if (item.DUEAMT > 0)
+                            {
+                                status = Convert.ToDecimal(item.DUEAMT);
+                                <td colspan="1" align="right" style="font-size:small">@status</td>
+                            }
+
+                        }
+
+
+
+
+
+                        <td colspan="2" align="center">
+                            <span>
+                                <a href="@Url.Action("IndexPost", new { id = item.ID, compid = item.COMPID, patientid = item.PATIENTID })" class="btn btn-sm btn-danger" target="_blank">
+                                    @*<span class="glyphicon glyphicons-remove"></span>*@@*@aac.ACCOUNTNM*@
+                                    <i class="fa fa-pencil-square-o"></i>
+                                </a>
+                            </span>
+                        </td>
+                    </tr>
+
+                }
+
+
+
+
+
+            </tbody>
+        </table>
+
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+    //Auto complete
+    <script language="javascript" type="text/javascript">
+        $(document).ready(function () {
+
+            $('#idTodate').datepicker({
+                format: "dd-M-yyyy",
+                autoclose: true,
+                todayHighlight: true,
+                showOnFocus: true,
+            }).on('show', function (e) {
+                if (e.date) {
+                    $(this).data('stickyDate', e.date);
+                }
+                else {
+                    $(this).data('stickyDate', null);
+
+                }
+            }).on('hide', function (e) {
+                var stickyDate = $(this).data('stickyDate');
+
+                if (!e.date && stickyDate) {
+                    $(this).datepicker('setDate', stickyDate);
+                    $(this).data('stickyDate', null);
+                }
+                document.getElementById("SubmitId").focus();
+            });
+            //$(function () {
+
+            //    $('#divslide').click(function () {
+            //        var txt = document.getElementById('txtslidestatus');
+            //        if (txt.value == 0) {
+            //            $('#txtslidestatus').val("1");
+            //        } else {
+            //            $('#txtslidestatus').val("0");
+
+            //        }
+
+
+            //    });
+
+            //});
+
+        });
+
+    </script>
+
+
+    <style type="text/css">
+        .ui-autocomplete {
+            position: absolute;
+            cursor: default;
+            background: #f0ffff;
+        }
+
+        /* workarounds */
+        html .ui-autocomplete {
+            width: 1px;
+        }
+        /* without this, the menu expands to 100% in IE6 */
+        .ui-menu {
+            list-style: none;
+            padding: 2px;
+            margin: 0;
+            display: block;
+            float: left;
+        }
+
+            .ui-menu .ui-menu {
+                margin-top: -3px;
+            }
+
+            .ui-menu .ui-menu-item {
+                margin: 0;
+                padding: 0;
+                zoom: 1;
+                float: left;
+                clear: left;
+                width: 100%;
+            }
+
+                .ui-menu .ui-menu-item a {
+                    text-decoration: none;
+                    display: block;
+                    padding: .2em .4em;
+                    line-height: 1.5;
+                    zoom: 1;
+                }
+
+                    .ui-menu .ui-menu-item a.ui-state-hover,
+                    .ui-menu .ui-menu-item a.ui-state-active {
+                        font-weight: normal;
+                        margin: -1px;
+                    }
+    </style>
+
+}
+
+
+<link href="~/Content/themes/base/jquery-ui.css" rel="stylesheet" />
+
+<script src="~/Scripts/jquery-1.9.1.min.js"></script>
+<script src="~/Scripts/jquery-ui-1.10.4.min.js"></script>
+<script src="~/Scripts/bootstrap-datepicker.js"></script>
+
+
